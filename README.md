@@ -115,4 +115,4 @@ If you use this code in a public web service, you must make your modifications p
 
 ## Author
 
-Built by [Alpay Sahin](https://github.com/SyK5) as a public showcase for production grade Multi Tenant SaaS architecture patterns.
+Built by Alpay Sahin · [GitHub](https://github.com/SyK5) · [LinkedIn](https://www.linkedin.com/in/alpay-sahin-syk5)
