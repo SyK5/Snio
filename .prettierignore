@@ -17,7 +17,7 @@ LICENSE
 *.min.js
 *.min.css
 
-.env
+apps/api/.env
 .env.*
 !.env.example
 !.env.*.example
