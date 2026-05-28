@@ -35,3 +35,7 @@ desktop.ini
 *.swp
 *.swo
 *~
+
+apps/api/.env.example
+
+apps/api/prisma/seed.ts
