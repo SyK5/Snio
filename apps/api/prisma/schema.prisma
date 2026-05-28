@@ -28,6 +28,18 @@ model User {
   leagueRosterEntries    LeagueRoster[]
   chatChannelMembers     ChatChannelMember[]
   chatMessages           ChatMessage[]
+  chatMessageReactions   ChatMessageReaction[]
+  chatMessageMentions    ChatMessageMention[]
+  chatMessageEdits       ChatMessageEdit[]
+  customEmojis           CustomEmoji[]
+  stickers               Sticker[]
+  callSessionsStarted    CallSession[]
+  callParticipations     CallParticipant[]
+  devices                UserDevice[]
+  notifications          Notification[]
+  auditLogs              AuditLog[]
+  documents              Document[]              @relation("DocumentRecipient")
+  generatedDocuments     Document[]              @relation("DocumentGeneratedBy")
 
   @@index([deleted_at])
   @@map("snio_users")
@@ -48,13 +60,13 @@ model Session {
 }
 
 model RefreshToken {
-  id              String    @id @default(cuid())
-  token_hash      String    @unique
-  user_id         String
-  replaced_by_id  String?
-  revoked_at      DateTime? @db.Timestamptz(6)
-  created_at      DateTime  @default(now()) @db.Timestamptz(6)
-  expires_at      DateTime  @db.Timestamptz(6)
+  id             String    @id @default(cuid())
+  token_hash     String    @unique
+  user_id        String
+  replaced_by_id String?
+  revoked_at     DateTime? @db.Timestamptz(6)
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+  expires_at     DateTime  @db.Timestamptz(6)
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -122,6 +134,10 @@ model Clan {
   events             Event[]
   trainings          Training[]
   leagueParticipants LeagueParticipant[]
+  chatChannels       ChatChannel[]
+  customEmojis       CustomEmoji[]
+  stickers           Sticker[]
+  documents          Document[]
 
   @@index([owner_id])
   @@index([deleted_at])
@@ -188,6 +204,7 @@ model Event {
   clan           Clan                 @relation(fields: [clan_id], references: [id], onDelete: Cascade)
   game           Game                 @relation(fields: [game_id], references: [id])
   participations EventParticipation[]
+  documents      Document[]
 
   @@index([clan_id])
   @@index([starts_at])
@@ -231,6 +248,7 @@ model Training {
 
   clan           Clan                    @relation(fields: [clan_id], references: [id], onDelete: Cascade)
   participations TrainingParticipation[]
+  documents      Document[]
 
   @@index([clan_id])
   @@index([starts_at])
@@ -267,6 +285,7 @@ model League {
   game         Game                @relation(fields: [game_id], references: [id])
   participants LeagueParticipant[]
   rosters      LeagueRoster[]
+  documents    Document[]
 
   @@index([game_id])
   @@index([deleted_at])
@@ -306,19 +325,30 @@ model LeagueRoster {
 }
 
 model ChatChannel {
-  id         String          @id @default(cuid())
-  type       ChatChannelType
-  clan_id    String?
-  name       String?
-  created_at DateTime        @default(now()) @db.Timestamptz(6)
-  updated_at DateTime        @updatedAt @db.Timestamptz(6)
-  deleted_at DateTime?       @db.Timestamptz(6)
+  id              String          @id @default(cuid())
+  type            ChatChannelType
+  clan_id         String?
+  parent_id       String?
+  name            String?
+  topic           String?
+  icon_url        String?
+  position        Int             @default(0)
+  last_message_at DateTime?       @db.Timestamptz(6)
+  archived_at     DateTime?       @db.Timestamptz(6)
+  created_at      DateTime        @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime        @updatedAt @db.Timestamptz(6)
+  deleted_at      DateTime?       @db.Timestamptz(6)
 
   clan     Clan?               @relation(fields: [clan_id], references: [id], onDelete: Cascade)
+  parent   ChatChannel?        @relation("ChannelThreads", fields: [parent_id], references: [id])
+  threads  ChatChannel[]       @relation("ChannelThreads")
   members  ChatChannelMember[]
   messages ChatMessage[]
+  calls    CallSession[]
 
   @@index([clan_id])
+  @@index([parent_id])
+  @@index([last_message_at])
   @@index([deleted_at])
   @@map("snio_chat_channels")
 }
@@ -326,16 +356,22 @@ model ChatChannel {
 enum ChatChannelType {
   CLAN
   DIRECT
+  GROUP
+  THREAD
 
   @@map("snio_chat_channel_type")
 }
 
 model ChatChannelMember {
-  id           String    @id @default(cuid())
-  channel_id   String
-  user_id      String
-  joined_at    DateTime  @default(now()) @db.Timestamptz(6)
-  last_read_at DateTime? @db.Timestamptz(6)
+  id                   String            @id @default(cuid())
+  channel_id           String
+  user_id              String
+  notification_level   NotificationLevel @default(ALL)
+  mute_state           MuteState         @default(ACTIVE)
+  muted_until          DateTime?         @db.Timestamptz(6)
+  last_read_at         DateTime?         @db.Timestamptz(6)
+  last_read_message_id String?
+  joined_at            DateTime          @default(now()) @db.Timestamptz(6)
 
   channel ChatChannel @relation(fields: [channel_id], references: [id], onDelete: Cascade)
   user    User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -345,19 +381,458 @@ model ChatChannelMember {
   @@map("snio_chat_channel_members")
 }
 
-model ChatMessage {
-  id         String    @id @default(cuid())
-  channel_id String
-  user_id    String
-  content    String
-  edited_at  DateTime? @db.Timestamptz(6)
-  created_at DateTime  @default(now()) @db.Timestamptz(6)
-  deleted_at DateTime? @db.Timestamptz(6)
+enum NotificationLevel {
+  ALL
+  MENTIONS_ONLY
+  NONE
 
-  channel ChatChannel @relation(fields: [channel_id], references: [id], onDelete: Cascade)
-  user    User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  @@map("snio_notification_level")
+}
+
+enum MuteState {
+  ACTIVE
+  MUTED_TEMP
+  MUTED_FOREVER
+
+  @@map("snio_mute_state")
+}
+
+model ChatMessage {
+  id             String      @id @default(cuid())
+  channel_id     String
+  user_id        String
+  type           MessageType @default(TEXT)
+  content        String?
+  reply_to_id    String?
+  thread_root_id String?
+  device_type    DeviceType  @default(WEB)
+  pinned_at      DateTime?   @db.Timestamptz(6)
+  edited_at      DateTime?   @db.Timestamptz(6)
+  metadata       Json?
+  created_at     DateTime    @default(now()) @db.Timestamptz(6)
+  deleted_at     DateTime?   @db.Timestamptz(6)
+
+  channel     ChatChannel             @relation(fields: [channel_id], references: [id], onDelete: Cascade)
+  user        User                    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  replyTo     ChatMessage?            @relation("MessageReplies", fields: [reply_to_id], references: [id])
+  replies     ChatMessage[]           @relation("MessageReplies")
+  threadRoot  ChatMessage?            @relation("MessageThread", fields: [thread_root_id], references: [id])
+  threadItems ChatMessage[]           @relation("MessageThread")
+  attachments ChatMessageAttachment[]
+  reactions   ChatMessageReaction[]
+  mentions    ChatMessageMention[]
+  edits       ChatMessageEdit[]
+  embeds      ChatMessageEmbed[]
 
   @@index([channel_id, created_at])
+  @@index([user_id])
+  @@index([reply_to_id])
+  @@index([thread_root_id])
   @@index([deleted_at])
   @@map("snio_chat_messages")
+}
+
+enum MessageType {
+  TEXT
+  SYSTEM
+  IMAGE
+  VIDEO
+  AUDIO
+  VOICE_MESSAGE
+  FILE
+  STICKER
+  GIF
+  EMOJI
+  REPLY
+  THREAD_START
+  CALL
+  CALL_MISSED
+  USER_JOIN
+  USER_LEAVE
+  USER_KICK
+  USER_BAN
+  CHANNEL_RENAME
+  CHANNEL_ICON_CHANGE
+  PIN
+  UNPIN
+  POLL
+  LOCATION
+  STREAM
+  SCREENSHARE
+  COMMAND
+  EPHEMERAL
+
+  @@map("snio_message_type")
+}
+
+enum DeviceType {
+  WEB
+  MOBILE_IOS
+  MOBILE_ANDROID
+  DESKTOP
+  API
+
+  @@map("snio_device_type")
+}
+
+model ChatMessageAttachment {
+  id                String         @id @default(cuid())
+  message_id        String
+  type              AttachmentType
+  file_name_on_disk String
+  original_name     String
+  mime_type         String
+  size_bytes        Int
+  s3_bucket         String
+  s3_key            String
+  checksum          String?
+  width             Int?
+  height            Int?
+  duration_seconds  Int?
+  thumbnail_s3_key  String?
+  created_at        DateTime       @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime?      @db.Timestamptz(6)
+
+  message ChatMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
+
+  @@index([message_id])
+  @@map("snio_chat_message_attachments")
+}
+
+enum AttachmentType {
+  IMAGE
+  VIDEO
+  AUDIO
+  VOICE
+  PDF
+  ARCHIVE
+  DOCUMENT
+  CODE
+  SPREADSHEET
+  MODEL_3D
+  OTHER
+
+  @@map("snio_attachment_type")
+}
+
+model ChatMessageReaction {
+  id              String       @id @default(cuid())
+  message_id      String
+  user_id         String
+  type            ReactionType @default(EMOJI)
+  reaction_key    String
+  custom_emoji_id String?
+  created_at      DateTime     @default(now()) @db.Timestamptz(6)
+
+  message     ChatMessage  @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  customEmoji CustomEmoji? @relation(fields: [custom_emoji_id], references: [id])
+
+  @@unique([message_id, user_id, reaction_key])
+  @@index([message_id])
+  @@map("snio_chat_message_reactions")
+}
+
+enum ReactionType {
+  EMOJI
+  CUSTOM_EMOJI
+  STICKER
+
+  @@map("snio_reaction_type")
+}
+
+model ChatMessageMention {
+  id                String      @id @default(cuid())
+  message_id        String
+  type              MentionType
+  mentioned_user_id String?
+  mentioned_role    ClanRole?
+  created_at        DateTime    @default(now()) @db.Timestamptz(6)
+
+  message       ChatMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  mentionedUser User?       @relation(fields: [mentioned_user_id], references: [id], onDelete: Cascade)
+
+  @@index([message_id])
+  @@index([mentioned_user_id])
+  @@map("snio_chat_message_mentions")
+}
+
+enum MentionType {
+  USER
+  ROLE
+  EVERYONE
+  HERE
+
+  @@map("snio_mention_type")
+}
+
+model ChatMessageEmbed {
+  id            String    @id @default(cuid())
+  message_id    String
+  type          EmbedType @default(LINK)
+  url           String
+  title         String?
+  description   String?
+  image_url     String?
+  thumbnail_url String?
+  provider      String?
+  width         Int?
+  height        Int?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+
+  message ChatMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
+
+  @@index([message_id])
+  @@map("snio_chat_message_embeds")
+}
+
+enum EmbedType {
+  LINK
+  GIF
+  IMAGE
+  VIDEO
+  ARTICLE
+  RICH
+
+  @@map("snio_embed_type")
+}
+
+model ChatMessageEdit {
+  id               String     @id @default(cuid())
+  message_id       String
+  previous_content String?
+  new_content      String?
+  content_hash     String
+  previous_hash    String?
+  edited_by_id     String
+  device_type      DeviceType @default(WEB)
+  ip_address       String?
+  edited_at        DateTime   @default(now()) @db.Timestamptz(6)
+
+  message  ChatMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  editedBy User        @relation(fields: [edited_by_id], references: [id])
+
+  @@index([message_id, edited_at])
+  @@map("snio_chat_message_edits")
+}
+
+model CustomEmoji {
+  id            String    @id @default(cuid())
+  clan_id       String
+  name          String
+  s3_key        String
+  cdn_url       String
+  animated      Boolean   @default(false)
+  created_by_id String
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at    DateTime? @db.Timestamptz(6)
+
+  clan      Clan                  @relation(fields: [clan_id], references: [id], onDelete: Cascade)
+  createdBy User                  @relation(fields: [created_by_id], references: [id])
+  reactions ChatMessageReaction[]
+
+  @@unique([clan_id, name])
+  @@index([clan_id])
+  @@map("snio_custom_emojis")
+}
+
+model Sticker {
+  id            String    @id @default(cuid())
+  clan_id       String?
+  name          String
+  s3_key        String
+  cdn_url       String
+  animated      Boolean   @default(false)
+  created_by_id String?
+  created_at    DateTime  @default(now()) @db.Timestamptz(6)
+  deleted_at    DateTime? @db.Timestamptz(6)
+
+  clan      Clan? @relation(fields: [clan_id], references: [id], onDelete: Cascade)
+  createdBy User? @relation(fields: [created_by_id], references: [id])
+
+  @@index([clan_id])
+  @@map("snio_stickers")
+}
+
+model CallSession {
+  id            String     @id @default(cuid())
+  channel_id    String
+  type          CallType   @default(VOICE)
+  status        CallStatus @default(RINGING)
+  started_by_id String
+  started_at    DateTime   @default(now()) @db.Timestamptz(6)
+  ended_at      DateTime?  @db.Timestamptz(6)
+
+  channel      ChatChannel       @relation(fields: [channel_id], references: [id], onDelete: Cascade)
+  startedBy    User              @relation(fields: [started_by_id], references: [id])
+  participants CallParticipant[]
+
+  @@index([channel_id])
+  @@index([status])
+  @@map("snio_call_sessions")
+}
+
+enum CallType {
+  VOICE
+  VIDEO
+
+  @@map("snio_call_type")
+}
+
+enum CallStatus {
+  RINGING
+  ONGOING
+  ENDED
+  MISSED
+
+  @@map("snio_call_status")
+}
+
+model CallParticipant {
+  id          String     @id @default(cuid())
+  call_id     String
+  user_id     String
+  device_type DeviceType @default(WEB)
+  joined_at   DateTime   @default(now()) @db.Timestamptz(6)
+  left_at     DateTime?  @db.Timestamptz(6)
+
+  call CallSession @relation(fields: [call_id], references: [id], onDelete: Cascade)
+  user User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([call_id, user_id])
+  @@index([user_id])
+  @@map("snio_call_participants")
+}
+
+model UserDevice {
+  id           String     @id @default(cuid())
+  user_id      String
+  type         DeviceType
+  name         String?
+  push_token   String?
+  user_agent   String?
+  last_seen_at DateTime?  @db.Timestamptz(6)
+  created_at   DateTime   @default(now()) @db.Timestamptz(6)
+  revoked_at   DateTime?  @db.Timestamptz(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("snio_user_devices")
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  user_id    String
+  type       NotificationType
+  payload    Json
+  read_at    DateTime?        @db.Timestamptz(6)
+  created_at DateTime         @default(now()) @db.Timestamptz(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, read_at])
+  @@index([user_id, created_at])
+  @@map("snio_notifications")
+}
+
+enum NotificationType {
+  MESSAGE_NEW
+  MESSAGE_MENTION
+  MESSAGE_REPLY
+  MESSAGE_REACTION
+  THREAD_REPLY
+  CHANNEL_INVITE
+  CLAN_INVITE
+  CLAN_ROLE_CHANGED
+  CLAN_KICKED
+  CLAN_MEMBER_JOINED
+  EVENT_INVITE
+  EVENT_REMINDER
+  EVENT_UPDATED
+  EVENT_CANCELLED
+  TRAINING_INVITE
+  TRAINING_REMINDER
+  TRAINING_CANCELLED
+  LEAGUE_ROSTER_ADDED
+  LEAGUE_ROSTER_REMOVED
+  LEAGUE_MATCH_SCHEDULED
+  DOCUMENT_ISSUED
+  SYSTEM_ANNOUNCEMENT
+  ACCOUNT_SECURITY
+  GAME_VOTE_STARTED
+  GAME_VOTE_RESULT
+
+  @@map("snio_notification_type")
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  actor_id    String?
+  action      String
+  entity_type String
+  entity_id   String?
+  metadata    Json?
+  ip_address  String?
+  device_type DeviceType?
+  created_at  DateTime    @default(now()) @db.Timestamptz(6)
+
+  actor User? @relation(fields: [actor_id], references: [id], onDelete: SetNull)
+
+  @@index([actor_id])
+  @@index([entity_type, entity_id])
+  @@index([created_at])
+  @@map("snio_audit_logs")
+}
+
+model Document {
+  id                String       @id @default(cuid())
+  type              DocumentType
+  title             String
+  recipient_id      String?
+  clan_id           String?
+  event_id          String?
+  training_id       String?
+  league_id         String?
+  generated_by_id   String?
+  file_name_on_disk String
+  s3_bucket         String
+  s3_key            String
+  mime_type         String       @default("application/pdf")
+  size_bytes        Int
+  checksum          String
+  verification_code String       @unique
+  template_version  String?
+  metadata          Json?
+  issued_at         DateTime     @default(now()) @db.Timestamptz(6)
+  created_at        DateTime     @default(now()) @db.Timestamptz(6)
+  deleted_at        DateTime?    @db.Timestamptz(6)
+
+  recipient   User?     @relation("DocumentRecipient", fields: [recipient_id], references: [id], onDelete: SetNull)
+  generatedBy User?     @relation("DocumentGeneratedBy", fields: [generated_by_id], references: [id], onDelete: SetNull)
+  clan        Clan?     @relation(fields: [clan_id], references: [id], onDelete: SetNull)
+  event       Event?    @relation(fields: [event_id], references: [id], onDelete: SetNull)
+  training    Training? @relation(fields: [training_id], references: [id], onDelete: SetNull)
+  league      League?   @relation(fields: [league_id], references: [id], onDelete: SetNull)
+
+  @@index([recipient_id])
+  @@index([clan_id])
+  @@index([event_id])
+  @@index([training_id])
+  @@index([league_id])
+  @@index([verification_code])
+  @@index([deleted_at])
+  @@map("snio_documents")
+}
+
+enum DocumentType {
+  PARTICIPATION_CERTIFICATE
+  ACHIEVEMENT_CERTIFICATE
+  RANKING_CERTIFICATE
+  EVENT_SUMMARY
+  LEAGUE_REPORT
+  INVOICE
+  OTHER
+
+  @@map("snio_document_type")
 }
