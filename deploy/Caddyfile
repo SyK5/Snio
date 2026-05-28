@@ -1,0 +1,19 @@
+snio.gg {
+	encode gzip zstd
+
+	handle /api/* {
+		reverse_proxy api:3000
+	}
+
+	handle /docs* {
+		reverse_proxy api:3000
+	}
+
+	handle {
+		reverse_proxy web:80
+	}
+}
+
+www.snio.gg {
+	redir https://snio.gg{uri} permanent
+}
