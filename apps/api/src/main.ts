@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core'
 import { Logger } from 'nestjs-pino'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { AppModule } from './app.module'
 
 async function bootstrap() {
@@ -7,9 +8,24 @@ async function bootstrap() {
   const logger = app.get(Logger)
   app.useLogger(logger)
   app.setGlobalPrefix('api')
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('Snio API')
+    .setDescription('Esport Plattform API für Clans, Events, Trainings und Chat')
+    .setVersion('0.1.0')
+    .addBearerAuth()
+    .build()
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig)
+  SwaggerModule.setup('docs', app, document, {
+    jsonDocumentUrl: 'docs/json',
+    swaggerOptions: { persistAuthorization: true },
+  })
+
   const port = Number(process.env.PORT ?? 3000)
   await app.listen(port)
   logger.log(`Snio API listening on http://localhost:${port}/api`)
+  logger.log(`Swagger docs on http://localhost:${port}/docs`)
 }
 
 bootstrap()
