@@ -1,23 +1,28 @@
 FROM node:22-alpine AS base
 RUN corepack enable
-WORKDIR /app
 
 FROM base AS pruner
+WORKDIR /repo
 COPY . .
 RUN pnpm dlx turbo@2 prune @snio/api --docker
 
-FROM base AS installer
-COPY --from=pruner /app/out/json/ .
+FROM base AS builder
+WORKDIR /app
+COPY --from=pruner /repo/out/json/ .
 RUN pnpm install --frozen-lockfile
-COPY --from=pruner /app/out/full/ .
+COPY --from=pruner /repo/out/full/ .
 RUN pnpm --filter @snio/api exec prisma generate
 RUN pnpm --filter @snio/api build
+RUN pnpm deploy --filter=@snio/api --prod /prod/api
 
-FROM base AS runner
+FROM node:22-alpine AS runner
 ENV NODE_ENV=production
+RUN apk add --no-cache wget
 RUN addgroup -S snio && adduser -S snio -G snio
-COPY --from=installer --chown=snio:snio /app .
+WORKDIR /app
+COPY --from=builder /prod/api ./
 USER snio
-WORKDIR /app/apps/api
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main.js"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+CMD ["node", "dist/src/main.js"]
