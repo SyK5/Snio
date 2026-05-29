@@ -47,9 +47,9 @@ jobs:
       JWT_REFRESH_TTL: 30d
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@
         with:
           version: 9
 
