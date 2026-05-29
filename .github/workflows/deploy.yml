@@ -59,7 +59,6 @@ jobs:
           host: ${{ secrets.HETZNER_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: "deploy-bundle/*"
           target: /tmp/snio-deploy
           strip_components: 1
@@ -74,17 +73,13 @@ jobs:
           host: ${{ secrets.HETZNER_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           envs: GHCR_USERNAME,GHCR_TOKEN
           script: |
             set -eu
-            install -d -m 755 /opt/snio
+            test -f /opt/snio/.env
             cp /tmp/snio-deploy/docker-compose.yml /opt/snio/docker-compose.yml
             cp /tmp/snio-deploy/Caddyfile /opt/snio/Caddyfile
-            test -f /opt/snio/.env
-            if [ -n "${GHCR_TOKEN:-}" ]; then
-              echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
-            fi
+            echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
             cd /opt/snio
             docker compose pull
             docker compose up -d
