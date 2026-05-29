@@ -45,16 +45,50 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to Hetzner
-        uses: appleboy/ssh-action@v1
+      - uses: actions/checkout@v4
+
+      - name: Prepare deploy bundle
+        run: |
+          mkdir -p deploy-bundle
+          cp deploy/docker-compose.prod.yml deploy-bundle/docker-compose.yml
+          cp deploy/Caddyfile deploy-bundle/Caddyfile
+
+      - name: Upload deploy files
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HETZNER_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          source: deploy-bundle/*
+          target: /tmp/snio-deploy
+          strip_components: 1
+          overwrite: true
+
+      - name: Deploy to Hetzner
+        uses: appleboy/ssh-action@v1
+        env:
+          GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          envs: GHCR_USERNAME,GHCR_TOKEN
           script: |
+            set -eu
+            install -d -m 755 /opt/snio
+            cp /tmp/snio-deploy/docker-compose.yml /opt/snio/docker-compose.yml
+            cp /tmp/snio-deploy/Caddyfile /opt/snio/Caddyfile
+            test -f /opt/snio/.env
+            if [ -n "${GHCR_TOKEN:-}" ]; then
+              echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
+            fi
             cd /opt/snio
             docker compose pull
             docker compose up -d
+            docker compose ps
             docker image prune -f
 
   notify:
