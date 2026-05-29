@@ -66,5 +66,10 @@ jobs:
         uses: sarisia/actions-status-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          ack_no_webhook: true
+          status: ${{ needs.deploy.result }}
           title: Snio Deployment
-          description: Branch main nach Production deployed
+          description: |
+            Build: ${{ needs.build.result }}
+            Deploy: ${{ needs.deploy.result }}
+            Commit: ${{ github.event.head_commit.message }}
