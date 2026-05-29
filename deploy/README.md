@@ -29,14 +29,14 @@ Two Server Setup auf Hetzner Cloud mit Private Network.
 | `docker-compose.prod.yml` | App Server `/opt/snio/docker-compose.yml` | Caddy, web, api, redis |
 | `docker-compose.db.yml` | DB Server `/opt/snio-db/docker-compose.yml` | Postgres |
 | `Caddyfile` | App Server `/opt/snio/Caddyfile` | Reverse Proxy Routing |
-| `.env.production.example` | Template fuer App Server `/opt/snio/.env` | App Secrets |
-| `.env.db.example` | Template fuer DB Server `/opt/snio-db/.env` | DB Credentials |
+| `.env.production.example` | Template für App Server `/opt/snio/.env` | App Secrets |
+| `.env.db.example` | Template für DB Server `/opt/snio-db/.env` | DB Credentials |
 
 ## Initial Setup
 
-### DB Server zuerst
+### DB Server zürst
 
-Server in Hetzner Cloud mit temporaer aktivem Public Network erstellen:
+Server in Hetzner Cloud mit temporär aktivem Public Network erstellen:
 
 - Name: `snio-db-01`
 - Image: Ubuntu LTS
@@ -44,12 +44,12 @@ Server in Hetzner Cloud mit temporaer aktivem Public Network erstellen:
 - SSH Key: `alpay-snio`
 - Network: `snio-private`
 - Private IP: `10.0.0.2`
-- Public IPv4: fuer Bootstrap aktiv, danach deaktivieren
+- Public IPv4: für Bootstrap aktiv, danach deaktivieren
 
 Das Subnet `10.0.0.0/28` ist innerhalb des Networks `10.0.0.0/24` korrekt. Es reicht für 14 nutzbare private Adressen; `10.0.0.1` ist Gateway/reserviert.
 
 ```bash
-ssh root@<db_public_ip_temporaer>
+ssh root@<db_public_ip_temporär>
 apt update && apt upgrade -y
 curl -fsSL https://get.docker.com | sh
 mkdir -p /opt/snio-db/backups
@@ -66,7 +66,7 @@ Vor dem Deaktivieren des Public Networks vom App Server aus testen:
 nc -vz 10.0.0.2 5432
 ```
 
-Wenn der Test erfolgreich ist, Public Network in der Hetzner Console fuer den DB Server deaktivieren.
+Wenn der Test erfolgreich ist, Public Network in der Hetzner Console für den DB Server deaktivieren.
 
 ### App Server
 
@@ -109,22 +109,27 @@ Caddy holt Let's Encrypt Zertifikat automatisch sobald die Domain auf den Server
 2. UFW auf App Server identisch zur Cloud Firewall.
 3. DB Server Public Network in Hetzner deaktiviert (UI Toggle).
 4. Postgres bindet nur an Private IP via `${PRIVATE_IP}:5432:5432`.
-5. Postgres plus Redis nutzen starke Passwoerter (`openssl rand -base64 48`).
+5. Postgres plus Redis nutzen starke Passwörter (`openssl rand -base64 48`).
 6. JWT Secrets jeweils 64+ Zeichen, ACCESS und REFRESH unterschiedlich.
-7. SSH Deploy Key ist dediziert (nicht persoenlicher Key).
+7. SSH Deploy Key ist dediziert (nicht persönlicher Key).
 8. Container laufen als non root User.
 
-Hinweis: Wenn der DB Server kein Public Network hat, hat er ohne zusätzliches NAT auch keinen normalen Internet-Outbound fuer `apt update`, `docker pull` oder externe Backups. Für Wartung entweder Public Network temporär kontrolliert aktivieren oder einen NAT-Weg über den App Server planen.
+Hinweis: Wenn der DB Server kein Public Network hat, hat er ohne zusätzliches NAT auch keinen normalen Internet-Outbound für `apt update`, `docker pull` oder externe Backups. Für Wartung entweder Public Network temporär kontrolliert aktivieren oder einen NAT-Weg über den App Server planen.
 
 ## GitHub Secrets
 
-| Secret | Inhalt |
-|---|---|
-| `HETZNER_HOST` | App Server Public IP |
-| `SSH_USER` | Deploy User auf App Server |
-| `SSH_PRIVATE_KEY` | Private Key des dedizierten Deploy Keys |
-| `DISCORD_WEBHOOK` | Discord Webhook URL |
+| Secret | Inhalt                                                                           |
+|---|----------------------------------------------------------------------------------|
+| `HETZNER_HOST` | App Server Public IP                                                             |
+| `SSH_USER` | Deploy User auf App Server                                                       |
+| `SSH_PRIVATE_KEY` | Private Key des dedizierten Deploy Keys                                          |
+| `SSH_PASSPHRASE` | Passphrase des Deploy Keys, falls der Key verschlüsselt ist                      |
+| `GHCR_USERNAME` | GitHub Username für `docker login ghcr.io` auf dem App Server                   |
+| `GHCR_TOKEN` | GitHub PAT mit `read:packages` für GHCR Pulls, falls Packages nicht public sind |
+| `DISCORD_WEBHOOK` | Discord Webhook URL                                                              |
+
+Die Action kopiert bei jedem Deploy `deploy/docker-compose.prod.yml` als `/opt/snio/docker-compose.yml` und `deploy/Caddyfile` als `/opt/snio/Caddyfile` auf den App Server. `/opt/snio/.env` wird bewusst nicht kopiert und muss einmalig manuell auf dem Server angelegt werden. Wenn diese Datei fehlt, bricht das Deployment ab.
 
 ## Migrations
 
-Der API Container fuehrt beim Start automatisch `prisma migrate deploy` aus. Neue Migrations in `apps/api/prisma/migrations/` werden beim naechsten Deploy automatisch angewendet.
+Der API Container führt beim Start automatisch `prisma migrate deploy` aus. Neue Migrations in `apps/api/prisma/migrations/` werden beim nächsten Deploy automatisch angewendet.
