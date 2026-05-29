@@ -84,7 +84,7 @@ jobs:
             docker compose pull
             docker compose run --rm api \
               node_modules/.bin/prisma migrate deploy \
-              --schema=apps/api/prisma/schema.prisma
+              --schema=prisma/schema.prisma
             docker compose up -d
             docker image prune -f
 
