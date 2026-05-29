@@ -38,6 +38,7 @@ yarn-error.log*
 # Docker local overrides
 docker-compose.override.yml
 docker-compose.override.yaml
+deploy/private/
 
 # Local databases
 *.db

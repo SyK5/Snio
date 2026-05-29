@@ -16,9 +16,11 @@ Two Server Setup auf Hetzner Cloud mit Private Network.
 - Backup Cron auf Hetzner Object Storage
 
 **Privates Netzwerk:**
-- 10.0.0.0/24
-- App Server: 10.0.0.1
+- Network: 10.0.0.0/24
+- Subnet: 10.0.0.0/28
+- Gateway: 10.0.0.1 (reserviert)
 - DB Server: 10.0.0.2
+- App Server: 10.0.0.3
 
 ## Files
 
@@ -34,6 +36,18 @@ Two Server Setup auf Hetzner Cloud mit Private Network.
 
 ### DB Server zuerst
 
+Server in Hetzner Cloud mit temporaer aktivem Public Network erstellen:
+
+- Name: `snio-db-01`
+- Image: Ubuntu LTS
+- Type: CX22
+- SSH Key: `alpay-snio`
+- Network: `snio-private`
+- Private IP: `10.0.0.2`
+- Public IPv4: fuer Bootstrap aktiv, danach deaktivieren
+
+Das Subnet `10.0.0.0/28` ist innerhalb des Networks `10.0.0.0/24` korrekt. Es reicht für 14 nutzbare private Adressen; `10.0.0.1` ist Gateway/reserviert.
+
 ```bash
 ssh root@<db_public_ip_temporaer>
 apt update && apt upgrade -y
@@ -44,10 +58,27 @@ cd /opt/snio-db
 # .env aus Template anlegen mit echten Werten
 docker compose up -d
 docker compose ps
-# Public Network in Hetzner Console fuer DB Server deaktivieren
 ```
 
+Vor dem Deaktivieren des Public Networks vom App Server aus testen:
+
+```bash
+nc -vz 10.0.0.2 5432
+```
+
+Wenn der Test erfolgreich ist, Public Network in der Hetzner Console fuer den DB Server deaktivieren.
+
 ### App Server
+
+Server in Hetzner Cloud erstellen:
+
+- Name: `snio-app-01`
+- Image: Ubuntu LTS
+- Type: CX22
+- SSH Key: `alpay-snio`
+- Network: `snio-private`
+- Private IP: `10.0.0.3`
+- Public IPv4: aktiv
 
 ```bash
 ssh root@<app_public_ip>
@@ -82,6 +113,8 @@ Caddy holt Let's Encrypt Zertifikat automatisch sobald die Domain auf den Server
 6. JWT Secrets jeweils 64+ Zeichen, ACCESS und REFRESH unterschiedlich.
 7. SSH Deploy Key ist dediziert (nicht persoenlicher Key).
 8. Container laufen als non root User.
+
+Hinweis: Wenn der DB Server kein Public Network hat, hat er ohne zusätzliches NAT auch keinen normalen Internet-Outbound fuer `apt update`, `docker pull` oder externe Backups. Für Wartung entweder Public Network temporär kontrolliert aktivieren oder einen NAT-Weg über den App Server planen.
 
 ## GitHub Secrets
 
