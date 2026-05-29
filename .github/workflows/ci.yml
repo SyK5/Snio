@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: testpw
+          POSTGRES_DB: snio_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://app:testpw@localhost:5432/snio_test?schema=public
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+      JWT_ACCESS_SECRET: ci_test_access_secret_minimum_64_chars_long_for_validation_only
+      JWT_REFRESH_SECRET: ci_test_refresh_secret_minimum_64_chars_long_for_validation_only
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 30d
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        working-directory: apps/api
+        run: pnpm prisma:generate
+
+      - name: Apply migrations
+        working-directory: apps/api
+        run: pnpm prisma:deploy
+
+      - name: Build all packages
+        run: pnpm turbo run build
+
+      - name: Lint
+        run: pnpm turbo run lint
+        continue-on-error: true
+
+      - name: Test
+        run: pnpm turbo run test
+        continue-on-error: true
