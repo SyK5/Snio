@@ -60,7 +60,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: deploy-bundle/*
+          source: "deploy-bundle/*"
           target: /tmp/snio-deploy
           strip_components: 1
           overwrite: true
