@@ -29,6 +29,12 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3000/health" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - snio
     extra_hosts:

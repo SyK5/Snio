@@ -82,8 +82,10 @@ jobs:
             echo "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin
             cd /opt/snio
             docker compose pull
+            docker compose run --rm api \
+              node_modules/.bin/prisma migrate deploy \
+              --schema=apps/api/prisma/schema.prisma
             docker compose up -d
-            docker compose ps
             docker image prune -f
 
   notify:
