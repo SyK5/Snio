@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core'
 import { Logger } from 'nestjs-pino'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import cookieParser from 'cookie-parser'
 import { AppModule } from './app.module'
 
 async function bootstrap() {
@@ -8,6 +9,8 @@ async function bootstrap() {
   const logger = app.get(Logger)
   app.useLogger(logger)
   app.setGlobalPrefix('api')
+  app.use(cookieParser())
+  app.enableCors({ origin: process.env.WEB_BASE_URL, credentials: true })
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Snio API')

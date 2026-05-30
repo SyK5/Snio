@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { LoggerModule } from 'nestjs-pino'
 import { AppController } from './app.controller'
+import { PrismaModule } from './common/prisma/prisma.module'
+import { AuthModule } from './modules/auth/auth.module'
 
 @Module({
   imports: [
@@ -13,6 +15,8 @@ import { AppController } from './app.controller'
         redact: { paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'], remove: true },
       },
     }),
+    PrismaModule,
+    AuthModule,
   ],
   controllers: [AppController],
 })
