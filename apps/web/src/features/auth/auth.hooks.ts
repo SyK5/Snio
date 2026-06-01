@@ -47,6 +47,14 @@ export function useRegister() {
   })
 }
 
+export function useVerifyEmail() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: authApi.verifyEmail,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ME_KEY }),
+  })
+}
+
 export function useLogout() {
   const navigate = useNavigate()
   const qc = useQueryClient()
