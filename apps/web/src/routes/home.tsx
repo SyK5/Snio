@@ -8,8 +8,8 @@ export function HomePage() {
       <div className="flex flex-col items-center gap-2">
         <h1 className="text-5xl font-black italic tracking-tight">SNIO</h1>
 
-        <p className="max-w-md text-center text-sm text-muted-foreground">Esport Plattform für Clans, Events und Trainings</p>
-        <p className="loading-text max-w-md text-center text-sm text-muted-foreground">In Entwicklung</p>
+        <p className="max-w-md text-center text-sm text-muted-foreground">{m.home_tagline()}</p>
+        <p className="loading-text max-w-md text-center text-sm text-muted-foreground">{m.home_status()}</p>
       </div>
 
       <span className="rounded-full border border-border bg-surface-muted px-4 py-1 text-xs text-muted-foreground">{m.nav_home()}</span>
