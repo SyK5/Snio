@@ -83,7 +83,7 @@ jobs:
             cd /opt/snio
             docker compose pull
             docker compose run --rm api \
-              node_modules/.bin/prisma migrate deploy \
+              node node_modules/prisma/build/index.js migrate deploy \
               --schema=prisma/schema.prisma
             docker compose up -d
             docker image prune -f

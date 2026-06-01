@@ -14,7 +14,8 @@ COPY --from=pruner /repo/out/full/ .
 RUN pnpm --filter @snio/api exec prisma generate
 RUN pnpm --filter @snio/api build
 RUN pnpm deploy --filter=@snio/api --prod /prod/api
-RUN cd /prod/api && pnpm exec prisma generate
+RUN cp -r apps/api/prisma /prod/api/prisma
+RUN cd /prod/api && node node_modules/prisma/build/index.js generate
 
 FROM node:22-alpine AS runner
 ENV NODE_ENV=production
