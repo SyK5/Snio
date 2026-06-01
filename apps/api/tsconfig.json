@@ -12,6 +12,7 @@
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
     "skipLibCheck": true,
     "sourceMap": true,
     "declaration": false,
