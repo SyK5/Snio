@@ -14,10 +14,20 @@
   "auth_register_action": "Registrieren",
   "auth_no_account": "Noch kein Konto?",
   "auth_have_account": "Bereits registriert?",
+  "auth_back": "Zurück",
+  "auth_error_invalid_credentials": "Anmeldedaten ungültig",
+  "auth_error_email_taken": "E-Mail bereits vergeben",
+  "auth_error_generic": "Etwas ist schiefgelaufen, bitte erneut versuchen",
+  "verify_sent_title": "Fast geschafft",
+  "verify_sent_body": "Wir haben dir eine E-Mail zur Bestätigung geschickt. Öffne den Link darin, um dein Konto zu aktivieren.",
+  "verify_sent_to_login": "Zur Anmeldung",
   "settings_title": "Einstellungen",
   "settings_theme": "Design",
   "settings_theme_dark": "Dunkel",
   "settings_theme_light": "Hell",
   "settings_theme_system": "System",
-  "settings_language": "Sprache"
+  "settings_language": "Sprache",
+  "settings_account": "Konto",
+  "settings_account_empty": "Hier erscheinen bald weitere Einstellungen für dein Konto.",
+  "settings_account_locked": "Melde dich an, um Konto Einstellungen zu verwalten."
 }

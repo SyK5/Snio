@@ -14,10 +14,20 @@
   "auth_register_action": "Sign up",
   "auth_no_account": "No account yet?",
   "auth_have_account": "Already registered?",
+  "auth_back": "Back",
+  "auth_error_invalid_credentials": "Invalid credentials",
+  "auth_error_email_taken": "Email already in use",
+  "auth_error_generic": "Something went wrong, please try again",
+  "verify_sent_title": "Almost done",
+  "verify_sent_body": "We sent you a confirmation email. Open the link inside to activate your account.",
+  "verify_sent_to_login": "To sign in",
   "settings_title": "Settings",
   "settings_theme": "Theme",
   "settings_theme_dark": "Dark",
   "settings_theme_light": "Light",
   "settings_theme_system": "System",
-  "settings_language": "Language"
+  "settings_language": "Language",
+  "settings_account": "Account",
+  "settings_account_empty": "More account settings will appear here soon.",
+  "settings_account_locked": "Sign in to manage account settings."
 }
