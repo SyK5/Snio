@@ -39,5 +39,7 @@
   "settings_language": "Language",
   "settings_account": "Account",
   "settings_account_empty": "More account settings will appear here soon.",
-  "settings_account_locked": "Sign in to manage account settings."
+  "settings_account_locked": "Sign in to manage account settings.",
+  "home_tagline": "Esports platform for clans, events and training",
+  "home_status": "In development"
 }

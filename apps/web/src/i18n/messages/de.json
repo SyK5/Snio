@@ -39,5 +39,7 @@
   "settings_language": "Sprache",
   "settings_account": "Konto",
   "settings_account_empty": "Hier erscheinen bald weitere Einstellungen für dein Konto.",
-  "settings_account_locked": "Melde dich an, um Konto Einstellungen zu verwalten."
+  "settings_account_locked": "Melde dich an, um Konto Einstellungen zu verwalten.",
+  "home_tagline": "Esport Plattform für Clans, Events und Trainings",
+  "home_status": "In Entwicklung"
 }
