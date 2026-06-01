@@ -2,12 +2,12 @@ import { forwardRef, type HTMLAttributes } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-const cardVariants = cva('rounded-2xl border backdrop-blur', {
+const cardVariants = cva('rounded-2xl border', {
   variants: {
     tone: {
-      base: 'border-slate-800 bg-slate-900/40',
-      muted: 'border-slate-800/60 bg-slate-950/40',
-      accent: 'border-indigo-500/30 bg-indigo-950/20',
+      base: 'border-border bg-card',
+      muted: 'border-border bg-surface-muted',
+      accent: 'border-primary/30 bg-primary/10',
     },
     padding: {
       none: 'p-0',
