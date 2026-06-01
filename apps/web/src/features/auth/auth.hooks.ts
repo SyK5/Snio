@@ -56,7 +56,7 @@ export function useLogout() {
     onSettled: () => {
       clear()
       qc.clear()
-      navigate('/login')
+      navigate('/')
     },
   })
 }
