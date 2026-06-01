@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { useCurrentUser, useLogout } from '@/features/auth/auth.hooks'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { useClickOutside } from '@/hooks/use-click-outside'
+import { m } from '@/i18n/paraglide/messages'
 
 export function ProfileMenu() {
   const [open, setOpen] = useState(false)
@@ -23,40 +24,38 @@ export function ProfileMenu() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(v => !v)}
-        title="Profil"
-        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full ring-2 ring-transparent transition hover:ring-indigo-500"
+        title={m.profile_settings()}
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full ring-2 ring-transparent transition hover:ring-primary"
       >
         {user?.avatar_url ? (
           <img src={user.avatar_url} alt={user.display_name} className="h-9 w-9 rounded-full object-cover" />
         ) : (
-          <FontAwesomeIcon icon={faCircleUser} className="text-3xl text-slate-400" />
+          <FontAwesomeIcon icon={faCircleUser} className="text-3xl text-muted-foreground" />
         )}
       </button>
 
       {open && (
         <Card tone="base" padding="none" className="absolute bottom-0 left-14 z-50 w-56 p-2 shadow-2xl">
           {isAuthed && (
-            <div className="mb-1 border-b border-slate-800 pb-2">
-              <div className="px-2 pt-1 text-sm font-semibold text-white">{user.display_name}</div>
-              <div className="truncate px-2 text-xs text-slate-400">{user.email}</div>
+            <div className="mb-1 border-b border-border pb-2">
+              <div className="px-2 pt-1 text-sm font-semibold text-foreground">{user.display_name}</div>
+              <div className="truncate px-2 text-xs text-muted-foreground">{user.email}</div>
             </div>
           )}
+          <MenuLink to="/settings" icon={faGear} label={m.profile_settings()} onClick={close} />
           {isAuthed ? (
-            <>
-              <MenuLink to="/settings" icon={faGear} label="Einstellungen" onClick={close} />
-              <MenuButton
-                icon={faRightFromBracket}
-                label="Abmelden"
-                onClick={() => {
-                  logout.mutate()
-                  close()
-                }}
-              />
-            </>
+            <MenuButton
+              icon={faRightFromBracket}
+              label={m.profile_logout()}
+              onClick={() => {
+                logout.mutate()
+                close()
+              }}
+            />
           ) : (
             <>
-              <MenuLink to="/login" icon={faRightToBracket} label="Anmelden" onClick={close} />
-              <MenuLink to="/register" icon={faUserPlus} label="Registrieren" onClick={close} />
+              <MenuLink to="/login" icon={faRightToBracket} label={m.profile_login()} onClick={close} />
+              <MenuLink to="/register" icon={faUserPlus} label={m.profile_register()} onClick={close} />
             </>
           )}
         </Card>
@@ -70,9 +69,9 @@ function MenuLink({ to, icon, label, onClick }: { to: string; icon: IconDefiniti
     <Link
       to={to}
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm text-slate-300 transition hover:bg-slate-800 hover:text-white"
+      className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
     >
-      <FontAwesomeIcon icon={icon} className="w-4 text-slate-400" />
+      <FontAwesomeIcon icon={icon} className="w-4" />
       {label}
     </Link>
   )
@@ -82,9 +81,9 @@ function MenuButton({ icon, label, onClick }: { icon: IconDefinition; label: str
   return (
     <button
       onClick={onClick}
-      className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm text-slate-300 transition hover:bg-slate-800 hover:text-white"
+      className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-2 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
     >
-      <FontAwesomeIcon icon={icon} className="w-4 text-slate-400" />
+      <FontAwesomeIcon icon={icon} className="w-4" />
       {label}
     </button>
   )
