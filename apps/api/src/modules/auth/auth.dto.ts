@@ -11,8 +11,29 @@ export const loginSchema = z.object({
   password: z.string().min(1),
 })
 
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1),
+})
+
+export const resendVerificationSchema = z.object({
+  email: z.string().email().toLowerCase(),
+})
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email().toLowerCase(),
+})
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1),
+  password: z.string().min(8).max(200),
+})
+
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>
+export type ResendVerificationInput = z.infer<typeof resendVerificationSchema>
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
 
 export interface AuthTokens {
   accessToken: string
@@ -21,4 +42,8 @@ export interface AuthTokens {
 
 export interface AccessResponse {
   accessToken: string
+}
+
+export interface SuccessResponse {
+  success: boolean
 }

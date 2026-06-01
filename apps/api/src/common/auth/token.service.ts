@@ -3,7 +3,7 @@ import { ConfigType } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { randomBytes, createHash } from 'node:crypto'
 import { authConfig } from './auth.config'
-import { AccessTokenPayload, RefreshTokenResult } from './auth.types'
+import { AccessTokenPayload, OpaqueTokenResult, RefreshTokenResult } from './auth.types'
 
 @Injectable()
 export class TokenService {
@@ -27,11 +27,19 @@ export class TokenService {
   }
 
   generateRefreshToken(): RefreshTokenResult {
+    return this.generateOpaqueToken(this.config.refreshTtlMs)
+  }
+
+  generateOpaqueToken(ttlMs: number): OpaqueTokenResult {
     const token = randomBytes(48).toString('base64url')
-    return { token, tokenHash: this.hashRefreshToken(token), expiresAt: new Date(Date.now() + this.config.refreshTtlMs) }
+    return { token, tokenHash: this.hashOpaque(token), expiresAt: new Date(Date.now() + ttlMs) }
   }
 
   hashRefreshToken(token: string): string {
+    return this.hashOpaque(token)
+  }
+
+  hashOpaque(token: string): string {
     return createHash('sha256').update(token).digest('hex')
   }
 }

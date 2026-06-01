@@ -1,10 +1,13 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common'
+import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
+import { ConfigType } from '@nestjs/config'
 import { Prisma, RefreshToken } from '@prisma/client'
 import { randomBytes } from 'node:crypto'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { PasswordService } from '../../common/auth/password.service'
 import { TokenService } from '../../common/auth/token.service'
-import { AuthTokens, LoginInput, RegisterInput } from './auth.dto'
+import { MailService } from '../../common/mail/mail.service'
+import { authConfig } from '../../common/auth/auth.config'
+import { AuthTokens, ForgotPasswordInput, LoginInput, RegisterInput, ResendVerificationInput, ResetPasswordInput, VerifyEmailInput } from './auth.dto'
 
 @Injectable()
 export class AuthService {
@@ -14,6 +17,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly password: PasswordService,
     private readonly token: TokenService,
+    private readonly mail: MailService,
+    @Inject(authConfig.KEY) private readonly config: ConfigType<typeof authConfig>,
   ) {}
 
   async register(input: RegisterInput): Promise<AuthTokens> {
@@ -22,11 +27,10 @@ export class AuthService {
       const user = await this.prisma.user.create({
         data: { email: input.email, password_hash, display_name: input.displayName },
       })
+      await this.dispatchVerification(user.id, user.email)
       return await this.issueTokens(user.id)
     } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        throw new ConflictException('E-Mail bereits vergeben')
-      }
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') throw new ConflictException('E-Mail bereits vergeben')
       throw e
     }
   }
@@ -70,6 +74,60 @@ export class AuthService {
 
     const refreshToken = await this.rotate(existing)
     return { accessToken: await this.token.signAccess({ sub: existing.user_id }), refreshToken }
+  }
+
+  async verifyEmail(input: VerifyEmailInput): Promise<void> {
+    const record = await this.prisma.emailVerificationToken.findUnique({
+      where: { token_hash: this.token.hashOpaque(input.token) },
+    })
+    if (!record || record.expires_at <= new Date()) throw new UnauthorizedException('Verifizierungslink ungültig')
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: record.user_id }, data: { email_verified: true } }),
+      this.prisma.emailVerificationToken.deleteMany({ where: { user_id: record.user_id } }),
+    ])
+  }
+
+  async resendVerification(input: ResendVerificationInput): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email: input.email } })
+    if (user && !user.email_verified && !user.deleted_at) await this.dispatchVerification(user.id, user.email)
+  }
+
+  async forgotPassword(input: ForgotPasswordInput): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { email: input.email } })
+    if (!user || user.deleted_at) return
+
+    const reset = this.token.generateOpaqueToken(this.config.passwordResetTtlMs)
+    await this.prisma.passwordResetToken.create({
+      data: { token_hash: reset.tokenHash, user_id: user.id, expires_at: reset.expiresAt },
+    })
+    await this.mail.sendPasswordReset(user.email, reset.token)
+  }
+
+  async resetPassword(input: ResetPasswordInput): Promise<void> {
+    const record = await this.prisma.passwordResetToken.findUnique({
+      where: { token_hash: this.token.hashOpaque(input.token) },
+    })
+    if (!record || record.used_at || record.expires_at <= new Date()) throw new UnauthorizedException('Reset Link ungültig oder abgelaufen')
+
+    const password_hash = await this.password.hash(input.password)
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: record.user_id }, data: { password_hash } }),
+      this.prisma.passwordResetToken.update({ where: { id: record.id }, data: { used_at: new Date() } }),
+      this.prisma.refreshToken.updateMany({
+        where: { user_id: record.user_id, revoked_at: null },
+        data: { revoked_at: new Date() },
+      }),
+    ])
+  }
+
+  private async dispatchVerification(userId: string, email: string): Promise<void> {
+    await this.prisma.emailVerificationToken.deleteMany({ where: { user_id: userId } })
+    const verification = this.token.generateOpaqueToken(this.config.emailVerificationTtlMs)
+    await this.prisma.emailVerificationToken.create({
+      data: { token_hash: verification.tokenHash, email, user_id: userId, expires_at: verification.expiresAt },
+    })
+    await this.mail.sendVerification(email, verification.token)
   }
 
   private async rotate(current: RefreshToken): Promise<string> {

@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Inject, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { Throttle } from '@nestjs/throttler'
 import type { Request, Response, CookieOptions } from 'express'
 import { authConfig } from '../../common/auth/auth.config'
 import { AuthGuard } from '../../common/guards/auth.guard'
@@ -8,7 +9,22 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator'
 import { AuthUser } from '../../common/auth/auth.types'
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe'
 import { AuthService } from './auth.service'
-import { AccessResponse, LoginInput, RegisterInput, loginSchema, registerSchema } from './auth.dto'
+import {
+  AccessResponse,
+  ForgotPasswordInput,
+  LoginInput,
+  RegisterInput,
+  ResendVerificationInput,
+  ResetPasswordInput,
+  SuccessResponse,
+  VerifyEmailInput,
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resendVerificationSchema,
+  resetPasswordSchema,
+  verifyEmailSchema,
+} from './auth.dto'
 
 @ApiTags('auth')
 @Controller('auth')
@@ -40,10 +56,37 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<{ success: boolean }> {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<SuccessResponse> {
     const presented = req.cookies?.[this.config.cookie.name]
     if (presented) await this.auth.logout(presented)
     this.clearRefreshCookie(res)
+    return { success: true }
+  }
+
+  @Post('verify-email')
+  async verifyEmail(@Body(new ZodValidationPipe(verifyEmailSchema)) dto: VerifyEmailInput): Promise<SuccessResponse> {
+    await this.auth.verifyEmail(dto)
+    return { success: true }
+  }
+
+  @Post('resend-verification')
+  @Throttle({ default: { limit: 3, ttl: 3_600_000 } })
+  async resendVerification(@Body(new ZodValidationPipe(resendVerificationSchema)) dto: ResendVerificationInput): Promise<SuccessResponse> {
+    await this.auth.resendVerification(dto)
+    return { success: true }
+  }
+
+  @Post('forgot-password')
+  @Throttle({ default: { limit: 3, ttl: 3_600_000 } })
+  async forgotPassword(@Body(new ZodValidationPipe(forgotPasswordSchema)) dto: ForgotPasswordInput): Promise<SuccessResponse> {
+    await this.auth.forgotPassword(dto)
+    return { success: true }
+  }
+
+  @Post('reset-password')
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
+  async resetPassword(@Body(new ZodValidationPipe(resetPasswordSchema)) dto: ResetPasswordInput): Promise<SuccessResponse> {
+    await this.auth.resetPassword(dto)
     return { success: true }
   }
 
