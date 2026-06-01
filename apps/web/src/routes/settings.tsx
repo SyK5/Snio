@@ -10,7 +10,7 @@ import { useAuthStore } from '@/features/auth/auth.store'
 import { m } from '@/i18n/paraglide/messages'
 import { locales, type Locale } from '@/i18n/paraglide/runtime'
 
-const LOCALE_LABELS: Record<string, string> = { de: 'Deutsch', en: 'English' }
+const LOCALE_LABELS: Record<string, string> = { de: 'Deutsch', en: 'English', tr: 'Türkçe', ru: 'Русский' }
 
 export function SettingsPage() {
   const preference = useThemeStore(s => s.preference)
