@@ -7,4 +7,6 @@ export const authApi = {
   logout: () => api.post<{ success: boolean }>('/auth/logout').then(r => r.data),
   refresh: () => api.post<AccessResponse>('/auth/refresh').then(r => r.data),
   me: () => api.get<AuthUser>('/auth/me').then(r => r.data),
+  verifyEmail: (token: string) => api.post<{ success: boolean }>('/auth/verify-email', { token }).then(r => r.data),
+  resendVerification: (email: string) => api.post<{ success: boolean }>('/auth/resend-verification', { email }).then(r => r.data),
 }
