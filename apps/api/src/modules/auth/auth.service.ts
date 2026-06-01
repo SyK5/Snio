@@ -1,4 +1,4 @@
-import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
+import { ConflictException, ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { Prisma, RefreshToken } from '@prisma/client'
 import { randomBytes } from 'node:crypto'
@@ -44,6 +44,7 @@ export class AuthService {
     const valid = await this.password.verify(hash, input.password)
 
     if (!user || !valid || user.deleted_at) throw new UnauthorizedException('Anmeldedaten ungültig')
+    if (!user.email_verified) throw new ForbiddenException('E-Mail nicht bestätigt')
 
     return this.issueTokens(user.id)
   }
