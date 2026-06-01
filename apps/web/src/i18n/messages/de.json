@@ -1,0 +1,23 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "nav_home": "Start",
+  "profile_login": "Anmelden",
+  "profile_register": "Registrieren",
+  "profile_logout": "Abmelden",
+  "profile_settings": "Einstellungen",
+  "auth_login_title": "Melde dich an",
+  "auth_register_title": "Erstelle dein Konto",
+  "auth_email": "E-Mail",
+  "auth_password": "Passwort",
+  "auth_display_name": "Anzeigename",
+  "auth_login_action": "Anmelden",
+  "auth_register_action": "Registrieren",
+  "auth_no_account": "Noch kein Konto?",
+  "auth_have_account": "Bereits registriert?",
+  "settings_title": "Einstellungen",
+  "settings_theme": "Design",
+  "settings_theme_dark": "Dunkel",
+  "settings_theme_light": "Hell",
+  "settings_theme_system": "System",
+  "settings_language": "Sprache"
+}
