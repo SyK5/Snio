@@ -17,6 +17,7 @@ export function ProfileMenu() {
 
   const accessToken = useAuthStore(s => s.accessToken)
   const { data: user } = useCurrentUser()
+  const { data: profile } = useProfile()
   const logout = useLogout()
   const close = () => setOpen(false)
   const isAuthed = !!accessToken && !!user
@@ -28,8 +29,8 @@ export function ProfileMenu() {
         title={m.profile_settings()}
         className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full ring-2 ring-transparent transition hover:ring-primary"
       >
-        {user?.avatar_url ? (
-          <img src={user.avatar_url} alt={user.display_name} className="h-9 w-9 rounded-full object-cover" />
+        {profile?.avatarUrl ? (
+          <img src={profile.avatarUrl} alt={user?.display_name ?? ''} className="h-9 w-9 rounded-full object-cover" />
         ) : (
           <FontAwesomeIcon icon={faCircleUser} className="text-3xl text-muted-foreground" />
         )}
