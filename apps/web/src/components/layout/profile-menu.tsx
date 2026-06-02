@@ -8,6 +8,7 @@ import { useCurrentUser, useLogout } from '@/features/auth/auth.hooks'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { useClickOutside } from '@/hooks/use-click-outside'
 import { m } from '@/i18n/paraglide/messages'
+import { useProfile } from '@/features/user/user.hooks'
 
 export function ProfileMenu() {
   const [open, setOpen] = useState(false)
