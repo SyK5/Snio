@@ -8,6 +8,8 @@ import { PrismaModule } from './common/prisma/prisma.module'
 import { MailModule } from './common/mail/mail.module'
 import { RequestContextMiddleware } from './common/context/request-context.middleware'
 import { AuthModule } from './modules/auth/auth.module'
+import { S3Module } from './common/s3/s3.module'
+import { UsersModule } from './modules/users/users.module'
 
 @Module({
   imports: [
@@ -21,8 +23,10 @@ import { AuthModule } from './modules/auth/auth.module'
       },
     }),
     PrismaModule,
+    S3Module,
     MailModule,
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
