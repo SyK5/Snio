@@ -40,6 +40,14 @@
   "settings_account": "Hesap",
   "settings_account_empty": "Hesabın için daha fazla ayar yakında burada görünecek.",
   "settings_account_locked": "Hesap ayarlarını yönetmek için giriş yap.",
+  "avatar_change": "Resmi değiştir",
+  "avatar_remove": "Kaldır",
+  "avatar_hint": "JPG, PNG veya WebP, maks 5 MB",
+  "avatar_success": "Profil resmi güncellendi",
+  "avatar_removed": "Profil resmi kaldırıldı",
+  "avatar_error_type": "Yalnızca JPG, PNG veya WebP izinli",
+  "avatar_error_size": "Dosya çok büyük, maks 5 MB",
+  "avatar_error_generic": "Yükleme başarısız, lütfen tekrar dene",
   "home_tagline": "Klanlar, etkinlikler ve eğitimler için espor platformu",
   "home_status": "Geliştirme aşamasında"
 }

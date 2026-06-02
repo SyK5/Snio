@@ -22,7 +22,7 @@
   "auth_error_unverified_body": "Ваша эл. почта ещё не подтверждена. Проверьте почту или запросите новую ссылку.",
   "auth_resend_action": "Отправить снова",
   "auth_resend_success": "Письмо с подтверждением отправлено повторно",
-  "verify_sent_title": "Почти готово",
+  "verify_sent_title": "Зл. Почта готово",
   "verify_sent_body": "Мы отправили вам письмо для подтверждения. Откройте ссылку внутри, чтобы активировать аккаунт.",
   "verify_sent_to_login": "К входу",
   "verify_pending_title": "Подтверждение эл. почты",
@@ -40,6 +40,14 @@
   "settings_account": "Аккаунт",
   "settings_account_empty": "Здесь скоро появятся дополнительные настройки аккаунта.",
   "settings_account_locked": "Войдите, чтобы управлять настройками аккаунта.",
+  "avatar_change": "Изменить изображение",
+  "avatar_remove": "Удалить",
+  "avatar_hint": "JPG, PNG или WebP, макс 5 МБ",
+  "avatar_success": "Фото профиля обновлено",
+  "avatar_removed": "Фото профиля удалено",
+  "avatar_error_type": "Разрешены только JPG, PNG или WebP",
+  "avatar_error_size": "Файл слишком большой, макс 5 МБ",
+  "avatar_error_generic": "Ошибка загрузки, попробуйте ещё раз",
   "home_tagline": "Киберспортивная платформа для кланов, событий и тренировок",
   "home_status": "В разработке"
 }

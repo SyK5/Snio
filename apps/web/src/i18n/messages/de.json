@@ -40,6 +40,14 @@
   "settings_account": "Konto",
   "settings_account_empty": "Hier erscheinen bald weitere Einstellungen für dein Konto.",
   "settings_account_locked": "Melde dich an, um Konto Einstellungen zu verwalten.",
+  "avatar_change": "Bild ändern",
+  "avatar_remove": "Entfernen",
+  "avatar_hint": "JPG, PNG oder WebP, max 5 MB",
+  "avatar_success": "Profilbild aktualisiert",
+  "avatar_removed": "Profilbild entfernt",
+  "avatar_error_type": "Nur JPG, PNG oder WebP erlaubt",
+  "avatar_error_size": "Datei zu groß, max 5 MB",
+  "avatar_error_generic": "Upload fehlgeschlagen, bitte erneut versuchen",
   "home_tagline": "Esport Plattform für Clans, Events und Trainings",
   "home_status": "In Entwicklung"
 }
