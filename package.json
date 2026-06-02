@@ -16,9 +16,9 @@
     "format": "turbo run format",
     "test": "turbo run test",
     "clean": "turbo run clean && rimraf node_modules",
-    "db:up": "docker compose up -d postgres redis",
+    "db:up": "docker compose up -d postgres redis minio minio-init",
     "db:down": "docker compose down",
-    "db:reset": "docker compose down -v && docker compose up -d postgres redis"
+    "db:reset": "docker compose down -v && docker compose up -d postgres redis minio minio-init"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",
