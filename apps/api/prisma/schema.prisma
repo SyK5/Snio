@@ -8,15 +8,19 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  email          String    @unique
-  email_verified Boolean   @default(false)
-  password_hash  String
-  display_name   String
-  avatar_url     String?
-  created_at     DateTime  @default(now()) @db.Timestamptz(6)
-  updated_at     DateTime  @updatedAt @db.Timestamptz(6)
-  deleted_at     DateTime? @db.Timestamptz(6)
+  id                String    @id @default(cuid())
+  email             String    @unique
+  username          String    @unique
+  discriminator     String    @db.Char(4)
+  pending_fields    String[]  @default([])
+  email_verified    Boolean   @default(false)
+  is_platform_admin Boolean   @default(false)
+  password_hash     String
+  display_name      String
+  avatar_url        String?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @updatedAt @db.Timestamptz(6)
+  deleted_at        DateTime? @db.Timestamptz(6)
 
   sessions               Session[]
   refreshTokens          RefreshToken[]
@@ -41,6 +45,7 @@ model User {
   documents              Document[]              @relation("DocumentRecipient")
   generatedDocuments     Document[]              @relation("DocumentGeneratedBy")
 
+  @@unique([display_name, discriminator])
   @@index([deleted_at])
   @@map("snio_users")
 }
@@ -130,6 +135,7 @@ model Clan {
 
   owner              User                @relation("ClanOwner", fields: [owner_id], references: [id])
   members            ClanMember[]
+  roles              ClanRoleDef[]
   games              ClanGame[]
   events             Event[]
   trainings          Training[]
@@ -148,25 +154,64 @@ model ClanMember {
   id        String    @id @default(cuid())
   clan_id   String
   user_id   String
-  role      ClanRole  @default(MEMBER)
   joined_at DateTime  @default(now()) @db.Timestamptz(6)
   left_at   DateTime? @db.Timestamptz(6)
 
-  clan Clan @relation(fields: [clan_id], references: [id], onDelete: Cascade)
-  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  clan  Clan             @relation(fields: [clan_id], references: [id], onDelete: Cascade)
+  user  User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  roles ClanMemberRole[]
 
   @@unique([clan_id, user_id])
   @@index([user_id])
   @@map("snio_clan_members")
 }
 
-enum ClanRole {
-  OWNER
-  LEADER
-  TRAINER
-  MEMBER
+model ClanRoleDef {
+  id         String   @id @default(cuid())
+  clan_id    String
+  key        String
+  name       String
+  color      String?
+  is_system  Boolean  @default(false)
+  position   Int      @default(0)
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @updatedAt @db.Timestamptz(6)
 
-  @@map("snio_clan_role")
+  clan     Clan                 @relation(fields: [clan_id], references: [id], onDelete: Cascade)
+  grants   ClanRoleGrant[]
+  members  ClanMemberRole[]
+  mentions ChatMessageMention[]
+
+  @@unique([clan_id, key])
+  @@index([clan_id])
+  @@map("snio_clan_roles")
+}
+
+model ClanRoleGrant {
+  id      String @id @default(cuid())
+  role_id String
+  grant   String
+  actions Int    @default(0)
+
+  role ClanRoleDef @relation(fields: [role_id], references: [id], onDelete: Cascade)
+
+  @@unique([role_id, grant])
+  @@index([role_id])
+  @@map("snio_clan_role_grants")
+}
+
+model ClanMemberRole {
+  id          String   @id @default(cuid())
+  member_id   String
+  role_id     String
+  assigned_at DateTime @default(now()) @db.Timestamptz(6)
+
+  member ClanMember  @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  role   ClanRoleDef @relation(fields: [role_id], references: [id], onDelete: Cascade)
+
+  @@unique([member_id, role_id])
+  @@index([role_id])
+  @@map("snio_clan_member_roles")
 }
 
 model ClanGame {
@@ -546,14 +591,16 @@ model ChatMessageMention {
   message_id        String
   type              MentionType
   mentioned_user_id String?
-  mentioned_role    ClanRole?
+  mentioned_role_id String?
   created_at        DateTime    @default(now()) @db.Timestamptz(6)
 
-  message       ChatMessage @relation(fields: [message_id], references: [id], onDelete: Cascade)
-  mentionedUser User?       @relation(fields: [mentioned_user_id], references: [id], onDelete: Cascade)
+  message       ChatMessage  @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  mentionedUser User?        @relation(fields: [mentioned_user_id], references: [id], onDelete: Cascade)
+  mentionedRole ClanRoleDef? @relation(fields: [mentioned_role_id], references: [id], onDelete: Cascade)
 
   @@index([message_id])
   @@index([mentioned_user_id])
+  @@index([mentioned_role_id])
   @@map("snio_chat_message_mentions")
 }
 
