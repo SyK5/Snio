@@ -8,6 +8,8 @@
   "auth_login_title": "Sign in",
   "auth_register_title": "Create your account",
   "auth_email": "Email",
+  "auth_username": "Username",
+  "auth_identifier": "Email or username",
   "auth_password": "Password",
   "auth_display_name": "Display name",
   "auth_login_action": "Sign in",
@@ -17,6 +19,8 @@
   "auth_back": "Back",
   "auth_error_invalid_credentials": "Invalid credentials",
   "auth_error_email_taken": "Email already in use",
+  "auth_error_username_taken": "Username already taken",
+  "auth_error_register_conflict": "Email or username already in use",
   "auth_error_generic": "Something went wrong, please try again",
   "auth_error_unverified_title": "Sign in not possible",
   "auth_error_unverified_body": "Your email is not confirmed yet. Check your inbox or request a new link.",
@@ -60,5 +64,10 @@
   "avatar_error_size": "File too large, max 5 MB",
   "avatar_error_generic": "Upload failed, please try again",
   "home_tagline": "Esports platform for clans, events and training",
-  "home_status": "In development"
+  "home_status": "In development",
+  "complete_username_title": "Choose a username",
+  "complete_username_body": "Before you continue, we need a unique username for your account. You can change it anytime later.",
+  "complete_save_action": "Save and continue",
+  "complete_generic_title": "Details required",
+  "complete_generic_body": "Your account needs additional details. Please update the app."
 }

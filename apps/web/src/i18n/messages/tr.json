@@ -8,6 +8,8 @@
   "auth_login_title": "Giriş yap",
   "auth_register_title": "Hesabını oluştur",
   "auth_email": "E-posta",
+  "auth_username": "Kullanıcı adı",
+  "auth_identifier": "E-posta veya kullanıcı adı",
   "auth_password": "Şifre",
   "auth_display_name": "Görünen ad",
   "auth_login_action": "Giriş yap",
@@ -17,6 +19,8 @@
   "auth_back": "Geri",
   "auth_error_invalid_credentials": "Geçersiz giriş bilgileri",
   "auth_error_email_taken": "E-posta zaten kullanımda",
+  "auth_error_username_taken": "Kullanıcı adı zaten alınmış",
+  "auth_error_register_conflict": "E-posta veya kullanıcı adı zaten kullanımda",
   "auth_error_generic": "Bir şeyler ters gitti, lütfen tekrar dene",
   "auth_error_unverified_title": "Giriş yapılamıyor",
   "auth_error_unverified_body": "E-postan henüz onaylanmadı. Gelen kutunu kontrol et veya yeni bir bağlantı iste.",
@@ -60,5 +64,10 @@
   "avatar_error_size": "Dosya çok büyük, maks 5 MB",
   "avatar_error_generic": "Yükleme başarısız, lütfen tekrar dene",
   "home_tagline": "Klanlar, etkinlikler ve eğitimler için espor platformu",
-  "home_status": "Geliştirme aşamasında"
+  "home_status": "Geliştirme aşamasında",
+  "complete_username_title": "Kullanıcı adı seç",
+  "complete_username_body": "Devam etmeden önce hesabın için benzersiz bir kullanıcı adına ihtiyacımız var. Daha sonra istediğin zaman değiştirebilirsin.",
+  "complete_save_action": "Kaydet ve devam et",
+  "complete_generic_title": "Bilgi gerekli",
+  "complete_generic_body": "Hesabın için ek bilgiler gerekiyor. Lütfen uygulamayı güncelle."
 }

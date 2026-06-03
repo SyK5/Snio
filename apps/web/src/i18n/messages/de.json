@@ -8,6 +8,8 @@
   "auth_login_title": "Melde dich an",
   "auth_register_title": "Erstelle dein Konto",
   "auth_email": "E-Mail",
+  "auth_username": "Benutzername",
+  "auth_identifier": "E-Mail oder Benutzername",
   "auth_password": "Passwort",
   "auth_display_name": "Anzeigename",
   "auth_login_action": "Anmelden",
@@ -17,6 +19,8 @@
   "auth_back": "Zurück",
   "auth_error_invalid_credentials": "Anmeldedaten ungültig",
   "auth_error_email_taken": "E-Mail bereits vergeben",
+  "auth_error_username_taken": "Benutzername bereits vergeben",
+  "auth_error_register_conflict": "E-Mail oder Benutzername bereits vergeben",
   "auth_error_generic": "Etwas ist schiefgelaufen, bitte erneut versuchen",
   "auth_error_unverified_title": "Anmeldung nicht möglich",
   "auth_error_unverified_body": "Deine E-Mail ist noch nicht bestätigt. Prüfe dein Postfach oder fordere einen neuen Link an.",
@@ -60,5 +64,10 @@
   "avatar_error_size": "Datei zu groß, max 5 MB",
   "avatar_error_generic": "Upload fehlgeschlagen, bitte erneut versuchen",
   "home_tagline": "Esport Plattform für Clans, Events und Trainings",
-  "home_status": "In Entwicklung"
+  "home_status": "In Entwicklung",
+  "complete_username_title": "Benutzername festlegen",
+  "complete_username_body": "Bevor es weitergeht, brauchen wir einen eindeutigen Benutzernamen für dein Konto. Du kannst ihn später jederzeit ändern.",
+  "complete_save_action": "Speichern und fortfahren",
+  "complete_generic_title": "Angaben erforderlich",
+  "complete_generic_body": "Für dein Konto werden zusätzliche Angaben benötigt. Bitte aktualisiere die App."
 }

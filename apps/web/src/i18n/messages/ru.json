@@ -8,6 +8,8 @@
   "auth_login_title": "Войдите в аккаунт",
   "auth_register_title": "Создайте аккаунт",
   "auth_email": "Эл. почта",
+  "auth_username": "Имя пользователя",
+  "auth_identifier": "Эл. почта или имя пользователя",
   "auth_password": "Пароль",
   "auth_display_name": "Отображаемое имя",
   "auth_login_action": "Войти",
@@ -17,6 +19,8 @@
   "auth_back": "Назад",
   "auth_error_invalid_credentials": "Неверные данные для входа",
   "auth_error_email_taken": "Эл. почта уже используется",
+  "auth_error_username_taken": "Имя пользователя уже занято",
+  "auth_error_register_conflict": "Эл. почта или имя пользователя уже используется",
   "auth_error_generic": "Что-то пошло не так, попробуйте ещё раз",
   "auth_error_unverified_title": "Вход невозможен",
   "auth_error_unverified_body": "Ваша эл. почта ещё не подтверждена. Проверьте почту или запросите новую ссылку.",
@@ -60,5 +64,10 @@
   "avatar_error_size": "Файл слишком большой, макс 5 МБ",
   "avatar_error_generic": "Ошибка загрузки, попробуйте ещё раз",
   "home_tagline": "Киберспортивная платформа для кланов, событий и тренировок",
-  "home_status": "В разработке"
+  "home_status": "В разработке",
+  "complete_username_title": "Выберите имя пользователя",
+  "complete_username_body": "Прежде чем продолжить, нам нужно уникальное имя пользователя для вашего аккаунта. Вы сможете изменить его позже в любое время.",
+  "complete_save_action": "Сохранить и продолжить",
+  "complete_generic_title": "Требуются данные",
+  "complete_generic_body": "Для вашего аккаунта нужны дополнительные данные. Пожалуйста, обновите приложение."
 }
