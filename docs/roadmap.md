@@ -287,6 +287,24 @@ deferred: hard deny until finalized
 
 Adding new scopes later means adding a resolver, not rewriting the extension.
 
+### B8 Paid Username Change
+
+Username is the unique login handle and appears in the profile URL and in mentions.
+
+Current rule (already implemented):
+Username can be set once for free while still pending (existing users via the complete-profile gate, new users at registration).
+After that a 30 day cooldown applies, tracked via User.username_changed_at.
+A change within the cooldown is rejected with a clear message stating the next free date.
+
+Planned:
+A paid change that bypasses the cooldown after a confirmed payment (around 5 EUR).
+Needs a Billing module with a payment provider (Stripe), invoices, tax handling and refund logic.
+This is a full sprint, not a small add on.
+The paid path simply skips the cooldown check once payment is confirmed, the data model (username_changed_at) is already prepared for it.
+
+UX requirement (already implemented in settings):
+Clear separation between username (login handle, shown as @name, in URL) and display name (shown as Name#tag, freely changeable).
+
 ## Data Model Changes
 
 New:
