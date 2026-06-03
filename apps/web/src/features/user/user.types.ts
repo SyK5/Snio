@@ -1,9 +1,17 @@
 export interface MeResponse {
   id: string
   email: string
+  username: string
   displayName: string
+  discriminator: string
   emailVerified: boolean
   avatarUrl: string | null
+  pendingFields: string[]
+}
+
+export interface UpdateProfilePayload {
+  username?: string
+  displayName?: string
 }
 
 export interface AvatarPresignResponse {

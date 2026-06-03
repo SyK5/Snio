@@ -9,9 +9,9 @@ interface AuthCardProps {
   title: string
   subtitle: string
   children: ReactNode
-  footerText: string
-  footerLinkLabel: string
-  footerLinkTo: string
+  footerText?: string
+  footerLinkLabel?: string
+  footerLinkTo?: string
 }
 
 export function AuthCard({ title, subtitle, children, footerText, footerLinkLabel, footerLinkTo }: AuthCardProps) {
@@ -35,12 +35,14 @@ export function AuthCard({ title, subtitle, children, footerText, footerLinkLabe
           <p className="text-center text-sm text-muted-foreground">{subtitle}</p>
         </div>
         {children}
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          {footerText}{' '}
-          <Link to={footerLinkTo} className="font-medium text-primary hover:opacity-80">
-            {footerLinkLabel}
-          </Link>
-        </p>
+        {footerText && footerLinkLabel && footerLinkTo && (
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            {footerText}{' '}
+            <Link to={footerLinkTo} className="font-medium text-primary hover:opacity-80">
+              {footerLinkLabel}
+            </Link>
+          </p>
+        )}
       </Card>
     </main>
   )
