@@ -55,6 +55,20 @@ export function useVerifyEmail() {
   })
 }
 
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (email: string) => authApi.forgotPassword(email),
+  })
+}
+
+export function useResetPassword() {
+  const navigate = useNavigate()
+  return useMutation({
+    mutationFn: ({ token, password }: { token: string; password: string }) => authApi.resetPassword(token, password),
+    onSuccess: () => navigate('/login'),
+  })
+}
+
 export function useLogout() {
   const navigate = useNavigate()
   const qc = useQueryClient()
