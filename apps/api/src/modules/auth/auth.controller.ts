@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Inject, Post, Query, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Throttle } from '@nestjs/throttler'
@@ -11,18 +11,21 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe'
 import { AuthService } from './auth.service'
 import {
   AccessResponse,
+  AvailabilityResponse,
   ForgotPasswordInput,
   LoginInput,
   RegisterInput,
   ResendVerificationInput,
   ResetPasswordInput,
   SuccessResponse,
+  UsernameAvailableInput,
   VerifyEmailInput,
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
   resendVerificationSchema,
   resetPasswordSchema,
+  usernameAvailableSchema,
   verifyEmailSchema,
 } from './auth.dto'
 
@@ -46,6 +49,12 @@ export class AuthController {
     const tokens = await this.auth.login(dto)
     this.setRefreshCookie(res, tokens.refreshToken)
     return { accessToken: tokens.accessToken }
+  }
+
+  @Get('username-available')
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  async usernameAvailable(@Query(new ZodValidationPipe(usernameAvailableSchema)) query: UsernameAvailableInput): Promise<AvailabilityResponse> {
+    return { available: await this.auth.isUsernameAvailable(query.username) }
   }
 
   @Post('refresh')

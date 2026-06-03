@@ -1,13 +1,15 @@
 import { ConflictException, ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
-import { Prisma, RefreshToken } from '@prisma/client'
-import { randomBytes } from 'node:crypto'
+import { Prisma, RefreshToken, User } from '@prisma/client'
+import { randomBytes, randomInt } from 'node:crypto'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { PasswordService } from '../../common/auth/password.service'
 import { TokenService } from '../../common/auth/token.service'
 import { MailService } from '../../common/mail/mail.service'
 import { authConfig } from '../../common/auth/auth.config'
 import { AuthTokens, ForgotPasswordInput, LoginInput, RegisterInput, ResendVerificationInput, ResetPasswordInput, VerifyEmailInput } from './auth.dto'
+
+const DISCRIMINATOR_ATTEMPTS = 8
 
 @Injectable()
 export class AuthService {
@@ -23,23 +25,19 @@ export class AuthService {
 
   async register(input: RegisterInput): Promise<AuthTokens> {
     const password_hash = await this.password.hash(input.password)
-    try {
-      const user = await this.prisma.user.create({
-        data: { email: input.email, password_hash, display_name: input.displayName },
-      })
-      await this.dispatchVerification(user.id, user.email)
-      return await this.issueTokens(user.id)
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') throw new ConflictException('E-Mail bereits vergeben')
-      throw e
-    }
+    const user = await this.createUser({ email: input.email, username: input.username, password_hash, display_name: input.displayName })
+    await this.dispatchVerification(user.id, user.email)
+    return this.issueTokens(user.id)
+  }
+
+  async isUsernameAvailable(username: string): Promise<boolean> {
+    const existing = await this.prisma.user.findUnique({ where: { username }, select: { id: true } })
+    return !existing
   }
 
   async login(input: LoginInput): Promise<AuthTokens> {
-    const user = await this.prisma.user.findUnique({
-      where: { email: input.email },
-      omit: { password_hash: false },
-    })
+    const where = input.identifier.includes('@') ? { email: input.identifier } : { username: input.identifier }
+    const user = await this.prisma.user.findUnique({ where, omit: { password_hash: false } })
     const hash = user?.password_hash ?? (await this.dummyHash())
     const valid = await this.password.verify(hash, input.password)
 
@@ -122,6 +120,21 @@ export class AuthService {
     ])
   }
 
+  private async createUser(data: { email: string; username: string; password_hash: string; display_name: string }): Promise<User> {
+    for (let i = 0; i < DISCRIMINATOR_ATTEMPTS; i++) {
+      try {
+        return await this.prisma.user.create({ data: { ...data, discriminator: randomDiscriminator() } })
+      } catch (e) {
+        const targets = uniqueTargets(e)
+        if (targets.includes('email')) throw new ConflictException('E-Mail bereits vergeben')
+        if (targets.includes('username')) throw new ConflictException('Benutzername bereits vergeben')
+        if (targets.includes('discriminator') || targets.includes('display_name')) continue
+        throw e
+      }
+    }
+    throw new ConflictException('Kein freier Discriminator für diesen Anzeigenamen, bitte anderen wählen')
+  }
+
   private async dispatchVerification(userId: string, email: string): Promise<void> {
     await this.prisma.emailVerificationToken.deleteMany({ where: { user_id: userId } })
     const verification = this.token.generateOpaqueToken(this.config.emailVerificationTtlMs)
@@ -166,4 +179,15 @@ export class AuthService {
     this.cachedDummyHash ??= await this.password.hash(randomBytes(32).toString('hex'))
     return this.cachedDummyHash
   }
+}
+
+function randomDiscriminator(): string {
+  return String(randomInt(1, 10000)).padStart(4, '0')
+}
+
+function uniqueTargets(e: unknown): string[] {
+  if (!(e instanceof Prisma.PrismaClientKnownRequestError) || e.code !== 'P2002') return []
+  const target = e.meta?.target
+  if (Array.isArray(target)) return target as string[]
+  return typeof target === 'string' ? [target] : []
 }
