@@ -5,6 +5,8 @@ import { LoginPage } from '@/routes/login'
 import { RegisterPage } from '@/routes/register'
 import { VerifyEmailSentPage } from '@/routes/verify-email-sent'
 import { VerifyEmailPage } from '@/routes/verify-email'
+import { ForgotPasswordPage } from '@/routes/forgot-password'
+import { ResetPasswordPage } from '@/routes/reset-password'
 import { SettingsPage } from '@/routes/settings'
 import { AppLayout } from '@/components/layout/app-layout'
 import { useAuthBootstrap } from '@/features/auth/use-auth-bootstrap'
@@ -26,6 +28,8 @@ export function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/verify-email-sent" element={<VerifyEmailSentPage />} />
       <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/settings" element={<SettingsPage />} />
