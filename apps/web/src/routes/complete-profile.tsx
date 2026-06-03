@@ -7,7 +7,7 @@ import { AuthCard } from '@/components/auth/auth-card'
 import { TextField } from '@/components/ui/field'
 import { Button } from '@/components/ui/button'
 import { authApi } from '@/features/auth/auth.api'
-import { useUpdateProfile } from '@/features/user/user.hooks'
+import { useUpdateUsername } from '@/features/user/user.hooks'
 import { usernameField } from '@/features/auth/auth.schemas'
 import { m } from '@/i18n/paraglide/messages'
 
@@ -20,7 +20,7 @@ export function CompleteProfilePage({ pendingFields }: { pendingFields: string[]
 }
 
 function CompleteUsername() {
-  const update = useUpdateProfile()
+  const update = useUpdateUsername()
   const { register, handleSubmit, watch, formState } = useForm<UsernameForm>({ resolver: zodResolver(usernameOnlySchema), mode: 'onTouched' })
 
   const username = watch('username')

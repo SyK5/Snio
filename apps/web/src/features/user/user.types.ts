@@ -2,6 +2,7 @@ export interface MeResponse {
   id: string
   email: string
   username: string
+  usernameChangedAt: string | null
   displayName: string
   discriminator: string
   emailVerified: boolean
@@ -10,8 +11,11 @@ export interface MeResponse {
 }
 
 export interface UpdateProfilePayload {
-  username?: string
-  displayName?: string
+  displayName: string
+}
+
+export interface UpdateUsernamePayload {
+  username: string
 }
 
 export interface AvatarPresignResponse {

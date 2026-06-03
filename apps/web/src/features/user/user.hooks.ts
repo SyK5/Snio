@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { userApi, uploadToS3 } from './user.api'
-import type { AvatarType, UpdateProfilePayload } from './user.types'
+import type { AvatarType, UpdateProfilePayload, UpdateUsernamePayload } from './user.types'
 
 const PROFILE_KEY = ['user', 'profile'] as const
 
@@ -19,6 +19,17 @@ export function useUpdateProfile() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (payload: UpdateProfilePayload) => userApi.updateProfile(payload),
+    onSuccess: data => {
+      qc.setQueryData(PROFILE_KEY, data)
+      qc.invalidateQueries({ queryKey: ['auth', 'me'] })
+    },
+  })
+}
+
+export function useUpdateUsername() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: UpdateUsernamePayload) => userApi.updateUsername(payload),
     onSuccess: data => {
       qc.setQueryData(PROFILE_KEY, data)
       qc.invalidateQueries({ queryKey: ['auth', 'me'] })
