@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Patch, Post, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { Throttle } from '@nestjs/throttler'
 import { AuthGuard } from '../../common/guards/auth.guard'
@@ -6,7 +6,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator'
 import { AuthUser } from '../../common/auth/auth.types'
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe'
 import { UsersService } from './users.service'
-import { AvatarConfirmInput, AvatarPresignInput, AvatarPresignResponse, MeResponse, avatarConfirmSchema, avatarPresignSchema } from './users.dto'
+import { AvatarConfirmInput, AvatarPresignInput, AvatarPresignResponse, MeResponse, UpdateProfileInput, avatarConfirmSchema, avatarPresignSchema, updateProfileSchema } from './users.dto'
 
 @ApiTags('users')
 @Controller('users')
@@ -18,6 +18,11 @@ export class UsersController {
   @Get('me')
   me(@CurrentUser() user: AuthUser): Promise<MeResponse> {
     return this.users.toMeResponse(user)
+  }
+
+  @Patch('me')
+  updateProfile(@CurrentUser() user: AuthUser, @Body(new ZodValidationPipe(updateProfileSchema)) dto: UpdateProfileInput): Promise<MeResponse> {
+    return this.users.updateProfile(user, dto)
   }
 
   @Post('me/avatar/presign')
