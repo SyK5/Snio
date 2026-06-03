@@ -24,7 +24,10 @@ export class AuthGuard implements CanActivate {
 
     req.user = user
     const store = currentStore()
-    if (store) store.userId = user.id
+    if (store) {
+      store.userId = user.id
+      store.isPlatformAdmin = user.is_platform_admin
+    }
     return true
   }
 

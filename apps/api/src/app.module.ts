@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { LoggerModule } from 'nestjs-pino'
 import { AppController } from './app.controller'
 import { PrismaModule } from './common/prisma/prisma.module'
+import { RlsModule } from './common/rls/rls.module'
 import { MailModule } from './common/mail/mail.module'
 import { RequestContextMiddleware } from './common/context/request-context.middleware'
 import { AuthModule } from './modules/auth/auth.module'
@@ -23,6 +24,7 @@ import { UsersModule } from './modules/users/users.module'
       },
     }),
     PrismaModule,
+    RlsModule,
     S3Module,
     MailModule,
     AuthModule,
