@@ -9,4 +9,6 @@ export const authApi = {
   me: () => api.get<AuthUser>('/auth/me').then(r => r.data),
   verifyEmail: (token: string) => api.post<{ success: boolean }>('/auth/verify-email', { token }).then(r => r.data),
   resendVerification: (email: string) => api.post<{ success: boolean }>('/auth/resend-verification', { email }).then(r => r.data),
+  forgotPassword: (email: string) => api.post<{ success: boolean }>('/auth/forgot-password', { email }).then(r => r.data),
+  resetPassword: (token: string, password: string) => api.post<{ success: boolean }>('/auth/reset-password', { token, password }).then(r => r.data),
 }

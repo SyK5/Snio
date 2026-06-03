@@ -11,5 +11,18 @@ export const registerSchema = z.object({
   password: z.string().min(8, 'Mindestens 8 Zeichen').max(200, 'Zu lang'),
 })
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email('Ungültige E-Mail'),
+})
+
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, 'Mindestens 8 Zeichen').max(200, 'Zu lang'),
+    confirmPassword: z.string(),
+  })
+  .refine(d => d.password === d.confirmPassword, { message: 'Passwörter stimmen nicht überein', path: ['confirmPassword'] })
+
 export type LoginForm = z.infer<typeof loginSchema>
 export type RegisterForm = z.infer<typeof registerSchema>
+export type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>
+export type ResetPasswordForm = z.infer<typeof resetPasswordSchema>
