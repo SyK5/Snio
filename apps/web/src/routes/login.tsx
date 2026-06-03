@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isAxiosError } from 'axios'
+import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { AuthCard } from '@/components/auth/auth-card'
 import { TextField } from '@/components/ui/field'
@@ -24,6 +25,9 @@ export function LoginPage() {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <TextField label={m.auth_email()} type="email" autoComplete="email" error={formState.errors.email?.message} {...register('email')} />
         <TextField label={m.auth_password()} type="password" autoComplete="current-password" error={formState.errors.password?.message} {...register('password')} />
+        <Link to="/forgot-password" className="-mt-2 self-end text-xs text-muted-foreground hover:text-foreground">
+          {m.auth_forgot_link()}
+        </Link>
         <Button type="submit" loading={login.isPending} className="mt-2">
           {m.auth_login_action()}
         </Button>
