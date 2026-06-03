@@ -1,12 +1,13 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common'
+import { BadRequestException, ConflictException, ForbiddenException, Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { randomInt, randomUUID } from 'node:crypto'
 import { PrismaService } from '../../common/prisma/prisma.service'
 import { S3Service } from '../../common/s3/s3.service'
 import { AuthUser } from '../../common/auth/auth.types'
-import { AvatarPresignResponse, MeResponse, UpdateProfileInput, TYPE_EXTENSIONS, AVATAR_TYPES } from './users.dto'
+import { AvatarPresignResponse, MeResponse, UpdateProfileInput, UpdateUsernameInput, TYPE_EXTENSIONS, AVATAR_TYPES } from './users.dto'
 
 const DISCRIMINATOR_ATTEMPTS = 8
+const USERNAME_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000
 
 @Injectable()
 export class UsersService {
@@ -20,6 +21,7 @@ export class UsersService {
       id: user.id,
       email: user.email,
       username: user.username,
+      usernameChangedAt: user.username_changed_at ? user.username_changed_at.toISOString() : null,
       displayName: user.display_name,
       discriminator: user.discriminator,
       emailVerified: user.email_verified,
@@ -29,15 +31,29 @@ export class UsersService {
   }
 
   async updateProfile(user: AuthUser, input: UpdateProfileInput): Promise<MeResponse> {
-    const renaming = input.displayName !== undefined && input.displayName !== user.display_name
-    const data: Prisma.UserUpdateInput = {}
-    if (input.username !== undefined) data.username = input.username
-    if (input.displayName !== undefined) data.display_name = input.displayName
-    if (renaming) data.discriminator = await this.freeDiscriminator(input.displayName as string, user.id)
-    if (input.username !== undefined && user.pending_fields.includes('username')) data.pending_fields = user.pending_fields.filter((f) => f !== 'username')
+    const renaming = input.displayName !== user.display_name
+    const data: Prisma.UserUpdateInput = { display_name: input.displayName }
+    if (renaming) data.discriminator = await this.freeDiscriminator(input.displayName, user.id)
 
     const updated = await this.applyProfile(user.id, data, renaming, input.displayName)
     return this.toMeResponse(updated)
+  }
+
+  async updateUsername(user: AuthUser, input: UpdateUsernameInput): Promise<MeResponse> {
+    const pending = user.pending_fields.includes('username')
+    if (!pending) this.assertCooldown(user.username_changed_at)
+    if (input.username === user.username) throw new BadRequestException('Benutzername unverändert')
+
+    const data: Prisma.UserUpdateInput = { username: input.username, username_changed_at: new Date() }
+    if (pending) data.pending_fields = user.pending_fields.filter((f) => f !== 'username')
+
+    try {
+      const updated = await this.prisma.user.update({ where: { id: user.id }, data })
+      return this.toMeResponse(updated)
+    } catch (e) {
+      if (uniqueTargets(e).includes('username')) throw new ConflictException('Benutzername bereits vergeben')
+      throw e
+    }
   }
 
   async presignAvatar(userId: string, contentType: (typeof AVATAR_TYPES)[number]): Promise<AvatarPresignResponse> {
@@ -67,6 +83,13 @@ export class UsersService {
   private resolveAvatar(key: string | null): Promise<string> | null {
     if (!key) return null
     return this.s3.presignDownload(key)
+  }
+
+  private assertCooldown(changedAt: Date | null): void {
+    if (!changedAt) return
+    const next = changedAt.getTime() + USERNAME_COOLDOWN_MS
+    if (Date.now() >= next) return
+    throw new ForbiddenException(`Nächste kostenlose Änderung ab ${new Date(next).toISOString()}`)
   }
 
   private async applyProfile(userId: string, data: Prisma.UserUpdateInput, renaming: boolean, displayName?: string): Promise<AuthUser> {

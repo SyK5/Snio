@@ -6,7 +6,7 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator'
 import { AuthUser } from '../../common/auth/auth.types'
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe'
 import { UsersService } from './users.service'
-import { AvatarConfirmInput, AvatarPresignInput, AvatarPresignResponse, MeResponse, UpdateProfileInput, avatarConfirmSchema, avatarPresignSchema, updateProfileSchema } from './users.dto'
+import { AvatarConfirmInput, AvatarPresignInput, AvatarPresignResponse, MeResponse, UpdateProfileInput, UpdateUsernameInput, avatarConfirmSchema, avatarPresignSchema, updateProfileSchema, updateUsernameSchema } from './users.dto'
 
 @ApiTags('users')
 @Controller('users')
@@ -23,6 +23,12 @@ export class UsersController {
   @Patch('me')
   updateProfile(@CurrentUser() user: AuthUser, @Body(new ZodValidationPipe(updateProfileSchema)) dto: UpdateProfileInput): Promise<MeResponse> {
     return this.users.updateProfile(user, dto)
+  }
+
+  @Patch('me/username')
+  @Throttle({ default: { limit: 5, ttl: 3_600_000 } })
+  updateUsername(@CurrentUser() user: AuthUser, @Body(new ZodValidationPipe(updateUsernameSchema)) dto: UpdateUsernameInput): Promise<MeResponse> {
+    return this.users.updateUsername(user, dto)
   }
 
   @Post('me/avatar/presign')

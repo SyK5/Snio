@@ -30,16 +30,18 @@ export const usernameField = z
       .refine((v) => !v.includes('..'), 'Keine doppelten Punkte'),
   )
 
-export const updateProfileSchema = z
-  .object({
-    username: usernameField.optional(),
-    displayName: z.string().trim().min(2).max(40).optional(),
-  })
-  .refine((v) => v.username !== undefined || v.displayName !== undefined, 'Keine Änderung angegeben')
+export const updateProfileSchema = z.object({
+  displayName: z.string().trim().min(2).max(40),
+})
+
+export const updateUsernameSchema = z.object({
+  username: usernameField,
+})
 
 export type AvatarPresignInput = z.infer<typeof avatarPresignSchema>
 export type AvatarConfirmInput = z.infer<typeof avatarConfirmSchema>
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>
+export type UpdateUsernameInput = z.infer<typeof updateUsernameSchema>
 
 export interface AvatarPresignResponse {
   key: string
@@ -52,6 +54,7 @@ export interface MeResponse {
   id: string
   email: string
   username: string
+  usernameChangedAt: string | null
   displayName: string
   discriminator: string
   emailVerified: boolean
