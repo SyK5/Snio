@@ -13,17 +13,17 @@ import { m } from '@/i18n/paraglide/messages'
 
 export function LoginPage() {
   const login = useLogin()
-  const { register, handleSubmit, formState, getValues } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
+  const { register, handleSubmit, formState } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
 
   const onSubmit = (values: LoginForm) =>
     login.mutate(values, {
-      onError: error => handleLoginError(error, getValues('email')),
+      onError: error => handleLoginError(error, values.identifier),
     })
 
   return (
     <AuthCard title="SNIO" subtitle={m.auth_login_title()} footerText={m.auth_no_account()} footerLinkLabel={m.profile_register()} footerLinkTo="/register">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
-        <TextField label={m.auth_email()} type="email" autoComplete="email" error={formState.errors.email?.message} {...register('email')} />
+        <TextField label={m.auth_identifier()} autoComplete="username" error={formState.errors.identifier?.message} {...register('identifier')} />
         <TextField label={m.auth_password()} type="password" autoComplete="current-password" error={formState.errors.password?.message} {...register('password')} />
         <Link to="/forgot-password" className="-mt-2 self-end text-xs text-muted-foreground hover:text-foreground">
           {m.auth_forgot_link()}
