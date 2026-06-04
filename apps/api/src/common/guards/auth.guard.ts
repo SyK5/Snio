@@ -27,6 +27,7 @@ export class AuthGuard implements CanActivate {
     if (store) {
       store.userId = user.id
       store.isPlatformAdmin = user.is_platform_admin
+      store.pendingFields = user.pending_fields
     }
     return true
   }

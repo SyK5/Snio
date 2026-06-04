@@ -4,6 +4,7 @@ export interface RequestStore {
   requestId: string
   userId?: string
   isPlatformAdmin?: boolean
+  pendingFields?: string[]
   system?: boolean
   clanId?: string
   isClanOwner?: boolean
