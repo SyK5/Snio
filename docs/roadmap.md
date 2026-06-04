@@ -162,6 +162,8 @@ Kicks
 Bans
 Clan deletion
 
+Concrete hook points already exist in ClansService (assignRole, removeRole, kick, softDelete) and are the first call sites to instrument.
+
 Admin UI with filtering support
 
 ### B5 Notification Center
@@ -203,6 +205,18 @@ Additional document creation support for organizers:
 Invitations
 Invoices
 Other organizer documents
+
+### B9 Clan Join Gating
+
+Clan join is currently open: any authenticated user with a complete profile can join any clan through POST /clans/:clanId/join. This is intentional for Sprint 2 because no invite or visibility model exists yet.
+
+Still needed:
+
+Clan visibility (PUBLIC | PRIVATE) or an invite flow (ClanInvite model plus invite codes).
+
+Join gating: PRIVATE clans reject open join, entry only through invite or owner/leader add.
+
+The join service runs in runSystem today (no membership yet at join time). The gate check (visibility or valid invite) goes in front of the membership creation, the runSystem block stays as is.
 
 ## Visibility, Registration and Chat (Design Locked, Migration per Sprint)
 
@@ -386,6 +400,8 @@ Roles are only bundles of grants.
 Effective grants for multi role members are calculated using bitwise OR across all assigned roles.
 
 Platform Admins and Clan Owners are bypasses and do not require grant lookups.
+
+Role hierarchy is position based. A member can only assign, remove or otherwise act on roles below their own highest role position. Kicking a member with an equal or higher highest role is rejected. Owners and Platform Admins bypass the position check. Effective position is loaded by the ClanContextGuard into the request store.
 
 Business uniqueness rules such as one team per player per tournament belong into service logic, not RLS.
 
