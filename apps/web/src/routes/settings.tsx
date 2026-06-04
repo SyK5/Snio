@@ -10,6 +10,7 @@ import { useAuthStore } from '@/features/auth/auth.store'
 import { m } from '@/i18n/paraglide/messages'
 import { locales, type Locale } from '@/i18n/paraglide/runtime'
 import { AvatarUpload } from '@/features/user/avatar-upload'
+import { ProfileFields } from '@/features/user/profile-fields'
 
 const LOCALE_LABELS: Record<string, string> = { de: 'Deutsch', en: 'English', tr: 'Türkçe', ru: 'Русский' }
 
@@ -56,6 +57,8 @@ function AccountSection() {
     <Card padding="md" className="flex flex-col gap-5">
       <h2 className="text-sm font-semibold text-foreground">{m.settings_account()}</h2>
       <AvatarUpload />
+      <div className="border-t border-border" />
+      <ProfileFields />
     </Card>
   )
 }

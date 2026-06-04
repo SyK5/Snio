@@ -2,6 +2,7 @@ export interface AuthUser {
   id: string
   email: string
   username: string
+  username_changed_at: string | null
   email_verified: boolean
   display_name: string
   discriminator: string
