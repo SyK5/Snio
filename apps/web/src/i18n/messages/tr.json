@@ -69,5 +69,14 @@
   "complete_username_body": "Devam etmeden önce hesabın için benzersiz bir kullanıcı adına ihtiyacımız var. Daha sonra istediğin zaman değiştirebilirsin.",
   "complete_save_action": "Kaydet ve devam et",
   "complete_generic_title": "Bilgi gerekli",
-  "complete_generic_body": "Hesabın için ek bilgiler gerekiyor. Lütfen uygulamayı güncelle."
+  "complete_generic_body": "Hesabın için ek bilgiler gerekiyor. Lütfen uygulamayı güncelle.",
+  "profile_save": "Kaydet",
+  "profile_display_label": "Görünen ad",
+  "profile_display_hint": "Başkaları seni böyle görür:",
+  "profile_display_saved": "Görünen ad kaydedildi",
+  "profile_username_label": "Kullanıcı adı",
+  "profile_username_hint": "Girişin ve profil URL'in:",
+  "profile_username_saved": "Kullanıcı adı kaydedildi",
+  "profile_username_cooldown": "Sonraki ücretsiz değişiklik şu tarihten itibaren",
+  "profile_username_cooldown_short": "Değişiklik henüz kilitli, lütfen sonra dene"
 }

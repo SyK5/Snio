@@ -26,7 +26,7 @@
   "auth_error_unverified_body": "Ваша эл. почта ещё не подтверждена. Проверьте почту или запросите новую ссылку.",
   "auth_resend_action": "Отправить снова",
   "auth_resend_success": "Письмо с подтверждением отправлено повторно",
-  "verify_sent_title": "Зл. Почта готово",
+  "verify_sent_title": "Почти готово",
   "verify_sent_body": "Мы отправили вам письмо для подтверждения. Откройте ссылку внутри, чтобы активировать аккаунт.",
   "verify_sent_to_login": "К входу",
   "verify_pending_title": "Подтверждение эл. почты",
@@ -69,5 +69,14 @@
   "complete_username_body": "Прежде чем продолжить, нам нужно уникальное имя пользователя для вашего аккаунта. Вы сможете изменить его позже в любое время.",
   "complete_save_action": "Сохранить и продолжить",
   "complete_generic_title": "Требуются данные",
-  "complete_generic_body": "Для вашего аккаунта нужны дополнительные данные. Пожалуйста, обновите приложение."
+  "complete_generic_body": "Для вашего аккаунта нужны дополнительные данные. Пожалуйста, обновите приложение.",
+  "profile_save": "Сохранить",
+  "profile_display_label": "Отображаемое имя",
+  "profile_display_hint": "Так вас видят другие:",
+  "profile_display_saved": "Отображаемое имя сохранено",
+  "profile_username_label": "Имя пользователя",
+  "profile_username_hint": "Ваш логин и URL профиля:",
+  "profile_username_saved": "Имя пользователя сохранено",
+  "profile_username_cooldown": "Следующее бесплатное изменение с",
+  "profile_username_cooldown_short": "Изменение пока заблокировано, попробуйте позже"
 }

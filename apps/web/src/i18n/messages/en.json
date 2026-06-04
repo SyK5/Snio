@@ -69,5 +69,14 @@
   "complete_username_body": "Before you continue, we need a unique username for your account. You can change it anytime later.",
   "complete_save_action": "Save and continue",
   "complete_generic_title": "Details required",
-  "complete_generic_body": "Your account needs additional details. Please update the app."
+  "complete_generic_body": "Your account needs additional details. Please update the app.",
+  "profile_save": "Save",
+  "profile_display_label": "Display name",
+  "profile_display_hint": "How others see you:",
+  "profile_display_saved": "Display name saved",
+  "profile_username_label": "Username",
+  "profile_username_hint": "Your login and profile URL:",
+  "profile_username_saved": "Username saved",
+  "profile_username_cooldown": "Next free change from",
+  "profile_username_cooldown_short": "Change still locked, please try later"
 }

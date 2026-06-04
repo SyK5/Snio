@@ -69,5 +69,14 @@
   "complete_username_body": "Bevor es weitergeht, brauchen wir einen eindeutigen Benutzernamen für dein Konto. Du kannst ihn später jederzeit ändern.",
   "complete_save_action": "Speichern und fortfahren",
   "complete_generic_title": "Angaben erforderlich",
-  "complete_generic_body": "Für dein Konto werden zusätzliche Angaben benötigt. Bitte aktualisiere die App."
+  "complete_generic_body": "Für dein Konto werden zusätzliche Angaben benötigt. Bitte aktualisiere die App.",
+  "profile_save": "Speichern",
+  "profile_display_label": "Anzeigename",
+  "profile_display_hint": "So wirst du anderen angezeigt:",
+  "profile_display_saved": "Anzeigename gespeichert",
+  "profile_username_label": "Benutzername",
+  "profile_username_hint": "Dein Login und deine Profil URL:",
+  "profile_username_saved": "Benutzername gespeichert",
+  "profile_username_cooldown": "Nächste kostenlose Änderung ab",
+  "profile_username_cooldown_short": "Änderung noch gesperrt, bitte später erneut"
 }
