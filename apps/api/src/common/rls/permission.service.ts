@@ -10,4 +10,11 @@ export class PermissionService {
     if (store.system || store.isPlatformAdmin || store.isClanOwner) return true
     return hasAction(store.grants?.[grant] ?? 0, action)
   }
+
+  canManageRole(targetPosition: number): boolean {
+    const store = currentStore()
+    if (!store) return false
+    if (store.system || store.isPlatformAdmin || store.isClanOwner) return true
+    return (store.clanRolePosition ?? -1) > targetPosition
+  }
 }

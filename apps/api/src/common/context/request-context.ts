@@ -8,6 +8,7 @@ export interface RequestStore {
   system?: boolean
   clanId?: string
   isClanOwner?: boolean
+  clanRolePosition?: number
   grants?: Record<string, number>
   membershipClanIds?: string[]
 }

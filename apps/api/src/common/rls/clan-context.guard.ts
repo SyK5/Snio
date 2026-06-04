@@ -20,7 +20,7 @@ export class ClanContextGuard implements CanActivate {
         owner_id: true,
         members: {
           where: { user_id: store.userId, left_at: null },
-          select: { roles: { select: { role: { select: { grants: { select: { grant: true, actions: true } } } } } } },
+          select: { roles: { select: { role: { select: { position: true, grants: { select: { grant: true, actions: true } } } } } } },
         },
       },
     })
@@ -31,10 +31,15 @@ export class ClanContextGuard implements CanActivate {
     if (!member && !isOwner && !store.isPlatformAdmin) throw new ForbiddenException('Kein Mitglied dieses Clans')
 
     const grants: Record<string, number> = {}
-    for (const mr of member?.roles ?? []) for (const g of mr.role.grants) grants[g.grant] = (grants[g.grant] ?? 0) | g.actions
+    let position = -1
+    for (const mr of member?.roles ?? []) {
+      if (mr.role.position > position) position = mr.role.position
+      for (const g of mr.role.grants) grants[g.grant] = (grants[g.grant] ?? 0) | g.actions
+    }
 
     store.clanId = clanId
     store.isClanOwner = isOwner
+    store.clanRolePosition = position
     store.grants = grants
     return true
   }
