@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHouse } from '@fortawesome/free-solid-svg-icons'
+import { faHouse, faUsers } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { ProfileMenu } from './profile-menu'
 import { cn } from '@/lib/utils'
@@ -14,7 +14,10 @@ interface NavItem {
 }
 
 export function Sidebar() {
-  const topNav: NavItem[] = [{ to: '/', icon: faHouse, label: m.nav_home(), end: true }]
+  const topNav: NavItem[] = [
+    { to: '/', icon: faHouse, label: m.nav_home(), end: true },
+    { to: '/clans', icon: faUsers, label: m.nav_clans() },
+  ]
 
   return (
     <aside className="flex w-16 flex-col items-center gap-6 border-r border-border bg-surface-muted py-5">

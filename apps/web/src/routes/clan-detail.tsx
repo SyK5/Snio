@@ -1,0 +1,87 @@
+import { useNavigate, useParams } from 'react-router-dom'
+import { isAxiosError } from 'axios'
+import { toast } from 'sonner'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { MemberRow } from '@/features/clan/member-row'
+import { useClan, useClanMembers, useDeleteClan, useLeaveClan } from '@/features/clan/clan.hooks'
+import { m } from '@/i18n/paraglide/messages'
+import type { ClanDetail, ClanRoleView } from '@/features/clan/clan.types'
+
+export function ClanDetailPage() {
+  const { clanId = '' } = useParams()
+  const { data: clan, isLoading, error } = useClan(clanId)
+
+  if (isLoading) return <Centered>{m.clan_loading()}</Centered>
+  if (error || !clan) return <Centered>{m.clan_not_found()}</Centered>
+
+  return (
+    <div className="mx-auto max-w-3xl px-6 py-10">
+      <Header clan={clan} />
+      <MembersSection clanId={clanId} clan={clan} />
+    </div>
+  )
+}
+
+function Header({ clan }: { clan: ClanDetail }) {
+  const navigate = useNavigate()
+  const leave = useLeaveClan()
+  const remove = useDeleteClan()
+
+  const onLeave = () => leave.mutate(clan.id, { onSuccess: () => navigate('/clans'), onError: error => toast.error(resolveError(error)) })
+  const onDelete = () => remove.mutate(clan.id, { onSuccess: () => { toast.success(m.clan_deleted()); navigate('/clans') }, onError: () => toast.error(m.clan_error_generic()) })
+
+  return (
+    <div className="mb-8 flex items-start gap-4">
+      <Logo url={clan.logoUrl} tag={clan.tag} />
+      <div className="min-w-0 flex-1">
+        <h1 className="text-2xl font-bold text-foreground">{clan.name}</h1>
+        <p className="text-sm text-muted-foreground">[{clan.tag}] · {m.clan_member_count({ count: clan.memberCount })}</p>
+        {clan.description && <p className="mt-2 text-sm text-foreground">{clan.description}</p>}
+      </div>
+      <div className="flex shrink-0 gap-2">
+        {clan.isOwner ? (
+          <Button size="sm" variant="danger" onClick={onDelete} loading={remove.isPending}>{m.clan_delete()}</Button>
+        ) : (
+          <Button size="sm" variant="ghost" onClick={onLeave} loading={leave.isPending}>{m.clan_leave()}</Button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function MembersSection({ clanId, clan }: { clanId: string; clan: ClanDetail }) {
+  const { data: members, isLoading } = useClanMembers(clanId)
+  const canManage = clan.isOwner
+  const roles = deriveRoles(members)
+
+  return (
+    <Card>
+      <h2 className="mb-2 text-sm font-semibold text-foreground">{m.clan_members_title()}</h2>
+      {isLoading && <p className="text-sm text-muted-foreground">{m.clan_loading()}</p>}
+      <div className="divide-y divide-border">
+        {members?.map(member => <MemberRow key={member.id} clanId={clanId} member={member} roles={roles} canManage={canManage} />)}
+      </div>
+    </Card>
+  )
+}
+
+function deriveRoles(members: { roles: ClanRoleView[] }[] | undefined): ClanRoleView[] {
+  const map = new Map<string, ClanRoleView>()
+  for (const member of members ?? []) for (const role of member.roles) map.set(role.id, role)
+  return [...map.values()].sort((a, b) => b.position - a.position)
+}
+
+function Logo({ url, tag }: { url: string | null; tag: string }) {
+  if (url) return <img src={url} alt={tag} className="h-16 w-16 rounded-2xl object-cover" />
+  return <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-muted text-lg font-bold text-muted-foreground">{tag.slice(0, 2)}</div>
+}
+
+function Centered({ children }: { children: string }) {
+  return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">{children}</div>
+}
+
+function resolveError(error: unknown): string {
+  if (isAxiosError(error) && error.response?.status === 403) return m.clan_leave_owner_blocked()
+  return m.clan_error_generic()
+}
