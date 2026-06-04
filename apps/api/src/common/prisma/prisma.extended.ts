@@ -8,3 +8,5 @@ export function createRlsClient(base: PrismaClient) {
 }
 
 export type RlsPrismaClient = ReturnType<typeof createRlsClient>
+
+export type RlsTransactionClient = Omit<RlsPrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>
