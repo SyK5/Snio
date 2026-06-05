@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { isAxiosError } from 'axios'
 import { useEffect, useState } from 'react'
 import { AuthCard } from '@/components/auth/auth-card'
-import { TextField } from '@/components/ui/field'
+import { TextField, PasswordField } from '@/components/ui/field'
 import { Button } from '@/components/ui/button'
 import { useRegister } from '@/features/auth/auth.hooks'
 import { authApi } from '@/features/auth/auth.api'
@@ -27,7 +27,7 @@ export function RegisterPage() {
         <TextField label={m.auth_display_name()} autoComplete="nickname" error={formState.errors.displayName?.message} {...register('displayName')} />
         <TextField label={m.auth_username()} autoComplete="username" error={usernameError} {...register('username')} />
         <TextField label={m.auth_email()} type="email" autoComplete="email" error={formState.errors.email?.message} {...register('email')} />
-        <TextField label={m.auth_password()} type="password" autoComplete="new-password" error={formState.errors.password?.message} {...register('password')} />
+        <PasswordField label={m.auth_password()} autoComplete="new-password" error={formState.errors.password?.message} {...register('password')} />
         {serverError && <span className="text-sm text-destructive">{serverError}</span>}
         <Button type="submit" loading={signup.isPending} disabled={taken} className="mt-2">
           {m.auth_register_action()}

@@ -4,7 +4,7 @@ import { isAxiosError } from 'axios'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { AuthCard } from '@/components/auth/auth-card'
-import { TextField } from '@/components/ui/field'
+import { TextField, PasswordField } from '@/components/ui/field'
 import { Button } from '@/components/ui/button'
 import { useLogin } from '@/features/auth/auth.hooks'
 import { authApi } from '@/features/auth/auth.api'
@@ -24,7 +24,7 @@ export function LoginPage() {
     <AuthCard title="SNIO" subtitle={m.auth_login_title()} footerText={m.auth_no_account()} footerLinkLabel={m.profile_register()} footerLinkTo="/register">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <TextField label={m.auth_identifier()} autoComplete="username" error={formState.errors.identifier?.message} {...register('identifier')} />
-        <TextField label={m.auth_password()} type="password" autoComplete="current-password" error={formState.errors.password?.message} {...register('password')} />
+        <PasswordField label={m.auth_password()} autoComplete="current-password" error={formState.errors.password?.message} {...register('password')} />
         <Link to="/forgot-password" className="-mt-2 self-end text-xs text-muted-foreground hover:text-foreground">
           {m.auth_forgot_link()}
         </Link>
