@@ -1,8 +1,10 @@
 # Snio
 
-> Status: in active development. Sprint 0 of 7. First milestone (Auth) targeted Mai 2026.
+> Live at [snio.gg](https://snio.gg) · public showcase project · in active development
 
-Multi Tenant Esport Plattform für Clans, Events und Trainings. Built as a public showcase project for production grade Multi Tenant SaaS patterns.
+Multi Tenant Esport Platform for Clans, Events and Trainings. Built as a public showcase project for production grade Multi Tenant SaaS patterns.
+
+For current development direction, design decisions and backlog see [docs/roadmap.md](docs/roadmap.md).
 
 ---
 
@@ -10,15 +12,19 @@ Multi Tenant Esport Plattform für Clans, Events und Trainings. Built as a publi
 
 A platform for Esport teams to organize themselves around games, events and trainings. Users register, create or join Clans, get assigned to specific games, organize matches and training sessions, and communicate in real time. Multiple games and multiple Clans per user are first class concepts.
 
+---
+
 ## What this repository demonstrates
 
-This is a public showcase of architectural patterns commonly required in production SaaS:
+A public showcase of architectural patterns commonly required in production SaaS:
 
-- Row Level Security as Prisma Middleware that intercepts every database access, resolves chained table relations, scans entities and controllers at field level, and injects filter conditions automatically into queries.
-- Request scoped User Context via AsyncLocalStorage. The authenticated User is isolated per request and carried through the entire flow without prop drilling.
-- Grant based Permission System. Permissions are explicit grants on resources, not static role tables. Combined with Guards and Decorators for declarative authorization.
-- JWT Access plus Refresh Token Rotation with Replay Detection.
-- Multi Tenant data isolation enforced at the persistence layer.
+- **Row Level Security as Prisma Extension.** Every database access is intercepted and filtered against the current request context. Scope resolvers cover context-free, clan scoped, self scoped, member scoped and conditional cases. Adding new scopes is a resolver registration, not a rewrite.
+- **Request scoped User Context via AsyncLocalStorage.** The authenticated User and their effective grants are isolated per request and carried through the entire flow without prop drilling.
+- **Grant based Permission System.** Permissions are explicit grants on resources stored in the database, not static role tables. Actions are stored as integer bitmask (READ, CREATE, UPDATE, DELETE, MANAGE). Multi role membership is supported and effective grants are computed via bitwise OR across roles.
+- **Position based Role Hierarchy.** A member can only act on roles below their own highest role position. Owners and Platform Admins bypass the position check. Effective position is loaded by the ClanContextGuard into the request store.
+- **JWT Access plus Refresh Token Rotation with Replay Detection.**
+- **Username System.** Username as unique login handle separated from display name. Discriminator support (Name#tag), 30 day cooldown after change, prepared paid bypass path.
+- **Multi Tenant data isolation** enforced at the persistence layer through the RLS extension.
 
 ---
 
@@ -26,7 +32,7 @@ This is a public showcase of architectural patterns commonly required in product
 
 | Layer | Technology |
 |---|---|
-| Backend Framework | NestJS 10 |
+| Backend Framework | NestJS 11 |
 | ORM | Prisma 6 |
 | Database | PostgreSQL 16 |
 | Cache and Sessions | Redis 7 |
@@ -34,9 +40,10 @@ This is a public showcase of architectural patterns commonly required in product
 | Auth | own implementation, JWT plus Refresh Rotation, Argon2 |
 | Email | Resend with React Email Templates |
 | Frontend | React 19, Vite 6, TypeScript |
-| Styling | Tailwind CSS 4, shadcn/ui |
+| Styling | Tailwind CSS 4, CVA (shadcn-style components) |
 | State | TanStack Query, Zustand |
 | Forms | React Hook Form, Zod |
+| i18n | Paraglide JS (Inlang) |
 | Storage | Hetzner Object Storage (S3 compatible) |
 | Monorepo | pnpm Workspaces with Turborepo |
 | Container | Docker Compose |
@@ -47,13 +54,13 @@ This is a public showcase of architectural patterns commonly required in product
 
 ## Architecture overview
 
-```
+​```
 [User Browser]
       |
       | HTTPS
       v
 [App Server, public]
-   |-- Nginx (reverse proxy, Lets Encrypt SSL)
+   |-- Caddy (reverse proxy, automatic HTTPS)
    |-- NestJS API container
    |-- Vite SPA container
    `-- Redis container
@@ -63,26 +70,9 @@ This is a public showcase of architectural patterns commonly required in product
 [Database Server, private]
    |-- Postgres 16 container
    `-- Backup cron to Hetzner Object Storage
-```
+​```
 
 Two server setup with strict separation: the database server has no public IP exposed for Postgres. All database traffic flows through a Hetzner Private Network. Backups are copied nightly to S3 compatible Object Storage with 7 day retention.
-
----
-
-## Roadmap
-
-| Sprint | Scope | Status |
-|---|---|---|
-| 0 | Monorepo setup, tooling, baseline | in progress |
-| 1 | Auth (Register, Login, Refresh Rotation, Email Verification, Password Reset) | planned |
-| 2 | Clans, Roles, Grant System foundation | planned |
-| 3 | Games and Events | planned |
-| 4 | Calendar and Trainings | planned |
-| 5 | Email Notifications via Resend | planned |
-| 6 | Realtime Chat via Socket.io | planned |
-| 7 | Polish and Hetzner production deployment | planned |
-
-Each sprint is closed when its features are tested, documented and merged to main.
 
 ---
 
@@ -90,7 +80,7 @@ Each sprint is closed when its features are tested, documented and merged to mai
 
 Requirements: Node 22+, pnpm 9+, Docker.
 
-```bash
+​```bash
 git clone https://github.com/SyK5/snio.git
 cd snio
 pnpm install
@@ -99,7 +89,7 @@ cp apps/web/.env.example apps/web/.env
 pnpm db:up
 cd apps/api && pnpm prisma:migrate && pnpm seed && cd ../..
 pnpm dev
-```
+​```
 
 API runs on http://localhost:3000, Web on http://localhost:5173.
 
