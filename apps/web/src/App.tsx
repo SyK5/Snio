@@ -9,7 +9,6 @@ import { ForgotPasswordPage } from '@/routes/forgot-password'
 import { ResetPasswordPage } from '@/routes/reset-password'
 import { SettingsPage } from '@/routes/settings'
 import { ClansPage } from '@/routes/clans'
-import { CreateClanPage } from '@/routes/clan-create'
 import { ClanDetailPage } from '@/routes/clan-detail'
 import { AppLayout } from '@/components/layout/app-layout'
 import { useAuthBootstrap } from '@/features/auth/use-auth-bootstrap'
@@ -36,7 +35,6 @@ export function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/clans" element={<ClansPage />} />
-        <Route path="/clans/new" element={<CreateClanPage />} />
         <Route path="/clans/:clanId" element={<ClanDetailPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>

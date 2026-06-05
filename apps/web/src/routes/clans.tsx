@@ -1,28 +1,31 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { CreateClanModal } from '@/features/clan/create-clan-modal'
 import { useClans } from '@/features/clan/clan.hooks'
 import { m } from '@/i18n/paraglide/messages'
 import type { ClanSummary } from '@/features/clan/clan.types'
 
 export function ClansPage() {
   const { data: clans, isLoading } = useClans()
+  const [creating, setCreating] = useState(false)
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">{m.clan_list_title()}</h1>
-        <Link to="/clans/new">
-          <Button size="sm">{m.clan_create_action()}</Button>
-        </Link>
+        <Button size="sm" onClick={() => setCreating(true)}>{m.clan_create_action()}</Button>
       </div>
 
       {isLoading && <p className="text-sm text-muted-foreground">{m.clan_loading()}</p>}
-      {!isLoading && clans?.length === 0 && <EmptyState />}
+      {!isLoading && clans?.length === 0 && <EmptyState onCreate={() => setCreating(true)} />}
 
       <div className="grid gap-3 sm:grid-cols-2">
         {clans?.map(clan => <ClanCard key={clan.id} clan={clan} />)}
       </div>
+
+      <CreateClanModal open={creating} onClose={() => setCreating(false)} />
     </div>
   )
 }
@@ -46,13 +49,11 @@ function Logo({ url, tag }: { url: string | null; tag: string }) {
   return <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-muted text-sm font-bold text-muted-foreground">{tag.slice(0, 2)}</div>
 }
 
-function EmptyState() {
+function EmptyState({ onCreate }: { onCreate: () => void }) {
   return (
     <Card tone="muted" className="flex flex-col items-center gap-2 py-10 text-center">
       <p className="text-sm text-muted-foreground">{m.clan_empty()}</p>
-      <Link to="/clans/new">
-        <Button size="sm" variant="ghost">{m.clan_create_action()}</Button>
-      </Link>
+      <Button size="sm" variant="ghost" onClick={onCreate}>{m.clan_create_action()}</Button>
     </Card>
   )
 }
