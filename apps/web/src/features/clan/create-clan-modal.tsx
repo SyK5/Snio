@@ -65,6 +65,7 @@ export function CreateClanModal({ open, onClose }: { open: boolean; onClose: () 
             <div className="truncate text-xs text-muted-foreground">{tag ? `[${tag}] · ` : ''}{m.clan_create_owner_hint()}</div>
           </div>
         </div>
+        <button type="submit" className="hidden" aria-hidden tabIndex={-1} />
       </form>
     </Modal>
   )
