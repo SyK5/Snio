@@ -36,9 +36,35 @@ export const assignRoleSchema = z.object({
   roleId: z.string().min(1).max(40),
 })
 
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Farbe muss ein Hex Wert sein wie #1b2c3d')
+
+export const createRoleSchema = z.object({
+  name: z.string().trim().min(2, 'Mindestens 2 Zeichen').max(40, 'Maximal 40 Zeichen'),
+  color: hexColor.nullable().optional(),
+})
+
+export const updateRoleSchema = z
+  .object({
+    name: z.string().trim().min(2).max(40).optional(),
+    color: hexColor.nullable().optional(),
+  })
+  .refine((d) => Object.keys(d).length > 0, 'Keine Änderungen übergeben')
+
+export const reorderRolesSchema = z.object({
+  roleIds: z.array(z.string().min(1)).min(1),
+})
+
+export const setGrantsSchema = z.object({
+  grants: z.array(z.object({ grant: z.string().min(1), actions: z.number().int().min(0).max(31) })),
+})
+
 export type CreateClanInput = z.infer<typeof createClanSchema>
 export type UpdateClanInput = z.infer<typeof updateClanSchema>
 export type AssignRoleInput = z.infer<typeof assignRoleSchema>
+export type CreateRoleInput = z.infer<typeof createRoleSchema>
+export type UpdateRoleInput = z.infer<typeof updateRoleSchema>
+export type ReorderRolesInput = z.infer<typeof reorderRolesSchema>
+export type SetGrantsInput = z.infer<typeof setGrantsSchema>
 
 export interface ClanRoleView {
   id: string
@@ -73,4 +99,25 @@ export interface ClanMemberView {
   avatarUrl: string | null
   joinedAt: string
   roles: ClanRoleView[]
+}
+
+export interface ClanRoleGrantView {
+  grant: string
+  actions: number
+}
+
+export interface ClanRoleDetail {
+  id: string
+  key: string
+  name: string
+  color: string | null
+  position: number
+  isSystem: boolean
+  grants: ClanRoleGrantView[]
+}
+
+export interface GrantCatalogEntry {
+  key: string
+  category: string
+  actions: number
 }
