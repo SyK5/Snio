@@ -101,3 +101,55 @@ function writeDetail(qc: ReturnType<typeof useQueryClient>, clan: ClanDetail) {
 function writeMember(qc: ReturnType<typeof useQueryClient>, clanId: string, member: ClanMemberView) {
   qc.setQueryData<ClanMemberView[]>(membersKey(clanId), prev => prev?.map(m => (m.id === member.id ? member : m)) ?? prev)
 }
+
+export function useGrantCatalog() {
+  return useQuery({ queryKey: grantCatalogKey, queryFn: () => clanApi.grantCatalog(), staleTime: Infinity })
+}
+
+export function useClanRoles(clanId: string) {
+  return useQuery({ queryKey: rolesKey(clanId), queryFn: () => clanApi.listRoles(clanId), enabled: !!clanId })
+}
+
+export function useCreateRole(clanId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CreateRolePayload) => clanApi.createRole(clanId, payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: rolesKey(clanId) }),
+  })
+}
+
+export function useUpdateRole(clanId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ roleId, payload }: { roleId: string; payload: UpdateRolePayload }) => clanApi.updateRole(clanId, roleId, payload),
+    onSuccess: role => writeRole(qc, clanId, role),
+  })
+}
+
+export function useDeleteRole(clanId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (roleId: string) => clanApi.deleteRole(clanId, roleId),
+    onSuccess: roles => qc.setQueryData(rolesKey(clanId), roles),
+  })
+}
+
+export function useReorderRoles(clanId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (roleIds: string[]) => clanApi.reorderRoles(clanId, roleIds),
+    onSuccess: roles => qc.setQueryData(rolesKey(clanId), roles),
+  })
+}
+
+export function useSetRoleGrants(clanId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ roleId, grants }: { roleId: string; grants: ClanRoleGrantView[] }) => clanApi.setRoleGrants(clanId, roleId, grants),
+    onSuccess: role => writeRole(qc, clanId, role),
+  })
+}
+
+function writeRole(qc: ReturnType<typeof useQueryClient>, clanId: string, role: ClanRoleDetail) {
+  qc.setQueryData<ClanRoleDetail[]>(rolesKey(clanId), prev => prev?.map(r => (r.id === role.id ? role : r)) ?? prev)
+}
