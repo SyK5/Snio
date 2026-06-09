@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { currentStore } from '../context/request-context'
-import { Action, hasAction } from './actions'
+import { Action, ALL_ACTIONS, hasAction } from './actions'
 
 @Injectable()
 export class PermissionService {
@@ -16,5 +16,19 @@ export class PermissionService {
     if (!store) return false
     if (store.system || store.isPlatformAdmin || store.isClanOwner) return true
     return (store.clanRolePosition ?? -1) > targetPosition
+  }
+
+  positionCeiling(): number {
+    const store = currentStore()
+    if (!store) return -1
+    if (store.system || store.isPlatformAdmin || store.isClanOwner) return Number.MAX_SAFE_INTEGER
+    return store.clanRolePosition ?? -1
+  }
+
+  effectiveActions(grant: string): number {
+    const store = currentStore()
+    if (!store) return 0
+    if (store.system || store.isPlatformAdmin || store.isClanOwner) return ALL_ACTIONS
+    return store.grants?.[grant] ?? 0
   }
 }
