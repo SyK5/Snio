@@ -1,8 +1,9 @@
 import { api } from '@/lib/api'
-import type { ClanDetail, ClanMemberView, ClanSummary, CreateClanPayload, UpdateClanPayload } from './clan.types'
+import type { ClanDetail, ClanMemberView, ClanPage, ClanRoleDetail, ClanRoleGrantView, CreateClanPayload, CreateRolePayload, GrantCatalogEntry, UpdateClanPayload, UpdateRolePayload } from './clan.types'
 
 export const clanApi = {
-  list: () => api.get<ClanSummary[]>('/clans').then(r => r.data),
+  list: (cursor?: string, limit = 20) =>
+    api.get<ClanPage>('/clans', { params: { ...(cursor ? { cursor } : {}), limit } }).then(r => r.data),
   detail: (clanId: string) => api.get<ClanDetail>(`/clans/${clanId}`).then(r => r.data),
   create: (payload: CreateClanPayload) => api.post<ClanDetail>('/clans', payload).then(r => r.data),
   update: (clanId: string, payload: UpdateClanPayload) => api.patch<ClanDetail>(`/clans/${clanId}`, payload).then(r => r.data),
