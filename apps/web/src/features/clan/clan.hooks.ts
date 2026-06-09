@@ -1,15 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { clanApi } from './clan.api'
-import type { ClanDetail, ClanMemberView, CreateClanPayload, UpdateClanPayload } from './clan.types'
+import type { ClanDetail, ClanMemberView, ClanPage, ClanRoleDetail, ClanRoleGrantView, ClanSummary, CreateClanPayload, CreateRolePayload, UpdateClanPayload, UpdateRolePayload } from './clan.types'
 
 const LIST_KEY = ['clans'] as const
+const listPageKey = (cursor?: string) => ['clans', cursor ?? 'first'] as const
 const detailKey = (clanId: string) => ['clan', clanId] as const
 const membersKey = (clanId: string) => ['clan', clanId, 'members'] as const
+const rolesKey = (clanId: string) => ['clan', clanId, 'roles'] as const
+const grantCatalogKey = ['grant-catalog'] as const
 
-export function useClans() {
+export function useClans(cursor?: string) {
   const accessToken = useAuthStore(s => s.accessToken)
-  return useQuery({ queryKey: LIST_KEY, queryFn: clanApi.list, enabled: !!accessToken })
+  return useQuery<ClanPage>({
+    queryKey: listPageKey(cursor),
+    queryFn: () => clanApi.list(cursor),
+    enabled: !!accessToken,
+  })
 }
 
 export function useClan(clanId: string) {
