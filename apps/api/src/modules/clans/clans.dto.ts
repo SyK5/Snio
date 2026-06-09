@@ -1,5 +1,17 @@
 import { z } from 'zod'
 
+export const listClansSchema = z.object({
+  cursor: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+})
+
+export type ListClansQuery = z.infer<typeof listClansSchema>
+
+export interface ClanPage {
+  items: ClanSummary[]
+  nextCursor: string | null
+}
+
 const tagField = z
   .string()
   .trim()

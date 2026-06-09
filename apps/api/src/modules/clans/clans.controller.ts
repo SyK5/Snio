@@ -25,8 +25,8 @@ export class ClansController {
   }
 
   @Get()
-  list(): Promise<ClanSummary[]> {
-    return this.clans.list()
+  list(@Query(new ZodValidationPipe(listClansSchema)) query: ListClansQuery): Promise<ClanPage> {
+    return this.clans.list(query)
   }
 
   @Post(':clanId/join')

@@ -34,25 +34,33 @@ export class ClansService {
         return this.toDetail(clan, 1, user.id)
       } catch (e) {
         const targets = uniqueTargets(e)
-        if (targets.includes('tag')) throw new ConflictException('Clan Tag bereits vergeben')
+        if (targets.includes('tag')) throw clanErrors.tagTaken()
         if (!targets.includes('slug')) throw e
         slug = `${slugify(input.name)}-${shortId()}`
       }
     }
-    throw new ConflictException('Clan konnte nicht angelegt werden, bitte anderen Namen wählen')
+    throw clanErrors.createFailed()
   }
 
-  async list(): Promise<ClanSummary[]> {
-    const clans = await this.prisma.clan.findMany({ where: { deleted_at: null }, orderBy: { created_at: 'desc' } })
-    if (clans.length === 0) return []
-    const counts = await this.prisma.clanMember.groupBy({ by: ['clan_id'], where: { clan_id: { in: clans.map((c) => c.id) }, left_at: null }, _count: { _all: true } })
+  async list(query: ListClansQuery): Promise<ClanPage> {
+    const take = query.limit + 1
+    const clans = await this.prisma.clan.findMany({
+      where: { deleted_at: null, ...(query.cursor ? { id: { lt: query.cursor } } : {}) },
+      orderBy: { created_at: 'desc' },
+      take,
+    })
+    const hasMore = clans.length === take
+    const page = hasMore ? clans.slice(0, -1) : clans
+    if (page.length === 0) return { items: [], nextCursor: null }
+    const counts = await this.prisma.clanMember.groupBy({ by: ['clan_id'], where: { clan_id: { in: page.map((c) => c.id) }, left_at: null }, _count: { _all: true } })
     const countMap = new Map(counts.map((c) => [c.clan_id, c._count._all]))
-    return Promise.all(clans.map((c) => this.toSummary(c, countMap.get(c.id) ?? 0)))
+    const items = await Promise.all(page.map((c) => this.toSummary(c, countMap.get(c.id) ?? 0)))
+    return { items, nextCursor: hasMore ? page[page.length - 1]!.id : null }
   }
 
   async detail(clanId: string, userId: string): Promise<ClanDetail> {
     const clan = await this.prisma.clan.findFirst({ where: { id: clanId, deleted_at: null } })
-    if (!clan) throw new NotFoundException('Clan nicht gefunden')
+    if (!clan) throw clanErrors.notFound()
     const memberCount = await this.prisma.clanMember.count({ where: { clan_id: clanId, left_at: null } })
     return this.toDetail(clan, memberCount, userId)
   }
