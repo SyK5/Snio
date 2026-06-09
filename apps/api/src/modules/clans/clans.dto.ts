@@ -87,6 +87,8 @@ export interface ClanDetail extends ClanSummary {
   description: string | null
   ownerId: string
   isOwner: boolean
+  canManageMembers: boolean
+  canManageRoles: boolean
   createdAt: string
 }
 
