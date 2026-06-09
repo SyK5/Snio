@@ -1,15 +1,35 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CreateClanModal } from '@/features/clan/create-clan-modal'
+import { ClanDetailModal } from '@/features/clan/clan-detail-modal'
 import { useClans } from '@/features/clan/clan.hooks'
 import { m } from '@/i18n/paraglide/messages'
 import type { ClanSummary } from '@/features/clan/clan.types'
 
 export function ClansPage() {
-  const { data: clans, isLoading } = useClans()
+  const [page, setPage] = useState(1)
+  const [stack, setStack] = useState<(string | undefined)[]>([undefined])
+  const cursor = stack[stack.length - 1]
+  const { data, isLoading } = useClans(cursor)
   const [creating, setCreating] = useState(false)
+  const [selected, setSelected] = useState<ClanSummary | null>(null)
+
+  const goNext = () => {
+    if (!data?.nextCursor) return
+    setStack(s => [...s, data.nextCursor!])
+    setPage(p => p + 1)
+  }
+
+  const goPrev = () => {
+    if (stack.length <= 1) return
+    setStack(s => s.slice(0, -1))
+    setPage(p => p - 1)
+  }
+
+  const clans = data?.items
+  const hasPrev = stack.length > 1
+  const hasNext = !!data?.nextCursor
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10">
@@ -18,29 +38,62 @@ export function ClansPage() {
         <Button size="sm" onClick={() => setCreating(true)}>{m.clan_create_action()}</Button>
       </div>
 
-      {isLoading && <p className="text-sm text-muted-foreground">{m.clan_loading()}</p>}
-      {!isLoading && clans?.length === 0 && <EmptyState onCreate={() => setCreating(true)} />}
+      {isLoading && <LoadingGrid />}
+
+      {!isLoading && clans?.length === 0 && !hasPrev && (
+        <EmptyState onCreate={() => setCreating(true)} />
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2">
-        {clans?.map(clan => <ClanCard key={clan.id} clan={clan} />)}
+        {!isLoading && clans?.map(clan => (
+          <ClanCard key={clan.id} clan={clan} onClick={() => setSelected(clan)} />
+        ))}
       </div>
 
+      {(hasPrev || hasNext) && (
+        <div className="mt-6 flex items-center justify-end gap-1">
+          <button
+            onClick={goPrev}
+            disabled={!hasPrev}
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            ‹
+          </button>
+          <span className="min-w-[2rem] text-center text-xs font-semibold text-highlight tabular-nums">{page}</span>
+          <button
+            onClick={goNext}
+            disabled={!hasNext}
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            ›
+          </button>
+        </div>
+      )}
+
       <CreateClanModal open={creating} onClose={() => setCreating(false)} />
+
+      {selected && (
+        <ClanDetailModal clan={selected} open={!!selected} onClose={() => setSelected(null)} />
+      )}
     </div>
   )
 }
 
-function ClanCard({ clan }: { clan: ClanSummary }) {
+function ClanCard({ clan, onClick }: { clan: ClanSummary; onClick: () => void }) {
   return (
-    <Link to={`/clans/${clan.id}`}>
-      <Card className="flex items-center gap-4 transition hover:border-primary/50">
+    <button type="button" onClick={onClick} className="group w-full text-left">
+      <Card className="flex cursor-pointer items-center gap-4 transition light:shadow-sm hover:border-highlight/60 hover:shadow-[0_0_0_1px_var(--highlight)] active:scale-[0.99]">
         <Logo url={clan.logoUrl} tag={clan.tag} />
         <div className="min-w-0 flex-1">
           <div className="truncate font-semibold text-foreground">{clan.name}</div>
-          <div className="text-xs text-muted-foreground">[{clan.tag}] · {m.clan_member_count({ count: clan.memberCount })}</div>
+          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span>[{clan.tag}]</span>
+            <span className="h-1 w-1 rounded-full bg-highlight" />
+            <span>{m.clan_member_count({ count: clan.memberCount })}</span>
+          </div>
         </div>
       </Card>
-    </Link>
+    </button>
   )
 }
 
@@ -55,5 +108,21 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
       <p className="text-sm text-muted-foreground">{m.clan_empty()}</p>
       <Button size="sm" variant="ghost" onClick={onCreate}>{m.clan_create_action()}</Button>
     </Card>
+  )
+}
+
+function LoadingGrid() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} className="flex items-center gap-4">
+          <div className="h-12 w-12 animate-pulse rounded-xl bg-muted" />
+          <div className="flex flex-col gap-2">
+            <div className="h-4 w-28 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
+          </div>
+        </Card>
+      ))}
+    </div>
   )
 }
