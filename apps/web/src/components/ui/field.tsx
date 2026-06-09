@@ -1,4 +1,4 @@
-import { forwardRef, useState, type InputHTMLAttributes } from 'react'
+import { forwardRef, useState, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons'
@@ -55,3 +55,23 @@ export const PasswordField = forwardRef<HTMLInputElement, TextFieldProps>(({ lab
 })
 
 PasswordField.displayName = 'PasswordField'
+
+interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement>, Omit<VariantProps<typeof inputVariants>, 'state'> {
+  label: string
+  error?: string
+}
+
+export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(({ label, error, className, id, ...props }, ref) => {
+  const fieldId = id ?? props.name
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={fieldId} className="text-sm font-medium text-foreground">
+        {label}
+      </label>
+      <textarea ref={ref} id={fieldId} className={cn(inputVariants({ state: error ? 'error' : 'default' }), 'min-h-24 resize-y', className)} {...props} />
+      {error && <span className="text-xs text-destructive">{error}</span>}
+    </div>
+  )
+})
+
+TextArea.displayName = 'TextArea'
