@@ -1,14 +1,14 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { isAxiosError } from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faShieldHalved } from '@fortawesome/free-solid-svg-icons'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
-import { TextField } from '@/components/ui/field'
+import { TextField, TextArea } from '@/components/ui/field'
 import { useCreateClan } from './clan.hooks'
+import { resolveClanError } from './clan.errors'
 import { createClanSchema, type CreateClanForm } from './clan.schemas'
 import { m } from '@/i18n/paraglide/messages'
 
@@ -30,7 +30,7 @@ export function CreateClanModal({ open, onClose }: { open: boolean; onClose: () 
         onClose()
         navigate(`/clans/${clan.id}`)
       },
-      onError: error => toast.error(resolveError(error)),
+      onError: error => toast.error(resolveClanError(error)),
     }),
   )
 
@@ -69,9 +69,4 @@ export function CreateClanModal({ open, onClose }: { open: boolean; onClose: () 
       </form>
     </Modal>
   )
-}
-
-function resolveError(error: unknown): string {
-  if (isAxiosError(error) && error.response?.status === 409) return m.clan_error_tag_taken()
-  return m.clan_error_generic()
 }

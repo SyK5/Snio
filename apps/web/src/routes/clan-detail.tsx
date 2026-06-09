@@ -1,10 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom'
-import { isAxiosError } from 'axios'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MemberRow } from '@/features/clan/member-row'
 import { useClan, useClanMembers, useDeleteClan, useLeaveClan } from '@/features/clan/clan.hooks'
+import { resolveClanError } from '@/features/clan/clan.errors'
 import { m } from '@/i18n/paraglide/messages'
 import type { ClanDetail, ClanRoleView } from '@/features/clan/clan.types'
 
@@ -28,8 +28,8 @@ function Header({ clan }: { clan: ClanDetail }) {
   const leave = useLeaveClan()
   const remove = useDeleteClan()
 
-  const onLeave = () => leave.mutate(clan.id, { onSuccess: () => navigate('/clans'), onError: error => toast.error(resolveError(error)) })
-  const onDelete = () => remove.mutate(clan.id, { onSuccess: () => { toast.success(m.clan_deleted()); navigate('/clans') }, onError: () => toast.error(m.clan_error_generic()) })
+  const onLeave = () => leave.mutate(clan.id, { onSuccess: () => navigate('/clans'), onError: error => toast.error(resolveClanError(error)) })
+  const onDelete = () => remove.mutate(clan.id, { onSuccess: () => { toast.success(m.clan_deleted()); navigate('/clans') }, onError: error => toast.error(resolveClanError(error)) })
 
   return (
     <div className="mb-8 flex items-start gap-4">
@@ -79,9 +79,4 @@ function Logo({ url, tag }: { url: string | null; tag: string }) {
 
 function Centered({ children }: { children: string }) {
   return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">{children}</div>
-}
-
-function resolveError(error: unknown): string {
-  if (isAxiosError(error) && error.response?.status === 403) return m.clan_leave_owner_blocked()
-  return m.clan_error_generic()
 }
