@@ -52,7 +52,7 @@ function Header({ clan }: { clan: ClanDetail }) {
 
 function MembersSection({ clanId, clan }: { clanId: string; clan: ClanDetail }) {
   const { data: members, isLoading } = useClanMembers(clanId)
-  const canManage = clan.isOwner
+  const canManage = clan.canManageMembers
   const roles = deriveRoles(members)
 
   return (
