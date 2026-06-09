@@ -208,7 +208,7 @@ Other organizer documents
 
 ### B9 Clan Join Gating
 
-Clan join is currently open: any authenticated user with a complete profile can join any clan through POST /clans/:clanId/join. This is intentional for Sprint 2 because no invite or visibility model exists yet.
+Clan join is currently open: any authenticated user with a complete profile can join any clan through POST /clans/:clanId/join. This is intentional at this stage because no invite or visibility model exists yet.
 
 Still needed:
 
@@ -218,9 +218,9 @@ Join gating: PRIVATE clans reject open join, entry only through invite or owner/
 
 The join service runs in runSystem today (no membership yet at join time). The gate check (visibility or valid invite) goes in front of the membership creation, the runSystem block stays as is.
 
-## Visibility, Registration and Chat (Design Locked, Migration per Sprint)
+## Visibility, Registration and Chat (Design Locked, Migration per Phase)
 
-These decisions are locked. The schema columns and models land with their respective sprint, not now, so each migration makes sense on its own (column plus the logic that uses it ship together, no dead column ballast).
+These decisions are locked. The schema columns and models land with their respective phase, not now, so each migration makes sense on its own (column plus the logic that uses it ship together, no dead column ballast).
 
 ### Event and League Visibility
 
@@ -249,7 +249,7 @@ Players register alone. EventParticipation already exists on user level, the sam
 
 TEAM:
 League already has this through LeagueParticipant and LeagueRoster.
-Event gets EventParticipant and EventRoster analogously in the event sprint.
+Event gets EventParticipant and EventRoster analogously in the events phase.
 
 Anti duplicate participation (B2) applies per event or league:
 A player may only be in exactly one participating team.
@@ -295,8 +295,8 @@ The RLS extension uses a resolver map scope to where fragment:
 context-free: no filter
 clan: field IN myClanIds or equals active clan
 self: user_id equals me
-member: id IN myChannelIds (lands with the chat sprint)
-conditional: composition via OR (lands with the event and chat sprints)
+member: id IN myChannelIds (lands with the chat phase)
+conditional: composition via OR (lands with the events and chat phases)
 deferred: hard deny until finalized
 
 Adding new scopes later means adding a resolver, not rewriting the extension.
@@ -313,7 +313,7 @@ A change within the cooldown is rejected with a clear message stating the next f
 Planned:
 A paid change that bypasses the cooldown after a confirmed payment (around 5 EUR).
 Needs a Billing module with a payment provider (Stripe), invoices, tax handling and refund logic.
-This is a full sprint, not a small add on.
+This is a full work package, not a small add on.
 The paid path simply skips the cooldown check once payment is confirmed, the data model (username_changed_at) is already prepared for it.
 
 UX requirement (already implemented in settings):
