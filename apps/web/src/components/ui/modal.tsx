@@ -1,10 +1,10 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { useId, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
-import { useDismiss } from '@/hooks/use-dismiss'
+import { useModalShell } from '@/hooks/use-modal-shell'
 import { cn } from '@/lib/utils'
 
 const overlayVariants = cva('fixed inset-0 z-50 flex bg-black/60', {
@@ -38,22 +38,14 @@ interface ModalProps extends VariantProps<typeof panelVariants> {
   footer?: ReactNode
   bodyClassName?: string
   size?: keyof typeof sizeMap
+  paused?: boolean
   children: ReactNode
 }
 
-export function Modal({ open, onClose, title, subtitle, icon, footer, bodyClassName, size, children, variant }: ModalProps) {
+export function Modal({ open, onClose, title, subtitle, icon, footer, bodyClassName, size, children, variant, paused }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null)
   const titleId = useId()
-  useDismiss(panelRef, open, onClose)
-
-  useEffect(() => {
-    if (!open) return
-    document.body.style.overflow = 'hidden'
-    panelRef.current?.focus()
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [open])
+  useModalShell(panelRef, open, onClose, paused)
 
   if (!open) return null
 
