@@ -54,7 +54,7 @@ export function CreateClanModal({ open, onClose }: { open: boolean; onClose: () 
       <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
         <TextField label={m.clan_field_name()} error={formState.errors.name?.message} maxLength={40} {...register('name')} />
         <TextField label={m.clan_field_tag()} error={formState.errors.tag?.message} maxLength={8} {...register('tag')} />
-        <TextField label={m.clan_field_description()} error={formState.errors.description?.message} maxLength={500} {...register('description')} />
+        <TextArea label={m.clan_field_description()} error={formState.errors.description?.message} maxLength={500} rows={3} {...register('description')} />
 
         <div className="mt-1 flex items-center gap-3 rounded-xl border border-border bg-surface-muted p-3">
           <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/30 bg-accent text-sm font-bold text-accent-foreground">
