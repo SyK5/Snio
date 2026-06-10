@@ -128,7 +128,10 @@ export class ClansService {
   }
 
   async kick(clanId: string, memberId: string): Promise<void> {
-    const member = await this.prisma.clanMember.findFirst({ where: { id: memberId, left_at: null }, include: { roles: { select: { role: { select: { position: true } } } } } })
+    const member = await this.prisma.clanMember.findFirst({
+      where: { id: memberId, left_at: null },
+      include: { roles: { select: { role: { select: { position: true } } } } },
+    })
     if (!member) throw clanErrors.memberNotFound()
     const clan = await this.prisma.clan.findFirst({ where: { id: clanId } })
     if (member.user_id === clan?.owner_id) throw clanErrors.ownerCannotBeKicked()
@@ -219,20 +222,21 @@ export class ClansService {
   async deleteRole(roleId: string): Promise<ClanRoleDetail[]> {
     const role = await this.prisma.clanRoleDef.findFirst({ where: { id: roleId } })
     if (!role) throw clanErrors.roleNotFound()
-    if (role.is_system) throw clanErrors.systemRoleNotDeletable()
+    if (role.key === 'owner') throw clanErrors.ownerRoleNotDeletable()
     if (!this.permissions.canManageRole(role.position)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.clanRoleGrant.deleteMany({ where: { role_id: roleId } })
     await this.prisma.clanMemberRole.deleteMany({ where: { role_id: roleId } })
     await this.prisma.clanRoleDef.deleteMany({ where: { id: roleId } })
+    await runSystem(() => this.ensureMembersHaveRole(role.clan_id))
     return this.listRoles()
   }
 
   async reorderRoles(orderedIds: string[]): Promise<ClanRoleDetail[]> {
     const roles = await this.prisma.clanRoleDef.findMany({ orderBy: { position: 'desc' } })
-    const sortable = roles.filter((r) => r.key !== 'owner')
-    const ids = sortable.map((r) => r.id)
-    if (orderedIds.length !== ids.length || new Set(orderedIds).size !== ids.length || orderedIds.some((id) => !ids.includes(id))) throw clanErrors.roleReorderInvalid()
-    const locked = sortable.filter((r) => r.position >= this.permissions.positionCeiling()).map((r) => r.id)
+    const sortable = roles.filter(r => r.key !== 'owner')
+    const ids = sortable.map(r => r.id)
+    if (orderedIds.length !== ids.length || new Set(orderedIds).size !== ids.length || orderedIds.some(id => !ids.includes(id))) throw clanErrors.roleReorderInvalid()
+    const locked = sortable.filter(r => r.position >= this.permissions.positionCeiling()).map(r => r.id)
     if (!locked.every((id, i) => orderedIds[i] === id)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.$transaction(this.reseatOps(orderedIds, ownerRoleId(roles)))
     return this.listRoles()

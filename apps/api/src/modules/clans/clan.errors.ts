@@ -16,6 +16,7 @@ export const clanErrors = {
   roleAboveOwnPosition: () => new ForbiddenException({ code: 'CLAN_ROLE_ABOVE_OWN_POSITION', message: 'Rolle liegt über deiner eigenen Position' }),
   systemRoleNotRenamable: () => new ForbiddenException({ code: 'CLAN_SYSTEM_ROLE_NOT_RENAMABLE', message: 'Systemrollen können nicht umbenannt werden' }),
   systemRoleNotDeletable: () => new ForbiddenException({ code: 'CLAN_SYSTEM_ROLE_NOT_DELETABLE', message: 'Systemrollen können nicht gelöscht werden' }),
+  ownerRoleNotDeletable: () => new ForbiddenException({ code: 'CLAN_OWNER_ROLE_NOT_DELETABLE', message: 'Die Owner Rolle kann nicht gelöscht werden' }),
   ownerRoleNotEditable: () => new ForbiddenException({ code: 'CLAN_OWNER_ROLE_NOT_EDITABLE', message: 'Die Owner Rolle kann nicht bearbeitet werden' }),
   grantUnknown: () => new BadRequestException({ code: 'CLAN_GRANT_UNKNOWN', message: 'Unbekannte Berechtigung' }),
   grantEscalation: () => new ForbiddenException({ code: 'CLAN_GRANT_ESCALATION', message: 'Du kannst keine Rechte vergeben, die du selbst nicht hast' }),
