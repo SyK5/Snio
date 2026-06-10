@@ -45,7 +45,7 @@ export class UsersService {
     if (input.username === user.username) throw new BadRequestException('Benutzername unverändert')
 
     const data: Prisma.UserUpdateInput = { username: input.username, username_changed_at: new Date() }
-    if (pending) data.pending_fields = user.pending_fields.filter((f) => f !== 'username')
+    if (pending) data.pending_fields = user.pending_fields.filter(f => f !== 'username')
 
     try {
       const updated = await this.prisma.user.update({ where: { id: user.id }, data })
@@ -111,7 +111,7 @@ export class UsersService {
 
   private async freeDiscriminator(displayName: string, selfId: string): Promise<string> {
     const rows = await this.prisma.user.findMany({ where: { display_name: displayName, id: { not: selfId } }, select: { discriminator: true } })
-    const taken = new Set(rows.map((r) => r.discriminator))
+    const taken = new Set(rows.map(r => r.discriminator))
     if (taken.size >= 9999) throw new ConflictException('Anzeigename ausgeschöpft, bitte anderen wählen')
     let tag = randomDiscriminator()
     while (taken.has(tag)) tag = randomDiscriminator()

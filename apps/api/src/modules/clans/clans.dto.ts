@@ -30,7 +30,7 @@ export const updateClanSchema = z
     tag: tagField.optional(),
     description: z.string().trim().max(500).nullable().optional(),
   })
-  .refine((d) => Object.keys(d).length > 0, 'Keine Änderungen übergeben')
+  .refine(d => Object.keys(d).length > 0, 'Keine Änderungen übergeben')
 
 export const assignRoleSchema = z.object({
   roleId: z.string().min(1).max(40),

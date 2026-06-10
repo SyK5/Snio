@@ -59,9 +59,9 @@ export class ClansService {
     const hasMore = clans.length === take
     const page = hasMore ? clans.slice(0, -1) : clans
     if (page.length === 0) return { items: [], nextCursor: null }
-    const counts = await this.prisma.clanMember.groupBy({ by: ['clan_id'], where: { clan_id: { in: page.map((c) => c.id) }, left_at: null }, _count: { _all: true } })
-    const countMap = new Map(counts.map((c) => [c.clan_id, c._count._all]))
-    const items = await Promise.all(page.map((c) => this.toSummary(c, countMap.get(c.id) ?? 0)))
+    const counts = await this.prisma.clanMember.groupBy({ by: ['clan_id'], where: { clan_id: { in: page.map(c => c.id) }, left_at: null }, _count: { _all: true } })
+    const countMap = new Map(counts.map(c => [c.clan_id, c._count._all]))
+    const items = await Promise.all(page.map(c => this.toSummary(c, countMap.get(c.id) ?? 0)))
     return { items, nextCursor: hasMore ? page[page.length - 1]!.id : null }
   }
 
@@ -123,7 +123,7 @@ export class ClansService {
 
   async listMembers(): Promise<ClanMemberView[]> {
     const members = await this.prisma.clanMember.findMany({ where: { left_at: null }, include: MEMBER_INCLUDE, orderBy: { joined_at: 'asc' } })
-    return Promise.all(members.map((m) => this.toMemberView(m)))
+    return Promise.all(members.map(m => this.toMemberView(m)))
   }
 
   async assignRole(memberId: string, roleId: string): Promise<ClanMemberView> {
@@ -230,7 +230,7 @@ export class ClansService {
   }
 
   private persistClan(user: AuthUser, input: CreateClanInput, slug: string): Promise<Clan> {
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async tx => {
       const clan = await tx.clan.create({ data: { slug, name: input.name, tag: input.tag, description: input.description ?? null, owner_id: user.id } })
       const roleIds = await this.seedSystemRoles(tx, clan.id)
       const member = await tx.clanMember.create({ data: { clan_id: clan.id, user_id: user.id } })
@@ -321,11 +321,19 @@ function highestPosition(roles: { role: { position: number } }[]): number {
 }
 
 function ownerRoleId(roles: { id: string; key: string }[]): string | undefined {
-  return roles.find((r) => r.key === 'owner')?.id
+  return roles.find(r => r.key === 'owner')?.id
 }
 
 function toRoleDetail(role: RoleWithGrants): ClanRoleDetail {
-  return { id: role.id, key: role.key, name: role.name, color: role.color, position: role.position, isSystem: role.is_system, grants: role.grants.map((g) => ({ grant: g.grant, actions: g.actions })) }
+  return {
+    id: role.id,
+    key: role.key,
+    name: role.name,
+    color: role.color,
+    position: role.position,
+    isSystem: role.is_system,
+    grants: role.grants.map(g => ({ grant: g.grant, actions: g.actions })),
+  }
 }
 
 function uniqueTargets(e: unknown): string[] {

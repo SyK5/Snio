@@ -19,7 +19,7 @@ export function combine(...masks: number[]): number {
 }
 
 export function toActions(mask: number): Action[] {
-  return ORDERED.filter((a) => hasAction(mask, a))
+  return ORDERED.filter(a => hasAction(mask, a))
 }
 
 export function fromActions(actions: Action[]): number {

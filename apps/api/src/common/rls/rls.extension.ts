@@ -18,7 +18,7 @@ async function clanIds(base: PrismaClient, store: RequestStore): Promise<string[
   if (store.membershipClanIds) return store.membershipClanIds
   if (!store.userId) return []
   const rows = await base.clanMember.findMany({ where: { user_id: store.userId, left_at: null }, select: { clan_id: true } })
-  store.membershipClanIds = rows.map((r) => r.clan_id)
+  store.membershipClanIds = rows.map(r => r.clan_id)
   return store.membershipClanIds
 }
 

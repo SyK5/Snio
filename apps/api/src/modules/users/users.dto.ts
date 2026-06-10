@@ -27,7 +27,7 @@ export const usernameField = z
       .regex(/^[a-z0-9._]+$/, 'Nur a-z, 0-9, Punkt und Unterstrich')
       .regex(/^[a-z0-9]/, 'Muss mit Buchstabe oder Zahl beginnen')
       .regex(/[a-z0-9]$/, 'Muss mit Buchstabe oder Zahl enden')
-      .refine((v) => !v.includes('..'), 'Keine doppelten Punkte'),
+      .refine(v => !v.includes('..'), 'Keine doppelten Punkte'),
   )
 
 export const updateProfileSchema = z.object({
