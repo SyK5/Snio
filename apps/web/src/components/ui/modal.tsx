@@ -51,7 +51,14 @@ export function Modal({ open, onClose, title, subtitle, icon, footer, bodyClassN
 
   return createPortal(
     <div className={overlayVariants({ variant })}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1} className={cn(panelVariants({ variant }), variant !== 'drawer' && sizeMap[size ?? 'md'], 'focus:outline-none')}>
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className={cn(panelVariants({ variant }), variant !== 'drawer' && sizeMap[size ?? 'md'], 'focus:outline-none')}
+      >
         <div className="flex items-start gap-3 border-b border-border p-5">
           {icon && (
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/30 bg-accent text-accent-foreground">
@@ -59,10 +66,17 @@ export function Modal({ open, onClose, title, subtitle, icon, footer, bodyClassN
             </span>
           )}
           <div className="min-w-0 flex-1">
-            <h2 id={titleId} className="text-lg font-semibold text-foreground">{title}</h2>
+            <h2 id={titleId} className="text-lg font-semibold text-foreground">
+              {title}
+            </h2>
             {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
           </div>
-          <button type="button" onClick={onClose} aria-label="close" className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="close"
+            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
+          >
             <FontAwesomeIcon icon={faXmark} />
           </button>
         </div>

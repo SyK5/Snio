@@ -102,9 +102,7 @@ function MembersTab({ clanId, canManage, isLoading, description }: { clanId: str
             ))}
           </div>
         )}
-        {!loading && members?.length === 0 && (
-          <p className="py-16 text-center text-sm text-muted-foreground">{m.table_empty()}</p>
-        )}
+        {!loading && members?.length === 0 && <p className="py-16 text-center text-sm text-muted-foreground">{m.table_empty()}</p>}
       </div>
     </div>
   )

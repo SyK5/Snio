@@ -36,7 +36,13 @@ export function ResetPasswordPage() {
     <AuthCard title="SNIO" subtitle={m.auth_reset_title()} footerText={m.auth_remember()} footerLinkLabel={m.auth_login_action()} footerLinkTo="/login">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
         <TextField label={m.auth_new_password()} type="password" autoComplete="new-password" error={formState.errors.password?.message} {...register('password')} />
-        <TextField label={m.auth_confirm_password()} type="password" autoComplete="new-password" error={formState.errors.confirmPassword?.message} {...register('confirmPassword')} />
+        <TextField
+          label={m.auth_confirm_password()}
+          type="password"
+          autoComplete="new-password"
+          error={formState.errors.confirmPassword?.message}
+          {...register('confirmPassword')}
+        />
         <Button type="submit" loading={reset.isPending} className="mt-2">
           {m.auth_reset_action()}
         </Button>

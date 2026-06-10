@@ -29,21 +29,34 @@ function Header({ clan }: { clan: ClanDetail }) {
   const remove = useDeleteClan()
 
   const onLeave = () => leave.mutate(clan.id, { onSuccess: () => navigate('/clans'), onError: error => toast.error(resolveClanError(error)) })
-  const onDelete = () => remove.mutate(clan.id, { onSuccess: () => { toast.success(m.clan_deleted()); navigate('/clans') }, onError: error => toast.error(resolveClanError(error)) })
+  const onDelete = () =>
+    remove.mutate(clan.id, {
+      onSuccess: () => {
+        toast.success(m.clan_deleted())
+        navigate('/clans')
+      },
+      onError: error => toast.error(resolveClanError(error)),
+    })
 
   return (
     <div className="mb-8 flex items-start gap-4">
       <Logo url={clan.logoUrl} tag={clan.tag} />
       <div className="min-w-0 flex-1">
         <h1 className="text-2xl font-bold text-foreground">{clan.name}</h1>
-        <p className="text-sm text-muted-foreground">[{clan.tag}] · {m.clan_member_count({ count: clan.memberCount })}</p>
+        <p className="text-sm text-muted-foreground">
+          [{clan.tag}] · {m.clan_member_count({ count: clan.memberCount })}
+        </p>
         {clan.description && <p className="mt-2 text-sm text-foreground">{clan.description}</p>}
       </div>
       <div className="flex shrink-0 gap-2">
         {clan.isOwner ? (
-          <Button size="sm" variant="danger" onClick={onDelete} loading={remove.isPending}>{m.clan_delete()}</Button>
+          <Button size="sm" variant="danger" onClick={onDelete} loading={remove.isPending}>
+            {m.clan_delete()}
+          </Button>
         ) : (
-          <Button size="sm" variant="ghost" onClick={onLeave} loading={leave.isPending}>{m.clan_leave()}</Button>
+          <Button size="sm" variant="ghost" onClick={onLeave} loading={leave.isPending}>
+            {m.clan_leave()}
+          </Button>
         )}
       </div>
     </div>
@@ -60,7 +73,9 @@ function MembersSection({ clanId, clan }: { clanId: string; clan: ClanDetail }) 
       <h2 className="mb-2 text-sm font-semibold text-foreground">{m.clan_members_title()}</h2>
       {isLoading && <p className="text-sm text-muted-foreground">{m.clan_loading()}</p>}
       <div className="divide-y divide-border">
-        {members?.map(member => <MemberRow key={member.id} clanId={clanId} member={member} roles={roles} canManage={canManage} />)}
+        {members?.map(member => (
+          <MemberRow key={member.id} clanId={clanId} member={member} roles={roles} canManage={canManage} />
+        ))}
       </div>
     </Card>
   )

@@ -46,8 +46,12 @@ export function CreateClanModal({ open, onClose }: { open: boolean; onClose: () 
       subtitle={m.clan_create_subtitle()}
       footer={
         <>
-          <Button variant="ghost" onClick={close}>{m.clan_cancel()}</Button>
-          <Button onClick={submit} loading={create.isPending}>{m.clan_create_action()}</Button>
+          <Button variant="ghost" onClick={close}>
+            {m.clan_cancel()}
+          </Button>
+          <Button onClick={submit} loading={create.isPending}>
+            {m.clan_create_action()}
+          </Button>
         </>
       }
     >
@@ -62,7 +66,10 @@ export function CreateClanModal({ open, onClose }: { open: boolean; onClose: () 
           </span>
           <div className="min-w-0">
             <div className="truncate text-sm font-medium text-foreground">{name || m.clan_create_name_placeholder()}</div>
-            <div className="truncate text-xs text-muted-foreground">{tag ? `[${tag}] · ` : ''}{m.clan_create_owner_hint()}</div>
+            <div className="truncate text-xs text-muted-foreground">
+              {tag ? `[${tag}] · ` : ''}
+              {m.clan_create_owner_hint()}
+            </div>
           </div>
         </div>
         <button type="submit" className="hidden" aria-hidden tabIndex={-1} />

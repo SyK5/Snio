@@ -34,7 +34,11 @@ export function Table<T>({ columns, rows, rowKey, onRowClick, isRowActive, isLoa
         <thead>
           <tr className="border-b border-border">
             {columns.map(col => (
-              <th key={col.key} style={{ width: col.width }} className={cn('px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground', alignClass[col.align ?? 'left'], col.headerClassName)}>
+              <th
+                key={col.key}
+                style={{ width: col.width }}
+                className={cn('px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground', alignClass[col.align ?? 'left'], col.headerClassName)}
+              >
                 {col.header}
               </th>
             ))}
@@ -51,25 +55,30 @@ export function Table<T>({ columns, rows, rowKey, onRowClick, isRowActive, isLoa
             </tr>
           )}
 
-          {!isLoading && rows.map(row => (
-            <tr
-              key={rowKey(row)}
-              tabIndex={interactive ? 0 : undefined}
-              onClick={onRowClick ? () => onRowClick(row) : undefined}
-              onKeyDown={onRowClick ? e => {
-                if (e.key !== 'Enter' && e.key !== ' ') return
-                e.preventDefault()
-                onRowClick(row)
-              } : undefined}
-              className={cn('outline-none transition', interactive && 'cursor-pointer hover:bg-muted focus-visible:bg-muted', isRowActive?.(row) && 'bg-accent')}
-            >
-              {columns.map(col => (
-                <td key={col.key} className={cn('px-4 py-3 text-foreground', alignClass[col.align ?? 'left'], col.cellClassName)}>
-                  {col.cell(row)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {!isLoading &&
+            rows.map(row => (
+              <tr
+                key={rowKey(row)}
+                tabIndex={interactive ? 0 : undefined}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                onKeyDown={
+                  onRowClick
+                    ? e => {
+                        if (e.key !== 'Enter' && e.key !== ' ') return
+                        e.preventDefault()
+                        onRowClick(row)
+                      }
+                    : undefined
+                }
+                className={cn('outline-none transition', interactive && 'cursor-pointer hover:bg-muted focus-visible:bg-muted', isRowActive?.(row) && 'bg-accent')}
+              >
+                {columns.map(col => (
+                  <td key={col.key} className={cn('px-4 py-3 text-foreground', alignClass[col.align ?? 'left'], col.cellClassName)}>
+                    {col.cell(row)}
+                  </td>
+                ))}
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>

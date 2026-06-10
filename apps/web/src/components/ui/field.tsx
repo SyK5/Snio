@@ -44,8 +44,19 @@ export const PasswordField = forwardRef<HTMLInputElement, TextFieldProps>(({ lab
         {label}
       </label>
       <div className="relative">
-        <input ref={ref} id={fieldId} {...props} type={visible ? 'text' : 'password'} className={cn(inputVariants({ state: error ? 'error' : 'default' }), 'w-full pr-10', className)} />
-        <button type="button" onClick={() => setVisible(v => !v)} aria-label={visible ? m.password_hide() : m.password_show()} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition hover:text-foreground">
+        <input
+          ref={ref}
+          id={fieldId}
+          {...props}
+          type={visible ? 'text' : 'password'}
+          className={cn(inputVariants({ state: error ? 'error' : 'default' }), 'w-full pr-10', className)}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible(v => !v)}
+          aria-label={visible ? m.password_hide() : m.password_show()}
+          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition hover:text-foreground"
+        >
           <FontAwesomeIcon icon={visible ? faEyeSlash : faEye} />
         </button>
       </div>

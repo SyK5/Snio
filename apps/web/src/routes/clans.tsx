@@ -35,20 +35,16 @@ export function ClansPage() {
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">{m.clan_list_title()}</h1>
-        <Button size="sm" onClick={() => setCreating(true)}>{m.clan_create_action()}</Button>
+        <Button size="sm" onClick={() => setCreating(true)}>
+          {m.clan_create_action()}
+        </Button>
       </div>
 
       {isLoading && <LoadingGrid />}
 
-      {!isLoading && clans?.length === 0 && !hasPrev && (
-        <EmptyState onCreate={() => setCreating(true)} />
-      )}
+      {!isLoading && clans?.length === 0 && !hasPrev && <EmptyState onCreate={() => setCreating(true)} />}
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        {!isLoading && clans?.map(clan => (
-          <ClanCard key={clan.id} clan={clan} onClick={() => setSelected(clan)} />
-        ))}
-      </div>
+      <div className="grid gap-3 sm:grid-cols-2">{!isLoading && clans?.map(clan => <ClanCard key={clan.id} clan={clan} onClick={() => setSelected(clan)} />)}</div>
 
       {(hasPrev || hasNext) && (
         <div className="mt-6 flex items-center justify-end gap-1">
@@ -72,9 +68,7 @@ export function ClansPage() {
 
       <CreateClanModal open={creating} onClose={() => setCreating(false)} />
 
-      {selected && (
-        <ClanDetailModal clan={selected} open={!!selected} onClose={() => setSelected(null)} />
-      )}
+      {selected && <ClanDetailModal clan={selected} open={!!selected} onClose={() => setSelected(null)} />}
     </div>
   )
 }
@@ -106,7 +100,9 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
   return (
     <Card tone="muted" className="flex flex-col items-center gap-2 py-10 text-center">
       <p className="text-sm text-muted-foreground">{m.clan_empty()}</p>
-      <Button size="sm" variant="ghost" onClick={onCreate}>{m.clan_create_action()}</Button>
+      <Button size="sm" variant="ghost" onClick={onCreate}>
+        {m.clan_create_action()}
+      </Button>
     </Card>
   )
 }

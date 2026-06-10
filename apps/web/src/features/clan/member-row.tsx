@@ -57,7 +57,11 @@ export function MemberRow({ clanId, member, roles, canManage }: { clanId: string
           {picking && (
             <Card padding="none" className="absolute right-0 top-10 z-20 w-48 p-1.5 shadow-2xl">
               {assignable.map(role => (
-                <button key={role.id} onClick={() => onAssign(role.id)} className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground">
+                <button
+                  key={role.id}
+                  onClick={() => onAssign(role.id)}
+                  className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                >
                   <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: role.color ?? 'var(--color-muted-foreground)' }} />
                   {role.name}
                 </button>
@@ -72,5 +76,9 @@ export function MemberRow({ clanId, member, roles, canManage }: { clanId: string
 
 function Avatar({ url, name }: { url: string | null; name: string }) {
   if (url) return <img src={url} alt={name} className="h-11 w-11 shrink-0 rounded-full object-cover" />
-  return <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface-muted text-sm font-semibold text-muted-foreground">{name.slice(0, 1).toUpperCase()}</div>
+  return (
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface-muted text-sm font-semibold text-muted-foreground">
+      {name.slice(0, 1).toUpperCase()}
+    </div>
+  )
 }

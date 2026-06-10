@@ -42,7 +42,9 @@ function DisplayNameField({ current, discriminator }: { current: string; discrim
   return (
     <div className="flex flex-col gap-2">
       <TextField label={m.profile_display_label()} value={value} onChange={e => setValue(e.target.value)} maxLength={40} />
-      <p className="text-xs text-muted-foreground">{m.profile_display_hint()} {current}#{discriminator}</p>
+      <p className="text-xs text-muted-foreground">
+        {m.profile_display_hint()} {current}#{discriminator}
+      </p>
       <Button size="sm" className="self-start" disabled={!dirty} loading={update.isPending} onClick={onSave}>
         {m.profile_save()}
       </Button>
@@ -74,9 +76,15 @@ function UsernameField({ current, changedAt }: { current: string; changedAt: str
   return (
     <div className="flex flex-col gap-2">
       <TextField label={m.profile_username_label()} value={value} onChange={e => setValue(e.target.value.toLowerCase())} maxLength={20} disabled={blocked} />
-      <p className="text-xs text-muted-foreground">{m.profile_username_hint()} @{current}</p>
+      <p className="text-xs text-muted-foreground">
+        {m.profile_username_hint()} @{current}
+      </p>
       {taken && !blocked && <span className="text-xs text-destructive">{m.auth_error_username_taken()}</span>}
-      {blocked && <span className="text-xs text-muted-foreground">{m.profile_username_cooldown()} {locked}</span>}
+      {blocked && (
+        <span className="text-xs text-muted-foreground">
+          {m.profile_username_cooldown()} {locked}
+        </span>
+      )}
       <Button size="sm" className="self-start" disabled={!dirty || blocked} loading={update.isPending} onClick={onSave}>
         {m.profile_save()}
       </Button>

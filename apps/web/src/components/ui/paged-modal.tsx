@@ -82,33 +82,32 @@ export function PagedModal({
         aria-labelledby={titleId}
         tabIndex={-1}
         className={cn(
-          'relative flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-surface text-foreground shadow-2xl focus:outline-none',
+          'relative flex w-full flex-col overflow-hidden rounded-2xl border border-border modal-surface text-foreground shadow-2xl focus:outline-none',
           'max-h-[88vh]',
           sizeMap[size],
         )}
       >
         <Head titleId={titleId} title={title} subtitle={subtitle} icon={icon} actions={actions} onClose={onClose} />
 
-        {hasSubhead && (
-          <Subhead filters={filters} pagination={pagination} tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} />
-        )}
+        {hasSubhead && <Subhead filters={filters} pagination={pagination} tabs={tabs} activeTab={activeTab} onTabChange={onTabChange} />}
 
-        <div className={cn('flex-1 overflow-y-auto', bodyClassName ?? 'p-5')}>
-          {children}
-        </div>
+        <div className={cn('flex-1 overflow-y-auto', bodyClassName ?? 'p-5')}>{children}</div>
 
-        {footer && (
-          <div className="flex items-center justify-end gap-2 border-t border-border p-4">
-            {footer}
-          </div>
-        )}
+        {footer && <div className="flex items-center justify-end gap-2 border-t border-border p-4">{footer}</div>}
       </div>
     </div>,
     document.body,
   )
 }
 
-function Head({ titleId, title, subtitle, icon, actions, onClose }: {
+function Head({
+  titleId,
+  title,
+  subtitle,
+  icon,
+  actions,
+  onClose,
+}: {
   titleId: string
   title: string
   subtitle?: string
@@ -124,7 +123,9 @@ function Head({ titleId, title, subtitle, icon, actions, onClose }: {
         </span>
       )}
       <div className="min-w-0 flex-1">
-        <h2 id={titleId} className="truncate text-lg font-semibold text-foreground">{title}</h2>
+        <h2 id={titleId} className="truncate text-lg font-semibold text-foreground">
+          {title}
+        </h2>
         {subtitle && <p className="mt-0.5 truncate text-sm text-muted-foreground">{subtitle}</p>}
       </div>
       <div className="flex shrink-0 items-center gap-1">
@@ -142,7 +143,13 @@ function Head({ titleId, title, subtitle, icon, actions, onClose }: {
   )
 }
 
-function Subhead({ filters, pagination, tabs, activeTab, onTabChange }: {
+function Subhead({
+  filters,
+  pagination,
+  tabs,
+  activeTab,
+  onTabChange,
+}: {
   filters?: ReactNode
   pagination?: PagedModalPagination
   tabs?: PagedModalTab[]
@@ -163,9 +170,7 @@ function Subhead({ filters, pagination, tabs, activeTab, onTabChange }: {
               className={cn(
                 'flex items-center gap-2 rounded-t-lg px-3 py-2.5 text-sm font-medium transition',
                 'border-b-2 -mb-px',
-                activeTab === tab.key
-                  ? 'border-highlight text-foreground'
-                  : 'border-transparent text-muted-foreground hover:text-foreground',
+                activeTab === tab.key ? 'border-highlight text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
               )}
             >
               {tab.icon && <FontAwesomeIcon icon={tab.icon} className="text-[0.7rem]" />}
@@ -177,9 +182,7 @@ function Subhead({ filters, pagination, tabs, activeTab, onTabChange }: {
 
       {hasFiltersOrPagination && (
         <div className="flex items-center justify-between gap-3 px-6 py-3">
-          <div className="flex flex-1 items-center gap-2">
-            {filters}
-          </div>
+          <div className="flex flex-1 items-center gap-2">{filters}</div>
           {pagination && <Pagination {...pagination} />}
         </div>
       )}
@@ -197,9 +200,7 @@ function Pagination({ page, hasPrev, hasNext, onPrev, onNext }: PagedModalPagina
       >
         <FontAwesomeIcon icon={faChevronLeft} className="text-xs" />
       </button>
-      <span className="min-w-[2rem] text-center text-xs font-semibold text-highlight tabular-nums">
-        {page}
-      </span>
+      <span className="min-w-[2rem] text-center text-xs font-semibold text-highlight tabular-nums">{page}</span>
       <button
         onClick={onNext}
         disabled={!hasNext}
