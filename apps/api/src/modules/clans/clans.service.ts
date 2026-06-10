@@ -98,7 +98,8 @@ export class ClansService {
       if (existing?.left_at === null) throw clanErrors.alreadyMember()
 
       const memberId = existing ? await this.reactivateMember(existing.id) : await this.createMember(clanId, user.id)
-      await this.assignSystemRole(memberId, clanId, 'member')
+      const base = await this.baseRole(clanId)
+      await this.prisma.clanMemberRole.createMany({ data: [{ member_id: memberId, role_id: base.id }], skipDuplicates: true })
       const memberCount = await this.prisma.clanMember.count({ where: { clan_id: clanId, left_at: null } })
       return this.toDetail(clan, memberCount, user.id)
     })
@@ -269,9 +270,21 @@ export class ClansService {
     return memberId
   }
 
-  private async assignSystemRole(memberId: string, clanId: string, key: SystemRoleKey): Promise<void> {
-    const role = await this.prisma.clanRoleDef.findFirstOrThrow({ where: { clan_id: clanId, key } })
-    await this.prisma.clanMemberRole.createMany({ data: [{ member_id: memberId, role_id: role.id }], skipDuplicates: true })
+  private async baseRole(clanId: string): Promise<{ id: string }> {
+    const existing = await this.prisma.clanRoleDef.findMany({ where: { clan_id: clanId, key: { not: 'owner' } }, orderBy: { position: 'asc' }, take: 1 })
+    if (existing[0]) return existing[0]
+    const tpl = SYSTEM_ROLES.find(r => r.key === 'member')!
+    return this.prisma.clanRoleDef.create({
+      data: { clan_id: clanId, key: 'member', name: tpl.name, color: tpl.color, position: 0, is_system: true, grants: { create: grantRows(ROLE_GRANT_DEFAULTS.member) } },
+    })
+  }
+
+  private async ensureMembersHaveRole(clanId: string): Promise<void> {
+    const base = await this.baseRole(clanId)
+    const members = await this.prisma.clanMember.findMany({ where: { clan_id: clanId, left_at: null }, include: { roles: true } })
+    const roleless = members.filter(m => m.roles.length === 0)
+    if (roleless.length === 0) return
+    await this.prisma.clanMemberRole.createMany({ data: roleless.map(m => ({ member_id: m.id, role_id: base.id })), skipDuplicates: true })
   }
 
   private async deactivateMember(memberId: string): Promise<void> {
