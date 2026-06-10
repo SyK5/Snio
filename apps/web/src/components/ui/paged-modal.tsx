@@ -74,7 +74,7 @@ export function PagedModal({
   const hasSubhead = !!(pagination || filters || (tabs && tabs.length > 0))
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <div
         ref={panelRef}
         role="dialog"

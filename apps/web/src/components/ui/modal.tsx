@@ -7,7 +7,7 @@ import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { useModalShell } from '@/hooks/use-modal-shell'
 import { cn } from '@/lib/utils'
 
-const overlayVariants = cva('fixed inset-0 z-50 flex bg-black/60', {
+const overlayVariants = cva('fixed inset-0 z-50 flex bg-black/70', {
   variants: {
     variant: {
       center: 'items-center justify-center p-4',
