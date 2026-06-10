@@ -26,7 +26,10 @@ export class S3Service {
     return createPresignedPost(this.client, {
       Bucket: this.config.bucket,
       Key: key,
-      Conditions: [['content-length-range', 1, maxBytes], ['eq', '$Content-Type', contentType]],
+      Conditions: [
+        ['content-length-range', 1, maxBytes],
+        ['eq', '$Content-Type', contentType],
+      ],
       Fields: { 'Content-Type': contentType },
       Expires: this.config.presignTtl,
     })

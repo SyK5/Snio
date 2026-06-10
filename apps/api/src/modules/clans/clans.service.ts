@@ -244,7 +244,15 @@ export class ClansService {
     for (const role of SYSTEM_ROLES) {
       const grants = ROLE_GRANT_DEFAULTS[role.key as DefaultRoleKey]
       const created = await tx.clanRoleDef.create({
-        data: { clan_id: clanId, key: role.key, name: role.name, color: role.color, position: role.position, is_system: true, grants: grants ? { create: grantRows(grants) } : undefined },
+        data: {
+          clan_id: clanId,
+          key: role.key,
+          name: role.name,
+          color: role.color,
+          position: role.position,
+          is_system: true,
+          grants: grants ? { create: grantRows(grants) } : undefined,
+        },
       })
       ids[role.key] = created.id
     }
@@ -308,7 +316,12 @@ export class ClansService {
 }
 
 function slugify(value: string): string {
-  const base = value.toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40)
+  const base = value
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40)
   return base || 'clan'
 }
 

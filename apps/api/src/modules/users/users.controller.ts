@@ -8,7 +8,18 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator'
 import { AuthUser } from '../../common/auth/auth.types'
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe'
 import { UsersService } from './users.service'
-import { AvatarConfirmInput, AvatarPresignInput, AvatarPresignResponse, MeResponse, UpdateProfileInput, UpdateUsernameInput, avatarConfirmSchema, avatarPresignSchema, updateProfileSchema, updateUsernameSchema } from './users.dto'
+import {
+  AvatarConfirmInput,
+  AvatarPresignInput,
+  AvatarPresignResponse,
+  MeResponse,
+  UpdateProfileInput,
+  UpdateUsernameInput,
+  avatarConfirmSchema,
+  avatarPresignSchema,
+  updateProfileSchema,
+  updateUsernameSchema,
+} from './users.dto'
 
 @ApiTags('users')
 @Controller('users')
