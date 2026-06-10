@@ -17,7 +17,7 @@ const overlayVariants = cva('fixed inset-0 z-50 flex bg-black/60', {
   defaultVariants: { variant: 'center' },
 })
 
-const panelVariants = cva('relative flex w-full flex-col overflow-hidden bg-surface text-foreground shadow-2xl', {
+const panelVariants = cva('relative flex w-full flex-col overflow-hidden modal-surface text-foreground shadow-2xl', {
   variants: {
     variant: {
       center: 'max-h-[85vh] rounded-2xl border border-border',

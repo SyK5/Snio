@@ -132,6 +132,10 @@
   }
 }
 
+.modal-surface {
+  background: radial-gradient(115% 65% at 50% -8%, color-mix(in srgb, var(--accent) 45%, var(--surface)), transparent 62%), var(--surface);
+}
+
 .theme-transition,
 .theme-transition *,
 .theme-transition *::before,
