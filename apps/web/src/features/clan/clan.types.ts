@@ -73,9 +73,16 @@ export interface GrantCatalogEntry {
   actions: number
 }
 
-export interface CreateRolePayload {
+export interface RoleTemplateView {
+  key: string
   name: string
+  color: string | null
+}
+
+export interface CreateRolePayload {
+  name?: string
   color?: string | null
+  template?: string
 }
 
 export interface UpdateRolePayload {

@@ -1,9 +1,20 @@
 import { api } from '@/lib/api'
-import type { ClanDetail, ClanMemberView, ClanPage, ClanRoleDetail, ClanRoleGrantView, CreateClanPayload, CreateRolePayload, GrantCatalogEntry, UpdateClanPayload, UpdateRolePayload } from './clan.types'
+import type {
+  ClanDetail,
+  ClanMemberView,
+  ClanPage,
+  ClanRoleDetail,
+  ClanRoleGrantView,
+  CreateClanPayload,
+  CreateRolePayload,
+  GrantCatalogEntry,
+  RoleTemplateView,
+  UpdateClanPayload,
+  UpdateRolePayload,
+} from './clan.types'
 
 export const clanApi = {
-  list: (cursor?: string, limit = 20) =>
-    api.get<ClanPage>('/clans', { params: { ...(cursor ? { cursor } : {}), limit } }).then(r => r.data),
+  list: (cursor?: string, limit = 20) => api.get<ClanPage>('/clans', { params: { ...(cursor ? { cursor } : {}), limit } }).then(r => r.data),
   detail: (clanId: string) => api.get<ClanDetail>(`/clans/${clanId}`).then(r => r.data),
   create: (payload: CreateClanPayload) => api.post<ClanDetail>('/clans', payload).then(r => r.data),
   update: (clanId: string, payload: UpdateClanPayload) => api.patch<ClanDetail>(`/clans/${clanId}`, payload).then(r => r.data),
@@ -15,10 +26,12 @@ export const clanApi = {
   assignRole: (clanId: string, memberId: string, roleId: string) => api.post<ClanMemberView>(`/clans/${clanId}/members/${memberId}/roles`, { roleId }).then(r => r.data),
   removeRole: (clanId: string, memberId: string, roleId: string) => api.delete<ClanMemberView>(`/clans/${clanId}/members/${memberId}/roles/${roleId}`).then(r => r.data),
   grantCatalog: () => api.get<GrantCatalogEntry[]>('/clans/meta/grants').then(r => r.data),
+  roleTemplates: () => api.get<RoleTemplateView[]>('/clans/meta/role-templates').then(r => r.data),
   listRoles: (clanId: string) => api.get<ClanRoleDetail[]>(`/clans/${clanId}/roles`).then(r => r.data),
   createRole: (clanId: string, payload: CreateRolePayload) => api.post<ClanRoleDetail>(`/clans/${clanId}/roles`, payload).then(r => r.data),
   updateRole: (clanId: string, roleId: string, payload: UpdateRolePayload) => api.patch<ClanRoleDetail>(`/clans/${clanId}/roles/${roleId}`, payload).then(r => r.data),
   deleteRole: (clanId: string, roleId: string) => api.delete<ClanRoleDetail[]>(`/clans/${clanId}/roles/${roleId}`).then(r => r.data),
   reorderRoles: (clanId: string, roleIds: string[]) => api.patch<ClanRoleDetail[]>(`/clans/${clanId}/roles/reorder`, { roleIds }).then(r => r.data),
-  setRoleGrants: (clanId: string, roleId: string, grants: ClanRoleGrantView[]) => api.put<ClanRoleDetail>(`/clans/${clanId}/roles/${roleId}/grants`, { grants }).then(r => r.data),
+  setRoleGrants: (clanId: string, roleId: string, grants: ClanRoleGrantView[]) =>
+    api.put<ClanRoleDetail>(`/clans/${clanId}/roles/${roleId}/grants`, { grants }).then(r => r.data),
 }

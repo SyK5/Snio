@@ -1,7 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { clanApi } from './clan.api'
-import type { ClanDetail, ClanMemberView, ClanPage, ClanRoleDetail, ClanRoleGrantView, ClanSummary, CreateClanPayload, CreateRolePayload, UpdateClanPayload, UpdateRolePayload } from './clan.types'
+import type {
+  ClanDetail,
+  ClanMemberView,
+  ClanPage,
+  ClanRoleDetail,
+  ClanRoleGrantView,
+  ClanSummary,
+  CreateClanPayload,
+  CreateRolePayload,
+  UpdateClanPayload,
+  UpdateRolePayload,
+} from './clan.types'
 
 const LIST_KEY = ['clans'] as const
 const listPageKey = (cursor?: string) => ['clans', cursor ?? 'first'] as const
@@ -9,6 +20,7 @@ const detailKey = (clanId: string) => ['clan', clanId] as const
 const membersKey = (clanId: string) => ['clan', clanId, 'members'] as const
 const rolesKey = (clanId: string) => ['clan', clanId, 'roles'] as const
 const grantCatalogKey = ['grant-catalog'] as const
+const roleTemplatesKey = ['role-templates'] as const
 
 export function useClans(cursor?: string) {
   const accessToken = useAuthStore(s => s.accessToken)
@@ -111,6 +123,10 @@ function writeMember(qc: ReturnType<typeof useQueryClient>, clanId: string, memb
 
 export function useGrantCatalog() {
   return useQuery({ queryKey: grantCatalogKey, queryFn: () => clanApi.grantCatalog(), staleTime: Infinity })
+}
+
+export function useRoleTemplates() {
+  return useQuery({ queryKey: roleTemplatesKey, queryFn: () => clanApi.roleTemplates(), staleTime: Infinity })
 }
 
 export function useClanRoles(clanId: string) {
