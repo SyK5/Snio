@@ -136,7 +136,7 @@
 }
 
 .modal-surface {
-  background: radial-gradient(115% 65% at 50% -8%, color-mix(in srgb, var(--accent) 45%, var(--surface)), transparent 62%), var(--surface);
+  background: radial-gradient(115% 65% at 50% -8%, color-mix(in srgb, #ffffff 5%, var(--surface-elevated)), var(--surface-elevated) 62%);
 }
 
 .theme-transition,
