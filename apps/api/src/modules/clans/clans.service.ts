@@ -293,11 +293,23 @@ export class ClansService {
     const isOwner = clan.owner_id === userId
     const canManageMembers = isOwner || this.permissions.can('clan_member', Action.MANAGE)
     const canManageRoles = isOwner || this.permissions.can('clan_role', Action.MANAGE)
-    return { ...summary, description: clan.description, ownerId: clan.owner_id, isOwner, canManageMembers, canManageRoles, createdAt: clan.created_at.toISOString() }
+    const canEditClan = isOwner || this.permissions.can('clan', Action.UPDATE)
+    return {
+      ...summary,
+      description: clan.description,
+      ownerId: clan.owner_id,
+      isOwner,
+      canManageMembers,
+      canManageRoles,
+      canEditClan,
+      createdAt: clan.created_at.toISOString(),
+    }
   }
 
   private async toMemberView(m: MemberWithRelations): Promise<ClanMemberView> {
-    const roles = m.roles.map((r) => ({ id: r.role.id, key: r.role.key, name: r.role.name, color: r.role.color, position: r.role.position })).sort((a, b) => b.position - a.position)
+    const roles = m.roles
+      .map(r => ({ id: r.role.id, key: r.role.key, name: r.role.name, color: r.role.color, position: r.role.position }))
+      .sort((a, b) => b.position - a.position)
     return {
       id: m.id,
       userId: m.user_id,
