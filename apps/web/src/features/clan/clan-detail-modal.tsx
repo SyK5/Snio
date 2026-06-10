@@ -7,7 +7,8 @@ import { PagedModal, type PagedModalTab } from '@/components/ui/paged-modal'
 import { Button } from '@/components/ui/button'
 import { MemberRow } from './member-row'
 import { RoleManagerModal } from './role-manager-modal'
-import { useClan, useClanMembers, useDeleteClan, useJoinClan, useLeaveClan } from './clan.hooks'
+import { ClanSettingsModal } from './clan-settings-modal'
+import { useClan, useClanMembers, useJoinClan, useLeaveClan } from './clan.hooks'
 import { resolveClanError } from './clan.errors'
 import { m } from '@/i18n/paraglide/messages'
 import type { ClanRoleView, ClanSummary } from './clan.types'
@@ -21,38 +22,50 @@ interface Props {
 export function ClanDetailModal({ clan, open, onClose }: Props) {
   const [tab, setTab] = useState('members')
   const [rolesOpen, setRolesOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const { data, isLoading } = useClan(clan.id)
   const leave = useLeaveClan()
-  const remove = useDeleteClan()
   const join = useJoinClan()
 
   const isMember = !!data
   const isOwner = data?.isOwner ?? false
   const canManage = data?.canManageMembers ?? false
   const canManageRoles = data?.canManageRoles ?? false
+  const canEditClan = data?.canEditClan ?? false
 
   const tabs: PagedModalTab[] = [
     { key: 'members', label: m.clan_tab_members(), icon: faUsers },
-    { key: 'chat',    label: m.clan_tab_chat(),    icon: faComments },
-    { key: 'events',  label: m.clan_tab_events(),  icon: faCalendarDays },
+    { key: 'chat', label: m.clan_tab_chat(), icon: faComments },
+    { key: 'events', label: m.clan_tab_events(), icon: faCalendarDays },
     { key: 'leagues', label: m.clan_tab_leagues(), icon: faTrophy },
   ]
 
   const onLeave = () => leave.mutate(clan.id, { onSuccess: onClose, onError: err => toast.error(resolveClanError(err)) })
-  const onDelete = () => remove.mutate(clan.id, { onSuccess: () => { toast.success(m.clan_deleted()); onClose() }, onError: err => toast.error(resolveClanError(err)) })
   const onJoin = () => join.mutate(clan.id, { onError: err => toast.error(resolveClanError(err)) })
 
   const actions = isLoading ? null : (
-    <>
-      {canManageRoles && <Button size="sm" variant="ghost" onClick={() => setRolesOpen(true)}>{m.clan_roles_manage()}</Button>}
-      {isOwner ? (
-        <Button size="sm" variant="danger" onClick={onDelete} loading={remove.isPending}>{m.clan_delete()}</Button>
-      ) : isMember ? (
-        <Button size="sm" variant="ghost" onClick={onLeave} loading={leave.isPending}>{m.clan_leave()}</Button>
-      ) : (
-        <Button size="sm" onClick={onJoin} loading={join.isPending}>{m.clan_join()}</Button>
+    <div className="flex items-center gap-2">
+      {canManageRoles && (
+        <Button size="sm" variant="ghost" onClick={() => setRolesOpen(true)}>
+          {m.clan_roles_manage()}
+        </Button>
       )}
-    </>
+      {canEditClan && (
+        <Button size="sm" variant="ghost" onClick={() => setSettingsOpen(true)}>
+          {m.clan_settings_action()}
+        </Button>
+      )}
+      {!isMember && (
+        <Button size="sm" onClick={onJoin} loading={join.isPending}>
+          {m.clan_join()}
+        </Button>
+      )}
+      {isMember && !isOwner && (
+        <Button size="sm" variant="ghost" onClick={onLeave} loading={leave.isPending}>
+          {m.clan_leave()}
+        </Button>
+      )}
+    </div>
   )
 
   return (
@@ -69,7 +82,7 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
         onTabChange={setTab}
         actions={actions}
         bodyClassName="p-0"
-        paused={rolesOpen}
+        paused={rolesOpen || settingsOpen}
       >
         {tab === 'members' && <MembersTab clanId={clan.id} canManage={canManage} isLoading={isLoading} description={data?.description ?? null} />}
         {tab === 'chat' && <ComingSoon icon={faComments} />}
@@ -77,6 +90,19 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
         {tab === 'leagues' && <ComingSoon icon={faTrophy} />}
       </PagedModal>
       <RoleManagerModal clanId={clan.id} isOwner={isOwner} open={rolesOpen} onClose={() => setRolesOpen(false)} />
+      {data && (
+        <ClanSettingsModal
+          clanId={clan.id}
+          defaults={{ name: data.name, tag: data.tag, description: data.description ?? '' }}
+          isOwner={isOwner}
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          onDeleted={() => {
+            setSettingsOpen(false)
+            onClose()
+          }}
+        />
+      )}
     </>
   )
 }

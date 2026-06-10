@@ -17,6 +17,7 @@ const MESSAGES: Record<string, () => string> = {
   CLAN_ROLE_ABOVE_OWN_POSITION: m.clan_error_role_above_own_position,
   CLAN_SYSTEM_ROLE_NOT_RENAMABLE: m.clan_error_system_role_not_renamable,
   CLAN_SYSTEM_ROLE_NOT_DELETABLE: m.clan_error_system_role_not_deletable,
+  CLAN_OWNER_ROLE_NOT_DELETABLE: m.clan_error_owner_role_not_deletable,
   CLAN_OWNER_ROLE_NOT_EDITABLE: m.clan_error_owner_role_not_editable,
   CLAN_GRANT_UNKNOWN: m.clan_error_grant_unknown,
   CLAN_GRANT_ESCALATION: m.clan_error_grant_escalation,

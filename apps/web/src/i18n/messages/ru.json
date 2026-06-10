@@ -127,6 +127,7 @@
   "clan_error_role_above_own_position": "Эта роль выше вашей собственной позиции, вы не можете её назначить или удалить",
   "clan_error_system_role_not_renamable": "Системные роли нельзя переименовать",
   "clan_error_system_role_not_deletable": "Системные роли нельзя удалить",
+  "clan_error_owner_role_not_deletable": "Роль владельца нельзя удалить",
   "clan_error_owner_role_not_editable": "Роль владельца нельзя редактировать",
   "clan_error_grant_unknown": "Неизвестное разрешение",
   "clan_error_grant_escalation": "Нельзя выдать права, которых у вас нет",

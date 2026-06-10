@@ -127,6 +127,7 @@
   "clan_error_role_above_own_position": "This role is above your own position, you cannot assign or remove it",
   "clan_error_system_role_not_renamable": "System roles cannot be renamed",
   "clan_error_system_role_not_deletable": "System roles cannot be deleted",
+  "clan_error_owner_role_not_deletable": "The owner role cannot be deleted",
   "clan_error_owner_role_not_editable": "The owner role cannot be edited",
   "clan_error_grant_unknown": "Unknown permission",
   "clan_error_grant_escalation": "You cannot grant permissions you do not have yourself",

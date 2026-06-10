@@ -127,6 +127,7 @@
   "clan_error_role_above_own_position": "Bu rol senin konumunun üzerinde, atayamaz veya kaldıramazsın",
   "clan_error_system_role_not_renamable": "Sistem rolleri yeniden adlandırılamaz",
   "clan_error_system_role_not_deletable": "Sistem rolleri silinemez",
+  "clan_error_owner_role_not_deletable": "Sahip rolü silinemez",
   "clan_error_owner_role_not_editable": "Sahip rolü düzenlenemez",
   "clan_error_grant_unknown": "Bilinmeyen yetki",
   "clan_error_grant_escalation": "Sahip olmadığın yetkileri veremezsin",

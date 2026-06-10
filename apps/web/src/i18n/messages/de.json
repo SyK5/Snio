@@ -127,6 +127,7 @@
   "clan_error_role_above_own_position": "Diese Rolle liegt über deiner eigenen Position, du kannst sie nicht vergeben oder entfernen",
   "clan_error_system_role_not_renamable": "Systemrollen können nicht umbenannt werden",
   "clan_error_system_role_not_deletable": "Systemrollen können nicht gelöscht werden",
+  "clan_error_owner_role_not_deletable": "Die Owner Rolle kann nicht gelöscht werden",
   "clan_error_owner_role_not_editable": "Die Owner Rolle kann nicht bearbeitet werden",
   "clan_error_grant_unknown": "Unbekannte Berechtigung",
   "clan_error_grant_escalation": "Du kannst keine Rechte vergeben, die du selbst nicht hast",
