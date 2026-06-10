@@ -10,7 +10,31 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator'
 import { AuthUser } from '../../common/auth/auth.types'
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe'
 import { ClansService } from './clans.service'
-import { AssignRoleInput, ClanDetail, ClanMemberView, ClanPage, ClanRoleDetail, ClanSummary, CreateClanInput, CreateRoleInput, GrantCatalogEntry, ListClansQuery, ReorderRolesInput, SetGrantsInput, UpdateClanInput, UpdateRoleInput, assignRoleSchema, createClanSchema, createRoleSchema, listClansSchema, reorderRolesSchema, setGrantsSchema, updateClanSchema, updateRoleSchema } from './clans.dto'
+import {
+  AssignRoleInput,
+  ClanDetail,
+  ClanMemberView,
+  ClanPage,
+  ClanRoleDetail,
+  ClanSummary,
+  CreateClanInput,
+  CreateRoleInput,
+  GrantCatalogEntry,
+  ListClansQuery,
+  ReorderRolesInput,
+  RoleTemplateView,
+  SetGrantsInput,
+  UpdateClanInput,
+  UpdateRoleInput,
+  assignRoleSchema,
+  createClanSchema,
+  createRoleSchema,
+  listClansSchema,
+  reorderRolesSchema,
+  setGrantsSchema,
+  updateClanSchema,
+  updateRoleSchema,
+} from './clans.dto'
 
 @ApiTags('clans')
 @Controller('clans')
@@ -95,6 +119,11 @@ export class ClansController {
   @Get('meta/grants')
   grantCatalog(): GrantCatalogEntry[] {
     return this.clans.grantCatalog()
+  }
+
+  @Get('meta/role-templates')
+  roleTemplates(): RoleTemplateView[] {
+    return this.clans.roleTemplates()
   }
 
   @Get(':clanId/roles')

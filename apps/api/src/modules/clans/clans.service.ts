@@ -10,7 +10,21 @@ import { GRANT_CATALOG, grantMeta } from '../../common/rls/grants.catalog'
 import { DefaultRoleKey, ROLE_GRANT_DEFAULTS, SYSTEM_ROLES, SystemRoleKey, grantRows } from '../../common/rls/role-templates'
 import { AuthUser } from '../../common/auth/auth.types'
 import { clanErrors } from './clan.errors'
-import { ClanDetail, ClanMemberView, ClanPage, ClanRoleDetail, ClanSummary, CreateClanInput, CreateRoleInput, GrantCatalogEntry, ListClansQuery, SetGrantsInput, UpdateClanInput, UpdateRoleInput } from './clans.dto'
+import {
+  ClanDetail,
+  ClanMemberView,
+  ClanPage,
+  ClanRoleDetail,
+  ClanSummary,
+  CreateClanInput,
+  CreateRoleInput,
+  GrantCatalogEntry,
+  ListClansQuery,
+  RoleTemplateView,
+  SetGrantsInput,
+  UpdateClanInput,
+  UpdateRoleInput,
+} from './clans.dto'
 
 const SLUG_ATTEMPTS = 6
 
@@ -150,25 +164,50 @@ export class ClansService {
     return Object.entries(GRANT_CATALOG).map(([key, meta]) => ({ key, category: meta.category, actions: meta.actions }))
   }
 
+  roleTemplates(): RoleTemplateView[] {
+    return SYSTEM_ROLES.filter(r => r.key !== 'owner').map(r => ({ key: r.key, name: r.name, color: r.color }))
+  }
+
   async listRoles(): Promise<ClanRoleDetail[]> {
     const roles = await this.prisma.clanRoleDef.findMany({ include: ROLE_INCLUDE, orderBy: { position: 'desc' } })
     return roles.map(toRoleDetail)
   }
 
   async createRole(clanId: string, input: CreateRoleInput): Promise<ClanRoleDetail> {
+    const tpl = input.template ? this.resolveTemplate(input.template) : null
+    if (input.template && !tpl) throw clanErrors.grantUnknown()
     const roles = await this.prisma.clanRoleDef.findMany({ orderBy: { position: 'desc' } })
-    const sortable = roles.filter((r) => r.key !== 'owner')
-    const insertAt = sortable.filter((r) => r.position >= this.permissions.positionCeiling()).length
-    const created = await this.prisma.clanRoleDef.create({ data: { clan_id: clanId, key: `r${shortId()}`, name: input.name, color: input.color ?? null, is_system: false, position: 0 } })
-    const order = [...sortable.slice(0, insertAt).map((r) => r.id), created.id, ...sortable.slice(insertAt).map((r) => r.id)]
+    const sortable = roles.filter(r => r.key !== 'owner')
+    const insertAt = sortable.filter(r => r.position >= this.permissions.positionCeiling()).length
+    const created = await this.prisma.clanRoleDef.create({
+      data: {
+        clan_id: clanId,
+        key: `r${shortId()}`,
+        name: tpl ? tpl.name : input.name!,
+        color: tpl ? tpl.color : (input.color ?? null),
+        is_system: false,
+        position: 0,
+        grants: tpl && tpl.grants.length ? { create: tpl.grants } : undefined,
+      },
+    })
+    const order = [...sortable.slice(0, insertAt).map(r => r.id), created.id, ...sortable.slice(insertAt).map(r => r.id)]
     await this.prisma.$transaction(this.reseatOps(order, ownerRoleId(roles)))
     return this.roleDetail(created.id)
+  }
+
+  private resolveTemplate(key: string): { name: string; color: string | null; grants: { grant: string; actions: number }[] } | null {
+    const meta = SYSTEM_ROLES.find(r => r.key === key && r.key !== 'owner')
+    if (!meta) return null
+    const defaults = ROLE_GRANT_DEFAULTS[key as DefaultRoleKey] ?? {}
+    const grants = grantRows(defaults)
+      .map(g => ({ grant: g.grant, actions: g.actions & this.permissions.effectiveActions(g.grant) }))
+      .filter(g => g.actions > 0)
+    return { name: meta.name, color: meta.color, grants }
   }
 
   async updateRole(roleId: string, input: UpdateRoleInput): Promise<ClanRoleDetail> {
     const role = await this.prisma.clanRoleDef.findFirst({ where: { id: roleId } })
     if (!role) throw clanErrors.roleNotFound()
-    if (role.is_system && input.name !== undefined && input.name !== role.name) throw clanErrors.systemRoleNotRenamable()
     if (!this.permissions.canManageRole(role.position)) throw clanErrors.roleAboveOwnPosition()
     const data: Prisma.ClanRoleDefUpdateManyMutationInput = {}
     if (input.name !== undefined) data.name = input.name

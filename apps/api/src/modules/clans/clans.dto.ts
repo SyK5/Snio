@@ -38,17 +38,20 @@ export const assignRoleSchema = z.object({
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Farbe muss ein Hex Wert sein wie #1b2c3d')
 
-export const createRoleSchema = z.object({
-  name: z.string().trim().min(2, 'Mindestens 2 Zeichen').max(40, 'Maximal 40 Zeichen'),
-  color: hexColor.nullable().optional(),
-})
+export const createRoleSchema = z
+  .object({
+    name: z.string().trim().min(2, 'Mindestens 2 Zeichen').max(40, 'Maximal 40 Zeichen').optional(),
+    color: hexColor.nullable().optional(),
+    template: z.string().min(1).max(40).optional(),
+  })
+  .refine(d => !!d.template || (!!d.name && d.name.trim().length >= 2), 'Name oder Template erforderlich')
 
 export const updateRoleSchema = z
   .object({
     name: z.string().trim().min(2).max(40).optional(),
     color: hexColor.nullable().optional(),
   })
-  .refine((d) => Object.keys(d).length > 0, 'Keine Änderungen übergeben')
+  .refine(d => Object.keys(d).length > 0, 'Keine Änderungen übergeben')
 
 export const reorderRolesSchema = z.object({
   roleIds: z.array(z.string().min(1)).min(1),
@@ -123,4 +126,10 @@ export interface GrantCatalogEntry {
   key: string
   category: string
   actions: number
+}
+
+export interface RoleTemplateView {
+  key: string
+  name: string
+  color: string | null
 }
