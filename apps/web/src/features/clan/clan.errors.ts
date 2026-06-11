@@ -6,6 +6,8 @@ const MESSAGES: Record<string, () => string> = {
   CLAN_CREATE_FAILED: m.clan_error_create_failed,
   CLAN_NOT_FOUND: m.clan_not_found,
   CLAN_ALREADY_MEMBER: m.clan_error_already_member,
+  CLAN_JOIN_CLOSED: m.clan_error_join_closed,
+  CLAN_INVITE_REQUIRED: m.clan_error_invite_required,
   CLAN_OWNER_CANNOT_LEAVE: m.clan_error_owner_cannot_leave,
   CLAN_NO_MEMBERSHIP: m.clan_error_no_membership,
   CLAN_OWNER_CANNOT_BE_KICKED: m.clan_error_owner_cannot_be_kicked,

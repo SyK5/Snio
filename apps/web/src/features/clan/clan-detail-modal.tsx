@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { MemberRow } from './member-row'
 import { RoleManagerModal } from './role-manager-modal'
 import { ClanSettingsModal } from './clan-settings-modal'
+import { InviteManagerModal } from './invite-manager-modal'
 import { useClan, useClanMembers, useJoinClan, useLeaveClan } from './clan.hooks'
 import { resolveClanError } from './clan.errors'
 import { m } from '@/i18n/paraglide/messages'
@@ -23,6 +24,7 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
   const [tab, setTab] = useState('members')
   const [rolesOpen, setRolesOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [invitesOpen, setInvitesOpen] = useState(false)
   const { data, isLoading } = useClan(clan.id)
   const leave = useLeaveClan()
   const join = useJoinClan()
@@ -32,6 +34,7 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
   const canManage = data?.canManageMembers ?? false
   const canManageRoles = data?.canManageRoles ?? false
   const canEditClan = data?.canEditClan ?? false
+  const canInvite = data?.canInvite ?? false
 
   const tabs: PagedModalTab[] = [
     { key: 'members', label: m.clan_tab_members(), icon: faUsers },
@@ -55,10 +58,18 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
           {m.clan_settings_action()}
         </Button>
       )}
-      {!isMember && (
+      {canInvite && (
+        <Button size="sm" variant="ghost" onClick={() => setInvitesOpen(true)}>
+          {m.clan_invite_action()}
+        </Button>
+      )}
+      {!isMember && clan.joinPolicy === 'OPEN' && (
         <Button size="sm" onClick={onJoin} loading={join.isPending}>
           {m.clan_join()}
         </Button>
+      )}
+      {!isMember && clan.joinPolicy !== 'OPEN' && (
+        <span className="text-xs text-muted-foreground">{clan.joinPolicy === 'INVITE_ONLY' ? m.clan_join_invite_only() : m.clan_join_closed()}</span>
       )}
       {isMember && !isOwner && (
         <Button size="sm" variant="ghost" onClick={onLeave} loading={leave.isPending}>
@@ -82,7 +93,7 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
         onTabChange={setTab}
         actions={actions}
         bodyClassName="p-0"
-        paused={rolesOpen || settingsOpen}
+        paused={rolesOpen || settingsOpen || invitesOpen}
       >
         {tab === 'members' && <MembersTab clanId={clan.id} canManage={canManage} isLoading={isLoading} description={data?.description ?? null} />}
         {tab === 'chat' && <ComingSoon icon={faComments} />}
@@ -90,10 +101,11 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
         {tab === 'leagues' && <ComingSoon icon={faTrophy} />}
       </PagedModal>
       <RoleManagerModal clanId={clan.id} isOwner={isOwner} open={rolesOpen} onClose={() => setRolesOpen(false)} />
+      <InviteManagerModal clanId={clan.id} open={invitesOpen} onClose={() => setInvitesOpen(false)} />
       {data && (
         <ClanSettingsModal
           clanId={clan.id}
-          defaults={{ name: data.name, tag: data.tag, description: data.description ?? '' }}
+          defaults={{ name: data.name, tag: data.tag, description: data.description ?? '', joinPolicy: data.joinPolicy }}
           isOwner={isOwner}
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}

@@ -6,6 +6,8 @@ export interface ClanRoleView {
   position: number
 }
 
+export type JoinPolicy = 'OPEN' | 'INVITE_ONLY' | 'CLOSED'
+
 export interface ClanSummary {
   id: string
   slug: string
@@ -13,6 +15,7 @@ export interface ClanSummary {
   tag: string
   logoUrl: string | null
   memberCount: number
+  joinPolicy: JoinPolicy
 }
 
 export interface ClanDetail extends ClanSummary {
@@ -22,6 +25,7 @@ export interface ClanDetail extends ClanSummary {
   canManageMembers: boolean
   canManageRoles: boolean
   canEditClan: boolean
+  canInvite: boolean
   createdAt: string
 }
 
@@ -51,6 +55,7 @@ export interface UpdateClanPayload {
   name?: string
   tag?: string
   description?: string | null
+  joinPolicy?: JoinPolicy
 }
 
 export interface ClanRoleGrantView {
