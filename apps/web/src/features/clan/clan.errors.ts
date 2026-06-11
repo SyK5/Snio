@@ -24,6 +24,14 @@ const MESSAGES: Record<string, () => string> = {
   CLAN_GRANT_UNKNOWN: m.clan_error_grant_unknown,
   CLAN_GRANT_ESCALATION: m.clan_error_grant_escalation,
   CLAN_ROLE_REORDER_INVALID: m.clan_error_role_reorder_invalid,
+  INVITE_NOT_FOUND: m.invite_error_not_found,
+  INVITE_REVOKED: m.invite_error_revoked,
+  INVITE_EXPIRED: m.invite_error_expired,
+  INVITE_EXHAUSTED: m.invite_error_exhausted,
+  INVITE_NOT_FOR_YOU: m.invite_error_not_for_you,
+  INVITE_USER_NOT_FOUND: m.invite_error_user_not_found,
+  INVITE_ALREADY_INVITED: m.invite_error_already_invited,
+  INVITE_CREATE_FAILED: m.invite_error_create_failed,
 }
 
 export function resolveClanError(error: unknown): string {

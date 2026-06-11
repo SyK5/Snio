@@ -95,3 +95,39 @@ export interface UpdateRolePayload {
   name?: string
   color?: string | null
 }
+
+export interface InviteTargetView {
+  userId: string
+  username: string
+  displayName: string
+  discriminator: string
+}
+
+export interface InviteView {
+  id: string
+  code: string
+  target: InviteTargetView | null
+  maxUses: number | null
+  uses: number
+  expiresAt: string | null
+  createdAt: string
+}
+
+export interface InvitePreview {
+  code: string
+  clanId: string
+  slug: string
+  name: string
+  tag: string
+  targeted: boolean
+}
+
+export interface CreateLinkPayload {
+  maxUses?: number | null
+  expiresAt?: string | null
+}
+
+export interface CreateTargetedPayload {
+  username: string
+  discriminator: string
+}
