@@ -27,6 +27,8 @@ model User {
   refreshTokens          RefreshToken[]
   memberships            ClanMember[]
   ownedClans             Clan[]                  @relation("ClanOwner")
+  createdClanInvites     ClanInvite[]            @relation("ClanInviteCreator")
+  receivedClanInvites    ClanInvite[]            @relation("ClanInviteTarget")
   ownedClanGames         ClanGame[]              @relation("ClanGameOwner")
   eventParticipations    EventParticipation[]
   trainingParticipations TrainingParticipation[]
@@ -129,6 +131,7 @@ model Clan {
   tag         String    @unique
   description String?
   logo_url    String?
+  join_policy JoinPolicy @default(OPEN)
   owner_id    String
   created_at  DateTime  @default(now()) @db.Timestamptz(6)
   updated_at  DateTime  @updatedAt @db.Timestamptz(6)
@@ -145,6 +148,7 @@ model Clan {
   customEmojis       CustomEmoji[]
   stickers           Sticker[]
   documents          Document[]
+  invites            ClanInvite[]
 
   @@index([owner_id])
   @@index([deleted_at])
@@ -213,6 +217,35 @@ model ClanMemberRole {
   @@unique([member_id, role_id])
   @@index([role_id])
   @@map("snio_clan_member_roles")
+}
+
+model ClanInvite {
+  id             String    @id @default(cuid())
+  code           String    @unique
+  clan_id        String
+  created_by_id  String
+  target_user_id String?
+  max_uses       Int?
+  uses           Int       @default(0)
+  expires_at     DateTime? @db.Timestamptz(6)
+  revoked_at     DateTime? @db.Timestamptz(6)
+  created_at     DateTime  @default(now()) @db.Timestamptz(6)
+
+  clan       Clan  @relation(fields: [clan_id], references: [id], onDelete: Cascade)
+  createdBy  User  @relation("ClanInviteCreator", fields: [created_by_id], references: [id])
+  targetUser User? @relation("ClanInviteTarget", fields: [target_user_id], references: [id], onDelete: Cascade)
+
+  @@index([clan_id])
+  @@index([target_user_id])
+  @@map("snio_clan_invites")
+}
+
+enum JoinPolicy {
+  OPEN
+  INVITE_ONLY
+  CLOSED
+
+  @@map("snio_join_policy")
 }
 
 model ClanGame {
