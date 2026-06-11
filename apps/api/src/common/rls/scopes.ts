@@ -18,6 +18,7 @@ export const MODEL_SCOPES: Record<string, ModelScope> = {
   ClanRoleDef: { scope: 'clan', field: 'clan_id' },
   ClanRoleGrant: { scope: 'clan', field: 'role.clan_id' },
   ClanMemberRole: { scope: 'clan', field: 'member.clan_id' },
+  ClanInvite: { scope: 'clan', field: 'clan_id' },
   ClanGame: { scope: 'clan', field: 'clan_id' },
   Event: { scope: 'clan', field: 'clan_id' },
   EventParticipation: { scope: 'clan', field: 'event.clan_id' },

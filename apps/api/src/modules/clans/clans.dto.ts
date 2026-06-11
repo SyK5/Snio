@@ -7,6 +7,8 @@ export const listClansSchema = z.object({
 
 export type ListClansQuery = z.infer<typeof listClansSchema>
 
+export type JoinPolicy = 'OPEN' | 'INVITE_ONLY' | 'CLOSED'
+
 export interface ClanPage {
   items: ClanSummary[]
   nextCursor: string | null
@@ -29,6 +31,7 @@ export const updateClanSchema = z
     name: z.string().trim().min(2).max(40).optional(),
     tag: tagField.optional(),
     description: z.string().trim().max(500).nullable().optional(),
+    joinPolicy: z.enum(['OPEN', 'INVITE_ONLY', 'CLOSED']).optional(),
   })
   .refine(d => Object.keys(d).length > 0, 'Keine Änderungen übergeben')
 
@@ -84,15 +87,18 @@ export interface ClanSummary {
   tag: string
   logoUrl: string | null
   memberCount: number
+  joinPolicy: JoinPolicy
 }
 
 export interface ClanDetail extends ClanSummary {
   description: string | null
   ownerId: string
+  joinPolicy: JoinPolicy
   isOwner: boolean
   canManageMembers: boolean
   canManageRoles: boolean
   canEditClan: boolean
+  canInvite: boolean
   createdAt: string
 }
 

@@ -91,6 +91,7 @@ export class ClansService {
     if (input.name !== undefined) data.name = input.name
     if (input.tag !== undefined) data.tag = input.tag
     if (input.description !== undefined) data.description = input.description
+    if (input.joinPolicy !== undefined) data.join_policy = input.joinPolicy
     try {
       await this.prisma.clan.updateMany({ where: { id: clanId, deleted_at: null }, data })
     } catch (e) {
@@ -108,15 +109,20 @@ export class ClansService {
     return runSystem(async () => {
       const clan = await this.prisma.clan.findFirst({ where: { id: clanId, deleted_at: null } })
       if (!clan) throw clanErrors.notFound()
-      const existing = await this.prisma.clanMember.findFirst({ where: { clan_id: clanId, user_id: user.id } })
-      if (existing?.left_at === null) throw clanErrors.alreadyMember()
-
-      const memberId = existing ? await this.reactivateMember(existing.id) : await this.createMember(clanId, user.id)
-      const base = await this.baseRole(clanId)
-      await this.prisma.clanMemberRole.createMany({ data: [{ member_id: memberId, role_id: base.id }], skipDuplicates: true })
-      const memberCount = await this.prisma.clanMember.count({ where: { clan_id: clanId, left_at: null } })
-      return this.toDetail(clan, memberCount, user.id)
+      if (clan.join_policy === 'CLOSED') throw clanErrors.joinClosed()
+      if (clan.join_policy === 'INVITE_ONLY') throw clanErrors.inviteRequired()
+      return this.admit(clan, user)
     })
+  }
+
+  async admit(clan: Clan, user: AuthUser): Promise<ClanDetail> {
+    const existing = await this.prisma.clanMember.findFirst({ where: { clan_id: clan.id, user_id: user.id } })
+    if (existing?.left_at === null) throw clanErrors.alreadyMember()
+    const memberId = existing ? await this.reactivateMember(existing.id) : await this.createMember(clan.id, user.id)
+    const base = await this.baseRole(clan.id)
+    await this.prisma.clanMemberRole.createMany({ data: [{ member_id: memberId, role_id: base.id }], skipDuplicates: true })
+    const memberCount = await this.prisma.clanMember.count({ where: { clan_id: clan.id, left_at: null } })
+    return this.toDetail(clan, memberCount, user.id)
   }
 
   async leave(clanId: string, user: AuthUser): Promise<void> {
@@ -341,7 +347,7 @@ export class ClansService {
   }
 
   private async toSummary(clan: Clan, memberCount: number): Promise<ClanSummary> {
-    return { id: clan.id, slug: clan.slug, name: clan.name, tag: clan.tag, logoUrl: await this.resolveImage(clan.logo_url), memberCount }
+    return { id: clan.id, slug: clan.slug, name: clan.name, tag: clan.tag, logoUrl: await this.resolveImage(clan.logo_url), memberCount, joinPolicy: clan.join_policy }
   }
 
   private async toDetail(clan: Clan, memberCount: number, userId: string): Promise<ClanDetail> {
@@ -350,14 +356,17 @@ export class ClansService {
     const canManageMembers = isOwner || this.permissions.can('clan_member', Action.MANAGE)
     const canManageRoles = isOwner || this.permissions.can('clan_role', Action.MANAGE)
     const canEditClan = isOwner || this.permissions.can('clan', Action.UPDATE)
+    const canInvite = isOwner || this.permissions.can('clan_invite', Action.CREATE)
     return {
       ...summary,
       description: clan.description,
       ownerId: clan.owner_id,
+      joinPolicy: clan.join_policy,
       isOwner,
       canManageMembers,
       canManageRoles,
       canEditClan,
+      canInvite,
       createdAt: clan.created_at.toISOString(),
     }
   }
