@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { isAxiosError } from 'axios'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { AuthCard } from '@/components/auth/auth-card'
 import { TextField, PasswordField } from '@/components/ui/field'
@@ -12,7 +12,10 @@ import { loginSchema, type LoginForm } from '@/features/auth/auth.schemas'
 import { m } from '@/i18n/paraglide/messages'
 
 export function LoginPage() {
-  const login = useLogin()
+  const [params] = useSearchParams()
+  const raw = params.get('redirect') ?? '/'
+  const redirectTo = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
+  const login = useLogin(redirectTo)
   const { register, handleSubmit, formState } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) })
 
   const onSubmit = (values: LoginForm) =>

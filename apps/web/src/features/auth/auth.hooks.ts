@@ -21,7 +21,7 @@ export function useCurrentUser() {
   })
 }
 
-export function useLogin() {
+export function useLogin(redirectTo = '/') {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const setAccessToken = useAuthStore(s => s.setAccessToken)
@@ -30,7 +30,7 @@ export function useLogin() {
     onSuccess: async (data: AccessResponse) => {
       setAccessToken(data.accessToken)
       await qc.invalidateQueries({ queryKey: ME_KEY })
-      navigate('/')
+      navigate(redirectTo)
     },
   })
 }

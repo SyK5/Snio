@@ -13,10 +13,12 @@ export function InvitePage() {
   const { code = '' } = useParams()
   const navigate = useNavigate()
   const accessToken = useAuthStore(s => s.accessToken)
+  const authReady = useAuthStore(s => s.authReady)
   const { data: preview, isLoading, isError } = useInvitePreview(code)
   const redeem = useRedeemInvite()
 
-  if (!accessToken) return <Navigate to="/login" replace />
+  if (!authReady) return <Centered>{m.invite_page_loading()}</Centered>
+  if (!accessToken) return <Navigate to={`/login?redirect=/invite/${code}`} replace />
   if (isLoading) return <Centered>{m.invite_page_loading()}</Centered>
   if (isError || !preview) return <Invalid onBack={() => navigate('/clans')} />
 
