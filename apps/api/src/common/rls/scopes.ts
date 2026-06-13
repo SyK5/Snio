@@ -27,6 +27,7 @@ export const MODEL_SCOPES: Record<string, ModelScope> = {
   CustomEmoji: { scope: 'clan', field: 'clan_id' },
 
   Notification: { scope: 'self', field: 'user_id' },
+  NotificationPreference: { scope: 'self', field: 'user_id' },
   UserDevice: { scope: 'self', field: 'user_id' },
 
   League: { scope: 'deferred' },
