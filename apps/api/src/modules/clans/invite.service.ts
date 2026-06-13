@@ -5,6 +5,8 @@ import { RLS_PRISMA, RlsPrismaClient } from '../../common/prisma/prisma.extended
 import { runSystem } from '../../common/context/request-context'
 import { AuthUser } from '../../common/auth/auth.types'
 import { NotificationService } from '../notifications/notification.service'
+import { AuditService } from '../audit/audit.service'
+import { AuditAction, AuditEntity } from '../audit/audit-actions'
 import { ClansService } from './clans.service'
 import { ClanDetail } from './clans.dto'
 import { clanErrors } from './clan.errors'
@@ -19,10 +21,12 @@ export class InviteService {
     @Inject(RLS_PRISMA) private readonly prisma: RlsPrismaClient,
     private readonly clans: ClansService,
     private readonly notifications: NotificationService,
+    private readonly audit: AuditService,
   ) {}
 
   async createLink(user: AuthUser, clanId: string, input: CreateLinkInput): Promise<InviteView> {
     const invite = await this.insert({ clan_id: clanId, created_by_id: user.id, max_uses: input.maxUses ?? null, expires_at: input.expiresAt ?? null })
+    await this.audit.write({ clanId, action: AuditAction.INVITE_CREATED, entityType: AuditEntity.INVITE, entityId: invite.id, metadata: { targeted: false } })
     return toInviteView(invite, null)
   }
 
@@ -44,6 +48,7 @@ export class InviteService {
       invitedByName: user.display_name,
       invitedByDiscriminator: user.discriminator,
     })
+    await this.audit.write({ clanId, action: AuditAction.INVITE_CREATED, entityType: AuditEntity.INVITE, entityId: invite.id, metadata: { targeted: true, targetUsername: target.username, targetDiscriminator: target.discriminator } })
     return toInviteView(invite, target)
   }
 
@@ -60,6 +65,7 @@ export class InviteService {
     const invite = await this.prisma.clanInvite.findFirst({ where: { id: inviteId, clan_id: clanId, revoked_at: null } })
     if (!invite) throw inviteErrors.notFound()
     await this.prisma.clanInvite.updateMany({ where: { id: inviteId }, data: { revoked_at: new Date() } })
+    await this.audit.write({ clanId, action: AuditAction.INVITE_REVOKED, entityType: AuditEntity.INVITE, entityId: inviteId })
   }
 
   async preview(code: string): Promise<InvitePreview> {
@@ -80,6 +86,7 @@ export class InviteService {
       if (clan.join_policy === 'CLOSED') throw clanErrors.joinClosed()
       const detail = await this.clans.admit(clan, user)
       await this.prisma.clanInvite.updateMany({ where: { id: invite.id }, data: { uses: { increment: 1 } } })
+      await this.audit.write({ clanId: clan.id, action: AuditAction.INVITE_REDEEMED, entityType: AuditEntity.INVITE, entityId: invite.id, metadata: { userId: user.id } })
       return detail
     })
   }
