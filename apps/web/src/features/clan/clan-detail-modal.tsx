@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faShieldHalved, faUsers, faComments, faCalendarDays, faTrophy } from '@fortawesome/free-solid-svg-icons'
+import { faShieldHalved, faUsers, faComments, faCalendarDays, faTrophy, faClockRotateLeft } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { PagedModal, type PagedModalTab } from '@/components/ui/paged-modal'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { MemberRow } from './member-row'
 import { RoleManagerModal } from './role-manager-modal'
 import { ClanSettingsModal } from './clan-settings-modal'
 import { InviteManagerModal } from './invite-manager-modal'
+import { AuditLogModal } from './audit-log-modal'
 import { useClan, useClanMembers, useJoinClan, useLeaveClan } from './clan.hooks'
 import { resolveClanError } from './clan.errors'
 import { m } from '@/i18n/paraglide/messages'
@@ -25,6 +26,7 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
   const [rolesOpen, setRolesOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [invitesOpen, setInvitesOpen] = useState(false)
+  const [auditOpen, setAuditOpen] = useState(false)
   const { data, isLoading } = useClan(clan.id)
   const leave = useLeaveClan()
   const join = useJoinClan()
@@ -35,6 +37,7 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
   const canManageRoles = data?.canManageRoles ?? false
   const canEditClan = data?.canEditClan ?? false
   const canInvite = data?.canInvite ?? false
+  const canViewAudit = data?.canViewAudit ?? false
 
   const tabs: PagedModalTab[] = [
     { key: 'members', label: m.clan_tab_members(), icon: faUsers },
@@ -61,6 +64,11 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
       {canInvite && (
         <Button size="sm" variant="ghost" onClick={() => setInvitesOpen(true)}>
           {m.clan_invite_action()}
+        </Button>
+      )}
+      {canViewAudit && (
+        <Button size="sm" variant="ghost" onClick={() => setAuditOpen(true)}>
+          {m.clan_audit_action()}
         </Button>
       )}
       {!isMember && clan.joinPolicy === 'OPEN' && (
@@ -93,7 +101,7 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
         onTabChange={setTab}
         actions={actions}
         bodyClassName="p-0"
-        paused={rolesOpen || settingsOpen || invitesOpen}
+        paused={rolesOpen || settingsOpen || invitesOpen || auditOpen}
       >
         {tab === 'members' && <MembersTab clanId={clan.id} canManage={canManage} isLoading={isLoading} description={data?.description ?? null} />}
         {tab === 'chat' && <ComingSoon icon={faComments} />}
@@ -102,6 +110,7 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
       </PagedModal>
       <RoleManagerModal clanId={clan.id} isOwner={isOwner} open={rolesOpen} onClose={() => setRolesOpen(false)} />
       <InviteManagerModal clanId={clan.id} open={invitesOpen} onClose={() => setInvitesOpen(false)} />
+      <AuditLogModal clanId={clan.id} open={auditOpen} onClose={() => setAuditOpen(false)} />
       {data && (
         <ClanSettingsModal
           clanId={clan.id}

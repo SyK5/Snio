@@ -26,6 +26,7 @@ export interface ClanDetail extends ClanSummary {
   canManageRoles: boolean
   canEditClan: boolean
   canInvite: boolean
+  canViewAudit: boolean
   createdAt: string
 }
 
@@ -130,4 +131,26 @@ export interface CreateLinkPayload {
 export interface CreateTargetedPayload {
   username: string
   discriminator: string
+}
+
+export interface AuditActorView {
+  userId: string
+  username: string
+  displayName: string
+  discriminator: string
+}
+
+export interface AuditLogView {
+  id: string
+  action: string
+  entityType: string
+  entityId: string | null
+  metadata: Record<string, unknown>
+  actor: AuditActorView | null
+  createdAt: string
+}
+
+export interface AuditLogPage {
+  items: AuditLogView[]
+  nextCursor: string | null
 }

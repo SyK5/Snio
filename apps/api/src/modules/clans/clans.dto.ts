@@ -99,6 +99,7 @@ export interface ClanDetail extends ClanSummary {
   canManageRoles: boolean
   canEditClan: boolean
   canInvite: boolean
+  canViewAudit: boolean
   createdAt: string
 }
 
