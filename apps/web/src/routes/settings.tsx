@@ -11,6 +11,7 @@ import { m } from '@/i18n/paraglide/messages'
 import { locales, type Locale } from '@/i18n/paraglide/runtime'
 import { AvatarUpload } from '@/features/user/avatar-upload'
 import { ProfileFields } from '@/features/user/profile-fields'
+import { NotificationPreferences } from '@/features/notification/notification-preferences'
 
 const LOCALE_LABELS: Record<string, string> = { de: 'Deutsch', en: 'English', tr: 'Türkçe', ru: 'Русский' }
 
@@ -48,6 +49,11 @@ export function SettingsPage() {
       </Card>
 
       {isAuthed ? <AccountSection /> : <LockedHint />}
+      {isAuthed && (
+        <div className="mt-6">
+          <NotificationPreferences />
+        </div>
+      )}
     </div>
   )
 }
