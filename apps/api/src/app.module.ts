@@ -13,6 +13,7 @@ import { S3Module } from './common/s3/s3.module'
 import { UsersModule } from './modules/users/users.module'
 import { ClansModule } from './modules/clans/clans.module'
 import { NotificationModule } from './modules/notifications/notification.module'
+import { AuditModule } from './modules/audit/audit.module'
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { NotificationModule } from './modules/notifications/notification.module'
     UsersModule,
     ClansModule,
     NotificationModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
