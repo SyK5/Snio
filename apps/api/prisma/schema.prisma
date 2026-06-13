@@ -44,6 +44,7 @@ model User {
   callParticipations     CallParticipant[]
   devices                UserDevice[]
   notifications          Notification[]
+  notificationPreferences NotificationPreference[]
   auditLogs              AuditLog[]
   documents              Document[]              @relation("DocumentRecipient")
   generatedDocuments     Document[]              @relation("DocumentGeneratedBy")
@@ -845,6 +846,21 @@ enum NotificationType {
   GAME_VOTE_RESULT
 
   @@map("snio_notification_type")
+}
+
+model NotificationPreference {
+  id         String           @id @default(cuid())
+  user_id    String
+  type       NotificationType
+  enabled    Boolean          @default(true)
+  created_at DateTime         @default(now()) @db.Timestamptz(6)
+  updated_at DateTime         @updatedAt @db.Timestamptz(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, type])
+  @@index([user_id])
+  @@map("snio_notification_preferences")
 }
 
 model AuditLog {
