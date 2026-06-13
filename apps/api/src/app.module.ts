@@ -12,6 +12,7 @@ import { AuthModule } from './modules/auth/auth.module'
 import { S3Module } from './common/s3/s3.module'
 import { UsersModule } from './modules/users/users.module'
 import { ClansModule } from './modules/clans/clans.module'
+import { NotificationModule } from './modules/notifications/notification.module'
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ClansModule } from './modules/clans/clans.module'
     AuthModule,
     UsersModule,
     ClansModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
