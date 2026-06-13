@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faHouse, faShieldHalved } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { ProfileMenu } from './profile-menu'
+import { NotificationBell } from '@/features/notification/notification-bell'
 import { cn } from '@/lib/utils'
 import { m } from '@/i18n/paraglide/messages'
 
@@ -29,6 +30,7 @@ export function Sidebar() {
         ))}
       </nav>
 
+      <NotificationBell />
       <ProfileMenu />
     </aside>
   )
