@@ -866,6 +866,7 @@ model NotificationPreference {
 model AuditLog {
   id          String      @id @default(cuid())
   actor_id    String?
+  clan_id     String?
   action      String
   entity_type String
   entity_id   String?
@@ -877,6 +878,7 @@ model AuditLog {
   actor User? @relation(fields: [actor_id], references: [id], onDelete: SetNull)
 
   @@index([actor_id])
+  @@index([clan_id, created_at])
   @@index([entity_type, entity_id])
   @@index([created_at])
   @@map("snio_audit_logs")
