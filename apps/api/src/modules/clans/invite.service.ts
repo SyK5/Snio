@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto'
 import { RLS_PRISMA, RlsPrismaClient } from '../../common/prisma/prisma.extended'
 import { runSystem } from '../../common/context/request-context'
 import { AuthUser } from '../../common/auth/auth.types'
+import { NotificationService } from '../notifications/notification.service'
 import { ClansService } from './clans.service'
 import { ClanDetail } from './clans.dto'
 import { clanErrors } from './clan.errors'
@@ -17,6 +18,7 @@ export class InviteService {
   constructor(
     @Inject(RLS_PRISMA) private readonly prisma: RlsPrismaClient,
     private readonly clans: ClansService,
+    private readonly notifications: NotificationService,
   ) {}
 
   async createLink(user: AuthUser, clanId: string, input: CreateLinkInput): Promise<InviteView> {
@@ -32,6 +34,16 @@ export class InviteService {
     const dup = await this.prisma.clanInvite.findFirst({ where: { clan_id: clanId, target_user_id: target.id, revoked_at: null } })
     if (dup && (dup.expires_at == null || dup.expires_at > new Date())) throw inviteErrors.alreadyInvited()
     const invite = await this.insert({ clan_id: clanId, created_by_id: user.id, target_user_id: target.id })
+    const clan = await this.prisma.clan.findFirst({ where: { id: clanId } })
+    await this.notifications.emit(target.id, 'CLAN_INVITE', {
+      clanId,
+      clanName: clan?.name ?? '',
+      clanTag: clan?.tag ?? '',
+      code: invite.code,
+      invitedById: user.id,
+      invitedByName: user.display_name,
+      invitedByDiscriminator: user.discriminator,
+    })
     return toInviteView(invite, target)
   }
 

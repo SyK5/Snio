@@ -6,6 +6,7 @@ import { runSystem } from '../../common/context/request-context'
 import { S3Service } from '../../common/s3/s3.service'
 import { PermissionService } from '../../common/rls/permission.service'
 import { Action } from '../../common/rls/actions'
+import { NotificationService } from '../notifications/notification.service'
 import { GRANT_CATALOG, grantMeta } from '../../common/rls/grants.catalog'
 import { DefaultRoleKey, ROLE_GRANT_DEFAULTS, SYSTEM_ROLES, SystemRoleKey, grantRows } from '../../common/rls/role-templates'
 import { AuthUser } from '../../common/auth/auth.types'
@@ -45,6 +46,7 @@ export class ClansService {
     @Inject(RLS_PRISMA) private readonly prisma: RlsPrismaClient,
     private readonly s3: S3Service,
     private readonly permissions: PermissionService,
+    private readonly notifications: NotificationService,
   ) {}
 
   async create(user: AuthUser, input: CreateClanInput): Promise<ClanDetail> {
@@ -122,6 +124,15 @@ export class ClansService {
     const base = await this.baseRole(clan.id)
     await this.prisma.clanMemberRole.createMany({ data: [{ member_id: memberId, role_id: base.id }], skipDuplicates: true })
     const memberCount = await this.prisma.clanMember.count({ where: { clan_id: clan.id, left_at: null } })
+    if (clan.owner_id !== user.id)
+      await this.notifications.emit(clan.owner_id, 'CLAN_MEMBER_JOINED', {
+        clanId: clan.id,
+        clanName: clan.name,
+        clanTag: clan.tag,
+        userId: user.id,
+        displayName: user.display_name,
+        discriminator: user.discriminator,
+      })
     return this.toDetail(clan, memberCount, user.id)
   }
 
@@ -143,6 +154,7 @@ export class ClansService {
     if (member.user_id === clan?.owner_id) throw clanErrors.ownerCannotBeKicked()
     if (!this.permissions.canManageRole(highestPosition(member.roles))) throw clanErrors.targetRoleTooHigh()
     await this.deactivateMember(memberId)
+    await this.notifications.emit(member.user_id, 'CLAN_KICKED', { clanId, clanName: clan?.name ?? '', clanTag: clan?.tag ?? '' })
   }
 
   async listMembers(): Promise<ClanMemberView[]> {
@@ -158,6 +170,7 @@ export class ClansService {
     if (role.is_system && role.key === 'owner') throw clanErrors.ownerRoleNotAssignable()
     if (!this.permissions.canManageRole(role.position)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.clanMemberRole.createMany({ data: [{ member_id: memberId, role_id: roleId }], skipDuplicates: true })
+    await this.notifyRoleChange(member.user_id, role.clan_id, role.name, 'assigned')
     return this.memberView(memberId)
   }
 
@@ -166,7 +179,16 @@ export class ClansService {
     if (role?.is_system && role.key === 'owner') throw clanErrors.ownerRoleNotRemovable()
     if (role && !this.permissions.canManageRole(role.position)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.clanMemberRole.deleteMany({ where: { member_id: memberId, role_id: roleId } })
+    if (role) {
+      const member = await this.prisma.clanMember.findFirst({ where: { id: memberId } })
+      if (member) await this.notifyRoleChange(member.user_id, role.clan_id, role.name, 'removed')
+    }
     return this.memberView(memberId)
+  }
+
+  private async notifyRoleChange(userId: string, clanId: string, roleName: string, action: 'assigned' | 'removed'): Promise<void> {
+    const clan = await this.prisma.clan.findFirst({ where: { id: clanId } })
+    await this.notifications.emit(userId, 'CLAN_ROLE_CHANGED', { clanId, clanName: clan?.name ?? '', roleName, action })
   }
 
   grantCatalog(): GrantCatalogEntry[] {
