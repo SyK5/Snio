@@ -7,6 +7,8 @@ import { S3Service } from '../../common/s3/s3.service'
 import { PermissionService } from '../../common/rls/permission.service'
 import { Action } from '../../common/rls/actions'
 import { NotificationService } from '../notifications/notification.service'
+import { AuditService } from '../audit/audit.service'
+import { AuditAction, AuditEntity } from '../audit/audit-actions'
 import { GRANT_CATALOG, grantMeta } from '../../common/rls/grants.catalog'
 import { DefaultRoleKey, ROLE_GRANT_DEFAULTS, SYSTEM_ROLES, SystemRoleKey, grantRows } from '../../common/rls/role-templates'
 import { AuthUser } from '../../common/auth/auth.types'
@@ -47,6 +49,7 @@ export class ClansService {
     private readonly s3: S3Service,
     private readonly permissions: PermissionService,
     private readonly notifications: NotificationService,
+    private readonly audit: AuditService,
   ) {}
 
   async create(user: AuthUser, input: CreateClanInput): Promise<ClanDetail> {
@@ -100,11 +103,13 @@ export class ClansService {
       if (uniqueTargets(e).includes('tag')) throw clanErrors.tagTaken()
       throw e
     }
+    await this.audit.write({ clanId, action: AuditAction.CLAN_UPDATED, entityType: AuditEntity.CLAN, entityId: clanId, metadata: { fields: Object.keys(data) } })
     return this.detail(clanId, userId)
   }
 
   async softDelete(clanId: string): Promise<void> {
     await this.prisma.clan.updateMany({ where: { id: clanId, deleted_at: null }, data: { deleted_at: new Date() } })
+    await this.audit.write({ clanId, action: AuditAction.CLAN_DELETED, entityType: AuditEntity.CLAN, entityId: clanId })
   }
 
   async join(clanId: string, user: AuthUser): Promise<ClanDetail> {
@@ -133,6 +138,7 @@ export class ClansService {
         displayName: user.display_name,
         discriminator: user.discriminator,
       })
+    await this.audit.write({ clanId: clan.id, action: AuditAction.MEMBER_JOINED, entityType: AuditEntity.MEMBER, entityId: user.id, metadata: { displayName: user.display_name, discriminator: user.discriminator } })
     return this.toDetail(clan, memberCount, user.id)
   }
 
@@ -142,6 +148,7 @@ export class ClansService {
     const member = await this.prisma.clanMember.findFirst({ where: { user_id: user.id, left_at: null } })
     if (!member) throw clanErrors.noMembership()
     await this.deactivateMember(member.id)
+    await this.audit.write({ clanId, action: AuditAction.MEMBER_LEFT, entityType: AuditEntity.MEMBER, entityId: user.id })
   }
 
   async kick(clanId: string, memberId: string): Promise<void> {
@@ -155,6 +162,7 @@ export class ClansService {
     if (!this.permissions.canManageRole(highestPosition(member.roles))) throw clanErrors.targetRoleTooHigh()
     await this.deactivateMember(memberId)
     await this.notifications.emit(member.user_id, 'CLAN_KICKED', { clanId, clanName: clan?.name ?? '', clanTag: clan?.tag ?? '' })
+    await this.audit.write({ clanId, action: AuditAction.MEMBER_KICKED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { memberId } })
   }
 
   async listMembers(): Promise<ClanMemberView[]> {
@@ -171,6 +179,7 @@ export class ClansService {
     if (!this.permissions.canManageRole(role.position)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.clanMemberRole.createMany({ data: [{ member_id: memberId, role_id: roleId }], skipDuplicates: true })
     await this.notifyRoleChange(member.user_id, role.clan_id, role.name, 'assigned')
+    await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_ASSIGNED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { roleId, roleName: role.name } })
     return this.memberView(memberId)
   }
 
@@ -180,8 +189,12 @@ export class ClansService {
     if (role && !this.permissions.canManageRole(role.position)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.clanMemberRole.deleteMany({ where: { member_id: memberId, role_id: roleId } })
     if (role) {
+      await runSystem(() => this.ensureMembersHaveRole(role.clan_id))
       const member = await this.prisma.clanMember.findFirst({ where: { id: memberId } })
-      if (member) await this.notifyRoleChange(member.user_id, role.clan_id, role.name, 'removed')
+      if (member) {
+        await this.notifyRoleChange(member.user_id, role.clan_id, role.name, 'removed')
+        await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_REMOVED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { roleId, roleName: role.name } })
+      }
     }
     return this.memberView(memberId)
   }
@@ -223,6 +236,7 @@ export class ClansService {
     })
     const order = [...sortable.slice(0, insertAt).map(r => r.id), created.id, ...sortable.slice(insertAt).map(r => r.id)]
     await this.prisma.$transaction(this.reseatOps(order, ownerRoleId(roles)))
+    await this.audit.write({ clanId, action: AuditAction.ROLE_CREATED, entityType: AuditEntity.ROLE, entityId: created.id, metadata: { name: created.name } })
     return this.roleDetail(created.id)
   }
 
@@ -244,6 +258,7 @@ export class ClansService {
     if (input.name !== undefined) data.name = input.name
     if (input.color !== undefined) data.color = input.color
     await this.prisma.clanRoleDef.updateMany({ where: { id: roleId }, data })
+    await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_UPDATED, entityType: AuditEntity.ROLE, entityId: roleId, metadata: { fields: Object.keys(data) } })
     return this.roleDetail(roleId)
   }
 
@@ -256,6 +271,7 @@ export class ClansService {
     await this.prisma.clanMemberRole.deleteMany({ where: { role_id: roleId } })
     await this.prisma.clanRoleDef.deleteMany({ where: { id: roleId } })
     await runSystem(() => this.ensureMembersHaveRole(role.clan_id))
+    await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_DELETED, entityType: AuditEntity.ROLE, entityId: roleId, metadata: { name: role.name } })
     return this.listRoles()
   }
 
@@ -267,6 +283,8 @@ export class ClansService {
     const locked = sortable.filter(r => r.position >= this.permissions.positionCeiling()).map(r => r.id)
     if (!locked.every((id, i) => orderedIds[i] === id)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.$transaction(this.reseatOps(orderedIds, ownerRoleId(roles)))
+    const reorderClanId = roles[0]?.clan_id
+    if (reorderClanId) await this.audit.write({ clanId: reorderClanId, action: AuditAction.ROLE_REORDERED, entityType: AuditEntity.ROLE, entityId: null, metadata: { order: orderedIds } })
     return this.listRoles()
   }
 
@@ -286,6 +304,7 @@ export class ClansService {
     }
     await this.prisma.clanRoleGrant.deleteMany({ where: { role_id: roleId } })
     if (rows.length) await this.prisma.clanRoleGrant.createMany({ data: rows })
+    await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_GRANTS_SET, entityType: AuditEntity.ROLE, entityId: roleId, metadata: { grantCount: rows.length } })
     return this.roleDetail(roleId)
   }
 
