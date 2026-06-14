@@ -46,7 +46,7 @@ export class AuditService {
       const rows = await this.prisma.auditLog.findMany({
         where: { clan_id: clanId, ...(category ? { action: { startsWith: `${category}.` } } : {}) },
         include: { actor: { select: ACTOR_SELECT } },
-        orderBy: { created_at: 'desc' },
+        orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
         take: limit + 1,
         ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
       })
