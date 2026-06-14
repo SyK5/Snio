@@ -17,11 +17,11 @@ export function auditText(e: AuditLogView): string {
     case 'member.left':
       return m.audit_member_left()
     case 'member.kicked':
-      return m.audit_member_kicked()
+      return m.audit_member_kicked({ target: target(p) })
     case 'role.assigned':
-      return m.audit_role_assigned({ role: str(p.roleName) })
+      return m.audit_role_assigned({ target: target(p), role: str(p.roleName) })
     case 'role.removed':
-      return m.audit_role_removed({ role: str(p.roleName) })
+      return m.audit_role_removed({ target: target(p), role: str(p.roleName) })
     case 'role.created':
       return m.audit_role_created({ role: str(p.name) })
     case 'role.updated':
@@ -45,6 +45,10 @@ export function auditText(e: AuditLogView): string {
 
 function str(v: unknown): string {
   return typeof v === 'string' ? v : ''
+}
+
+function target(p: Record<string, unknown>): string {
+  return handle(str(p.targetName), str(p.targetDiscriminator))
 }
 
 function handle(name?: string, discriminator?: string): string {
