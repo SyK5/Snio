@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { NotificationType, Prisma } from '@prisma/client'
 import { RLS_PRISMA, RlsPrismaClient } from '../../common/prisma/prisma.extended'
-import { currentUserId, runSystem } from '../../common/context/request-context'
+import { currentUserId, requestContext } from '../../common/context/request-context'
 import { NOTIFIABLE_TYPES, NotifiableType, NotificationPage, NotificationPreferenceView, NotificationView } from './notification.dto'
 
 @Injectable()
@@ -11,20 +11,18 @@ export class NotificationService {
   constructor(@Inject(RLS_PRISMA) private readonly prisma: RlsPrismaClient) {}
 
   async emit(userId: string, type: NotificationType, payload: Prisma.InputJsonValue): Promise<void> {
-    try {
-      await runSystem(async () => {
+    void requestContext
+      .run({ requestId: 'notif', system: true }, async () => {
         const pref = await this.prisma.notificationPreference.findFirst({ where: { user_id: userId, type } })
         if (pref && !pref.enabled) return
         await this.prisma.notification.create({ data: { user_id: userId, type, payload } })
       })
-    } catch {
-      this.logger.warn(`notification emit failed: ${type} -> ${userId}`)
-    }
+      .catch(() => this.logger.warn(`notification emit failed: ${type} -> ${userId}`))
   }
 
   async list(cursor: string | undefined, limit: number): Promise<NotificationPage> {
     const rows = await this.prisma.notification.findMany({
-      orderBy: { created_at: 'desc' },
+      orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
       take: limit + 1,
       ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
     })
