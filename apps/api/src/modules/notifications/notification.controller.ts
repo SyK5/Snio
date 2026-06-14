@@ -51,7 +51,8 @@ export class NotificationController {
 
   @Put('preferences/:type')
   setPreference(@Param('type') type: string, @Body(new ZodValidationPipe(setPreferenceSchema)) dto: SetPreferenceInput): Promise<NotificationPreferenceView> {
-    if (!NOTIFIABLE_TYPES.includes(type as NotifiableType)) throw new BadRequestException({ code: 'NOTIFICATION_TYPE_INVALID', message: 'Unbekannter Benachrichtigungstyp' })
+    if (!NOTIFIABLE_TYPES.includes(type as NotifiableType))
+      throw new BadRequestException({ code: 'NOTIFICATION_TYPE_INVALID', message: 'Unbekannter Benachrichtigungstyp' })
     return this.notifications.setPreference(type as NotifiableType, dto.enabled)
   }
 }

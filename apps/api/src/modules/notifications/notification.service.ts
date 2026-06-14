@@ -63,5 +63,11 @@ export class NotificationService {
 }
 
 function toView(n: { id: string; type: NotificationType; payload: Prisma.JsonValue; read_at: Date | null; created_at: Date }): NotificationView {
-  return { id: n.id, type: n.type, payload: (n.payload ?? {}) as Record<string, unknown>, readAt: n.read_at?.toISOString() ?? null, createdAt: n.created_at.toISOString() }
+  return {
+    id: n.id,
+    type: n.type,
+    payload: (n.payload ?? {}) as Record<string, unknown>,
+    readAt: n.read_at?.toISOString() ?? null,
+    createdAt: n.created_at.toISOString(),
+  }
 }

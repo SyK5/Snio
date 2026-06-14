@@ -48,7 +48,13 @@ export class InviteService {
       invitedByName: user.display_name,
       invitedByDiscriminator: user.discriminator,
     })
-    await this.audit.write({ clanId, action: AuditAction.INVITE_CREATED, entityType: AuditEntity.INVITE, entityId: invite.id, metadata: { targeted: true, targetUsername: target.username, targetDiscriminator: target.discriminator } })
+    await this.audit.write({
+      clanId,
+      action: AuditAction.INVITE_CREATED,
+      entityType: AuditEntity.INVITE,
+      entityId: invite.id,
+      metadata: { targeted: true, targetUsername: target.username, targetDiscriminator: target.discriminator },
+    })
     return toInviteView(invite, target)
   }
 

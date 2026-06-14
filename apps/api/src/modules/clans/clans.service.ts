@@ -138,7 +138,13 @@ export class ClansService {
         displayName: user.display_name,
         discriminator: user.discriminator,
       })
-    await this.audit.write({ clanId: clan.id, action: AuditAction.MEMBER_JOINED, entityType: AuditEntity.MEMBER, entityId: user.id, metadata: { displayName: user.display_name, discriminator: user.discriminator } })
+    await this.audit.write({
+      clanId: clan.id,
+      action: AuditAction.MEMBER_JOINED,
+      entityType: AuditEntity.MEMBER,
+      entityId: user.id,
+      metadata: { displayName: user.display_name, discriminator: user.discriminator },
+    })
     return this.toDetail(clan, memberCount, user.id)
   }
 
@@ -162,7 +168,13 @@ export class ClansService {
     if (!this.permissions.canManageRole(highestPosition(member.roles))) throw clanErrors.targetRoleTooHigh()
     await this.deactivateMember(memberId)
     await this.notifications.emit(member.user_id, 'CLAN_KICKED', { clanId, clanName: clan?.name ?? '', clanTag: clan?.tag ?? '' })
-    await this.audit.write({ clanId, action: AuditAction.MEMBER_KICKED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { targetName: member.user.display_name, targetDiscriminator: member.user.discriminator } })
+    await this.audit.write({
+      clanId,
+      action: AuditAction.MEMBER_KICKED,
+      entityType: AuditEntity.MEMBER,
+      entityId: member.user_id,
+      metadata: { targetName: member.user.display_name, targetDiscriminator: member.user.discriminator },
+    })
   }
 
   async listMembers(): Promise<ClanMemberView[]> {
@@ -171,7 +183,10 @@ export class ClansService {
   }
 
   async assignRole(memberId: string, roleId: string): Promise<ClanMemberView> {
-    const member = await this.prisma.clanMember.findFirst({ where: { id: memberId, left_at: null }, include: { user: { select: { display_name: true, discriminator: true } } } })
+    const member = await this.prisma.clanMember.findFirst({
+      where: { id: memberId, left_at: null },
+      include: { user: { select: { display_name: true, discriminator: true } } },
+    })
     if (!member) throw clanErrors.memberNotFound()
     const role = await this.prisma.clanRoleDef.findFirst({ where: { id: roleId } })
     if (!role) throw clanErrors.roleNotFound()
@@ -179,7 +194,13 @@ export class ClansService {
     if (!this.permissions.canManageRole(role.position)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.clanMemberRole.createMany({ data: [{ member_id: memberId, role_id: roleId }], skipDuplicates: true })
     await this.notifyRoleChange(member.user_id, role.clan_id, role.name, 'assigned')
-    await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_ASSIGNED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { roleId, roleName: role.name, targetName: member.user.display_name, targetDiscriminator: member.user.discriminator } })
+    await this.audit.write({
+      clanId: role.clan_id,
+      action: AuditAction.ROLE_ASSIGNED,
+      entityType: AuditEntity.MEMBER,
+      entityId: member.user_id,
+      metadata: { roleId, roleName: role.name, targetName: member.user.display_name, targetDiscriminator: member.user.discriminator },
+    })
     return this.memberView(memberId)
   }
 
@@ -192,7 +213,13 @@ export class ClansService {
       const member = await this.prisma.clanMember.findFirst({ where: { id: memberId }, include: { user: { select: { display_name: true, discriminator: true } } } })
       if (member) {
         await this.notifyRoleChange(member.user_id, role.clan_id, role.name, 'removed')
-        await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_REMOVED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { roleId, roleName: role.name, targetName: member.user.display_name, targetDiscriminator: member.user.discriminator } })
+        await this.audit.write({
+          clanId: role.clan_id,
+          action: AuditAction.ROLE_REMOVED,
+          entityType: AuditEntity.MEMBER,
+          entityId: member.user_id,
+          metadata: { roleId, roleName: role.name, targetName: member.user.display_name, targetDiscriminator: member.user.discriminator },
+        })
       }
     }
     return this.memberView(memberId)
@@ -257,7 +284,13 @@ export class ClansService {
     if (input.name !== undefined) data.name = input.name
     if (input.color !== undefined) data.color = input.color
     await this.prisma.clanRoleDef.updateMany({ where: { id: roleId }, data })
-    await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_UPDATED, entityType: AuditEntity.ROLE, entityId: roleId, metadata: { fields: Object.keys(data) } })
+    await this.audit.write({
+      clanId: role.clan_id,
+      action: AuditAction.ROLE_UPDATED,
+      entityType: AuditEntity.ROLE,
+      entityId: roleId,
+      metadata: { fields: Object.keys(data) },
+    })
     return this.roleDetail(roleId)
   }
 
@@ -283,7 +316,8 @@ export class ClansService {
     if (!locked.every((id, i) => orderedIds[i] === id)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.$transaction(this.reseatOps(orderedIds, ownerRoleId(roles)))
     const reorderClanId = roles[0]?.clan_id
-    if (reorderClanId) await this.audit.write({ clanId: reorderClanId, action: AuditAction.ROLE_REORDERED, entityType: AuditEntity.ROLE, entityId: null, metadata: { order: orderedIds } })
+    if (reorderClanId)
+      await this.audit.write({ clanId: reorderClanId, action: AuditAction.ROLE_REORDERED, entityType: AuditEntity.ROLE, entityId: null, metadata: { order: orderedIds } })
     return this.listRoles()
   }
 
@@ -303,7 +337,13 @@ export class ClansService {
     }
     await this.prisma.clanRoleGrant.deleteMany({ where: { role_id: roleId } })
     if (rows.length) await this.prisma.clanRoleGrant.createMany({ data: rows })
-    await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_GRANTS_SET, entityType: AuditEntity.ROLE, entityId: roleId, metadata: { grantCount: rows.length } })
+    await this.audit.write({
+      clanId: role.clan_id,
+      action: AuditAction.ROLE_GRANTS_SET,
+      entityType: AuditEntity.ROLE,
+      entityId: roleId,
+      metadata: { grantCount: rows.length },
+    })
     return this.roleDetail(roleId)
   }
 
