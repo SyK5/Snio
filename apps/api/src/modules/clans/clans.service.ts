@@ -213,7 +213,7 @@ export class ClansService {
 
   async listRoles(): Promise<ClanRoleDetail[]> {
     const roles = await this.prisma.clanRoleDef.findMany({ include: ROLE_INCLUDE, orderBy: { position: 'desc' } })
-    return roles.map(toRoleDetail)
+    return roles.map(r => toRoleDetail(r, this.isManageable(r)))
   }
 
   async createRole(clanId: string, input: CreateRoleInput): Promise<ClanRoleDetail> {
@@ -310,7 +310,11 @@ export class ClansService {
   private async roleDetail(roleId: string): Promise<ClanRoleDetail> {
     const role = await this.prisma.clanRoleDef.findFirst({ where: { id: roleId }, include: ROLE_INCLUDE })
     if (!role) throw clanErrors.roleNotFound()
-    return toRoleDetail(role)
+    return toRoleDetail(role, this.isManageable(role))
+  }
+
+  private isManageable(role: { key: string; position: number }): boolean {
+    return role.key !== 'owner' && this.permissions.can('clan_role', Action.MANAGE) && this.permissions.canManageRole(role.position)
   }
 
   private reseatOps(orderedSortableIds: string[], ownerId: string | undefined) {
@@ -415,7 +419,7 @@ export class ClansService {
 
   private async toMemberView(m: MemberWithRelations): Promise<ClanMemberView> {
     const roles = m.roles
-      .map(r => ({ id: r.role.id, key: r.role.key, name: r.role.name, color: r.role.color, position: r.role.position }))
+      .map(r => ({ id: r.role.id, key: r.role.key, name: r.role.name, color: r.role.color, position: r.role.position, manageable: this.isManageable(r.role) }))
       .sort((a, b) => b.position - a.position)
     return {
       id: m.id,
@@ -456,7 +460,7 @@ function ownerRoleId(roles: { id: string; key: string }[]): string | undefined {
   return roles.find(r => r.key === 'owner')?.id
 }
 
-function toRoleDetail(role: RoleWithGrants): ClanRoleDetail {
+function toRoleDetail(role: RoleWithGrants, manageable: boolean): ClanRoleDetail {
   return {
     id: role.id,
     key: role.key,
@@ -464,6 +468,7 @@ function toRoleDetail(role: RoleWithGrants): ClanRoleDetail {
     color: role.color,
     position: role.position,
     isSystem: role.is_system,
+    manageable,
     grants: role.grants.map(g => ({ grant: g.grant, actions: g.actions })),
   }
 }

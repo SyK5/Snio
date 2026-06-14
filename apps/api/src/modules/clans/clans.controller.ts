@@ -104,14 +104,14 @@ export class ClansController {
 
   @Post(':clanId/members/:memberId/roles')
   @UseGuards(ClanContextGuard, PermissionGuard)
-  @RequireGrant('clan_member', Action.MANAGE)
+  @RequireGrant('clan_role', Action.MANAGE)
   assignRole(@Param('memberId') memberId: string, @Body(new ZodValidationPipe(assignRoleSchema)) dto: AssignRoleInput): Promise<ClanMemberView> {
     return this.clans.assignRole(memberId, dto.roleId)
   }
 
   @Delete(':clanId/members/:memberId/roles/:roleId')
   @UseGuards(ClanContextGuard, PermissionGuard)
-  @RequireGrant('clan_member', Action.MANAGE)
+  @RequireGrant('clan_role', Action.MANAGE)
   removeRole(@Param('memberId') memberId: string, @Param('roleId') roleId: string): Promise<ClanMemberView> {
     return this.clans.removeRole(memberId, roleId)
   }

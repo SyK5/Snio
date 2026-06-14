@@ -78,6 +78,7 @@ export interface ClanRoleView {
   name: string
   color: string | null
   position: number
+  manageable: boolean
 }
 
 export interface ClanSummary {
@@ -126,6 +127,7 @@ export interface ClanRoleDetail {
   color: string | null
   position: number
   isSystem: boolean
+  manageable: boolean
   grants: ClanRoleGrantView[]
 }
 
