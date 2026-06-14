@@ -3,6 +3,7 @@ import { z } from 'zod'
 export const auditLogQuerySchema = z.object({
   cursor: z.string().optional(),
   limit: z.coerce.number().int().min(1).max(100).default(50),
+  category: z.enum(['clan', 'member', 'role', 'invite']).optional(),
 })
 
 export type AuditLogQuery = z.infer<typeof auditLogQuerySchema>

@@ -20,6 +20,6 @@ export class AuditController {
   @Get()
   @RequireGrant('audit_log', Action.READ)
   list(@Param('clanId') clanId: string, @Query(new ZodValidationPipe(auditLogQuerySchema)) query: AuditLogQuery): Promise<AuditLogPage> {
-    return this.audit.list(clanId, query.cursor, query.limit)
+    return this.audit.list(clanId, query.cursor, query.limit, query.category)
   }
 }

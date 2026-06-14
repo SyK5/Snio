@@ -41,10 +41,10 @@ export class AuditService {
     }
   }
 
-  async list(clanId: string, cursor: string | undefined, limit: number): Promise<AuditLogPage> {
+  async list(clanId: string, cursor: string | undefined, limit: number, category?: string): Promise<AuditLogPage> {
     return runSystem(async () => {
       const rows = await this.prisma.auditLog.findMany({
-        where: { clan_id: clanId },
+        where: { clan_id: clanId, ...(category ? { action: { startsWith: `${category}.` } } : {}) },
         include: { actor: { select: ACTOR_SELECT } },
         orderBy: { created_at: 'desc' },
         take: limit + 1,
