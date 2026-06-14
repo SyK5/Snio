@@ -103,7 +103,9 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
         bodyClassName="p-0"
         paused={rolesOpen || settingsOpen || invitesOpen || auditOpen}
       >
-        {tab === 'members' && <MembersTab clanId={clan.id} canManageRoles={canManageRoles} canManageMembers={canManage} isLoading={isLoading} description={data?.description ?? null} />}
+        {tab === 'members' && (
+          <MembersTab clanId={clan.id} canManageRoles={canManageRoles} canManageMembers={canManage} isLoading={isLoading} description={data?.description ?? null} />
+        )}
         {tab === 'chat' && <ComingSoon icon={faComments} />}
         {tab === 'events' && <ComingSoon icon={faCalendarDays} />}
         {tab === 'leagues' && <ComingSoon icon={faTrophy} />}
@@ -128,7 +130,19 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
   )
 }
 
-function MembersTab({ clanId, canManageRoles, canManageMembers, isLoading, description }: { clanId: string; canManageRoles: boolean; canManageMembers: boolean; isLoading: boolean; description: string | null }) {
+function MembersTab({
+  clanId,
+  canManageRoles,
+  canManageMembers,
+  isLoading,
+  description,
+}: {
+  clanId: string
+  canManageRoles: boolean
+  canManageMembers: boolean
+  isLoading: boolean
+  description: string | null
+}) {
   const { data: members, isLoading: loadingMembers } = useClanMembers(clanId)
   const { data: roles, isLoading: loadingRoles } = useClanRoles(clanId, canManageRoles)
   const loading = isLoading || loadingMembers || loadingRoles
