@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { faClockRotateLeft } from '@fortawesome/free-solid-svg-icons'
-import { PagedModal } from '@/components/ui/paged-modal'
+import { PagedModal, type PagedModalTab } from '@/components/ui/paged-modal'
 import { getLocale } from '@/i18n/paraglide/runtime'
 import { m } from '@/i18n/paraglide/messages'
 import { useAuditLog } from './audit.hooks'
@@ -13,11 +14,31 @@ interface Props {
 }
 
 export function AuditLogModal({ clanId, open, onClose }: Props) {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useAuditLog(clanId, open)
+  const [category, setCategory] = useState('all')
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useAuditLog(clanId, open, category === 'all' ? undefined : category)
   const items = data?.pages.flatMap(p => p.items) ?? []
 
+  const tabs: PagedModalTab[] = [
+    { key: 'all', label: m.audit_filter_all() },
+    { key: 'role', label: m.audit_filter_roles() },
+    { key: 'member', label: m.audit_filter_members() },
+    { key: 'clan', label: m.audit_filter_clan() },
+    { key: 'invite', label: m.audit_filter_invites() },
+  ]
+
   return (
-    <PagedModal open={open} onClose={onClose} icon={faClockRotateLeft} title={m.audit_title()} subtitle={m.audit_subtitle()} size="lg" bodyClassName="p-0">
+    <PagedModal
+      open={open}
+      onClose={onClose}
+      icon={faClockRotateLeft}
+      title={m.audit_title()}
+      subtitle={m.audit_subtitle()}
+      size="lg"
+      bodyClassName="p-0"
+      tabs={tabs}
+      activeTab={category}
+      onTabChange={setCategory}
+    >
       <div className="max-h-[60vh] overflow-y-auto">
         {isLoading && <p className="px-6 py-10 text-center text-sm text-muted-foreground">{m.clan_loading()}</p>}
         {!isLoading && items.length === 0 && <p className="px-6 py-16 text-center text-sm text-muted-foreground">{m.audit_empty()}</p>}
