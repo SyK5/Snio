@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { currentStore } from '../context/request-context'
-import { Action, ALL_ACTIONS, hasAction } from './actions'
+import { Action, ALL_ACTIONS, expand, hasAction } from './actions'
 
 @Injectable()
 export class PermissionService {
@@ -29,6 +29,6 @@ export class PermissionService {
     const store = currentStore()
     if (!store) return 0
     if (store.system || store.isPlatformAdmin || store.isClanOwner) return ALL_ACTIONS
-    return store.grants?.[grant] ?? 0
+    return expand(store.grants?.[grant] ?? 0)
   }
 }

@@ -10,8 +10,12 @@ export const ALL_ACTIONS = Action.READ | Action.CREATE | Action.UPDATE | Action.
 
 const ORDERED: Action[] = [Action.READ, Action.CREATE, Action.UPDATE, Action.DELETE, Action.MANAGE]
 
+export function expand(mask: number): number {
+  return (mask & Action.MANAGE) === Action.MANAGE ? ALL_ACTIONS : mask
+}
+
 export function hasAction(mask: number, action: Action): boolean {
-  return (mask & action) === action
+  return (expand(mask) & action) === action
 }
 
 export function combine(...masks: number[]): number {
