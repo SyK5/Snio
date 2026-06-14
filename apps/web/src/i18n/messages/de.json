@@ -265,9 +265,9 @@
   "audit_clan_deleted": "hat den Clan gelöscht",
   "audit_member_joined": "ist beigetreten",
   "audit_member_left": "hat den Clan verlassen",
-  "audit_member_kicked": "hat ein Mitglied entfernt",
-  "audit_role_assigned": "hat die Rolle {role} zugewiesen",
-  "audit_role_removed": "hat die Rolle {role} entfernt",
+  "audit_member_kicked": "hat {target} entfernt",
+  "audit_role_assigned": "hat {target} die Rolle {role} zugewiesen",
+  "audit_role_removed": "hat {target} die Rolle {role} entfernt",
   "audit_role_created": "hat die Rolle {role} erstellt",
   "audit_role_updated": "hat eine Rolle bearbeitet",
   "audit_role_deleted": "hat die Rolle {role} gelöscht",
@@ -275,5 +275,10 @@
   "audit_role_grants_set": "hat die Rechte einer Rolle angepasst",
   "audit_invite_created": "hat eine Einladung erstellt",
   "audit_invite_revoked": "hat eine Einladung zurückgezogen",
-  "audit_invite_redeemed": "hat eine Einladung eingelöst"
+  "audit_invite_redeemed": "hat eine Einladung eingelöst",
+  "audit_filter_all": "Alle",
+  "audit_filter_roles": "Rollen",
+  "audit_filter_members": "Mitglieder",
+  "audit_filter_clan": "Clan",
+  "audit_filter_invites": "Einladungen"
 }

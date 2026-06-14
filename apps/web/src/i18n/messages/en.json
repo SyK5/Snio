@@ -265,9 +265,9 @@
   "audit_clan_deleted": "deleted the clan",
   "audit_member_joined": "joined",
   "audit_member_left": "left the clan",
-  "audit_member_kicked": "removed a member",
-  "audit_role_assigned": "assigned the role {role}",
-  "audit_role_removed": "removed the role {role}",
+  "audit_member_kicked": "removed {target}",
+  "audit_role_assigned": "assigned {target} the role {role}",
+  "audit_role_removed": "removed the role {role} from {target}",
   "audit_role_created": "created the role {role}",
   "audit_role_updated": "edited a role",
   "audit_role_deleted": "deleted the role {role}",
@@ -275,5 +275,10 @@
   "audit_role_grants_set": "adjusted a role's permissions",
   "audit_invite_created": "created an invite",
   "audit_invite_revoked": "revoked an invite",
-  "audit_invite_redeemed": "redeemed an invite"
+  "audit_invite_redeemed": "redeemed an invite",
+  "audit_filter_all": "All",
+  "audit_filter_roles": "Roles",
+  "audit_filter_members": "Members",
+  "audit_filter_clan": "Clan",
+  "audit_filter_invites": "Invites"
 }

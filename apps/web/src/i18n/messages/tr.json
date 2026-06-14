@@ -265,9 +265,9 @@
   "audit_clan_deleted": "klanı sildi",
   "audit_member_joined": "katıldı",
   "audit_member_left": "klandan ayrıldı",
-  "audit_member_kicked": "bir üyeyi çıkardı",
-  "audit_role_assigned": "{role} rolünü atadı",
-  "audit_role_removed": "{role} rolünü kaldırdı",
+  "audit_member_kicked": "{target} kullanıcısını çıkardı",
+  "audit_role_assigned": "{target} kullanıcısına {role} rolünü atadı",
+  "audit_role_removed": "{target} kullanıcısından {role} rolünü kaldırdı",
   "audit_role_created": "{role} rolünü oluşturdu",
   "audit_role_updated": "bir rolü düzenledi",
   "audit_role_deleted": "{role} rolünü sildi",
@@ -275,5 +275,10 @@
   "audit_role_grants_set": "bir rolün yetkilerini ayarladı",
   "audit_invite_created": "bir davet oluşturdu",
   "audit_invite_revoked": "bir daveti geri çekti",
-  "audit_invite_redeemed": "bir daveti kullandı"
+  "audit_invite_redeemed": "bir daveti kullandı",
+  "audit_filter_all": "Tümü",
+  "audit_filter_roles": "Roller",
+  "audit_filter_members": "Üyeler",
+  "audit_filter_clan": "Klan",
+  "audit_filter_invites": "Davetler"
 }

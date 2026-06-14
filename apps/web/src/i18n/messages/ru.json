@@ -265,9 +265,9 @@
   "audit_clan_deleted": "удалил клан",
   "audit_member_joined": "присоединился",
   "audit_member_left": "покинул клан",
-  "audit_member_kicked": "удалил участника",
-  "audit_role_assigned": "назначил роль {role}",
-  "audit_role_removed": "снял роль {role}",
+  "audit_member_kicked": "удалил участника {target}",
+  "audit_role_assigned": "назначил роль {role} участнику {target}",
+  "audit_role_removed": "снял роль {role} с участника {target}",
   "audit_role_created": "создал роль {role}",
   "audit_role_updated": "изменил роль",
   "audit_role_deleted": "удалил роль {role}",
@@ -275,5 +275,10 @@
   "audit_role_grants_set": "настроил права роли",
   "audit_invite_created": "создал приглашение",
   "audit_invite_revoked": "отозвал приглашение",
-  "audit_invite_redeemed": "использовал приглашение"
+  "audit_invite_redeemed": "использовал приглашение",
+  "audit_filter_all": "Все",
+  "audit_filter_roles": "Роли",
+  "audit_filter_members": "Участники",
+  "audit_filter_clan": "Клан",
+  "audit_filter_invites": "Приглашения"
 }
