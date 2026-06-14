@@ -9,7 +9,7 @@ import { useDismiss } from '@/hooks/use-dismiss'
 import { m } from '@/i18n/paraglide/messages'
 import type { ClanMemberView, ClanRoleView } from './clan.types'
 
-export function MemberRow({ clanId, member, roles, canManage }: { clanId: string; member: ClanMemberView; roles: ClanRoleView[]; canManage: boolean }) {
+export function MemberRow({ clanId, member, roles, canManageMembers }: { clanId: string; member: ClanMemberView; roles: ClanRoleView[]; canManageMembers: boolean }) {
   const [picking, setPicking] = useState(false)
   const pickerRef = useRef<HTMLDivElement>(null)
   const assign = useAssignRole(clanId)
@@ -18,7 +18,7 @@ export function MemberRow({ clanId, member, roles, canManage }: { clanId: string
   useDismiss(pickerRef, picking, () => setPicking(false))
 
   const assigned = new Set(member.roles.map(r => r.id))
-  const assignable = roles.filter(r => !assigned.has(r.id) && r.key !== 'owner')
+  const assignable = roles.filter(r => !assigned.has(r.id) && r.manageable)
 
   const onRemoveRole = (roleId: string) => remove.mutate({ memberId: member.id, roleId }, { onError: err => toast.error(resolveClanError(err)) })
   const onAssign = (roleId: string) => {
@@ -38,22 +38,24 @@ export function MemberRow({ clanId, member, roles, canManage }: { clanId: string
         {member.roles.length > 0 && (
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
             {member.roles.map(role => (
-              <RoleBadge key={role.id} role={role} removable={canManage && role.key !== 'owner'} onRemove={() => onRemoveRole(role.id)} />
+              <RoleBadge key={role.id} role={role} removable={role.manageable} onRemove={() => onRemoveRole(role.id)} />
             ))}
           </div>
         )}
       </div>
 
-      {canManage && (
+      {(assignable.length > 0 || canManageMembers) && (
         <div ref={pickerRef} className="relative flex shrink-0 items-center gap-2">
           {assignable.length > 0 && (
             <Button size="sm" variant="ghost" onClick={() => setPicking(v => !v)}>
               {m.clan_role_add()}
             </Button>
           )}
-          <Button size="sm" variant="danger" onClick={onKick} loading={kick.isPending}>
-            {m.clan_member_kick()}
-          </Button>
+          {canManageMembers && (
+            <Button size="sm" variant="danger" onClick={onKick} loading={kick.isPending}>
+              {m.clan_member_kick()}
+            </Button>
+          )}
           {picking && (
             <Card padding="none" className="absolute right-0 top-10 z-20 w-48 p-1.5 shadow-2xl">
               {assignable.map(role => (

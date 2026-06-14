@@ -10,10 +10,10 @@ import { RoleManagerModal } from './role-manager-modal'
 import { ClanSettingsModal } from './clan-settings-modal'
 import { InviteManagerModal } from './invite-manager-modal'
 import { AuditLogModal } from './audit-log-modal'
-import { useClan, useClanMembers, useJoinClan, useLeaveClan } from './clan.hooks'
+import { useClan, useClanMembers, useClanRoles, useJoinClan, useLeaveClan } from './clan.hooks'
 import { resolveClanError } from './clan.errors'
 import { m } from '@/i18n/paraglide/messages'
-import type { ClanRoleView, ClanSummary } from './clan.types'
+import type { ClanSummary } from './clan.types'
 
 interface Props {
   clan: ClanSummary
@@ -103,7 +103,7 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
         bodyClassName="p-0"
         paused={rolesOpen || settingsOpen || invitesOpen || auditOpen}
       >
-        {tab === 'members' && <MembersTab clanId={clan.id} canManage={canManage} isLoading={isLoading} description={data?.description ?? null} />}
+        {tab === 'members' && <MembersTab clanId={clan.id} canManageRoles={canManageRoles} canManageMembers={canManage} isLoading={isLoading} description={data?.description ?? null} />}
         {tab === 'chat' && <ComingSoon icon={faComments} />}
         {tab === 'events' && <ComingSoon icon={faCalendarDays} />}
         {tab === 'leagues' && <ComingSoon icon={faTrophy} />}
@@ -128,10 +128,10 @@ export function ClanDetailModal({ clan, open, onClose }: Props) {
   )
 }
 
-function MembersTab({ clanId, canManage, isLoading, description }: { clanId: string; canManage: boolean; isLoading: boolean; description: string | null }) {
+function MembersTab({ clanId, canManageRoles, canManageMembers, isLoading, description }: { clanId: string; canManageRoles: boolean; canManageMembers: boolean; isLoading: boolean; description: string | null }) {
   const { data: members, isLoading: loadingMembers } = useClanMembers(clanId)
-  const roles = deriveRoles(members)
-  const loading = isLoading || loadingMembers
+  const { data: roles, isLoading: loadingRoles } = useClanRoles(clanId, canManageRoles)
+  const loading = isLoading || loadingMembers || loadingRoles
 
   return (
     <div className="flex flex-col">
@@ -145,7 +145,7 @@ function MembersTab({ clanId, canManage, isLoading, description }: { clanId: str
         {!loading && (
           <div className="divide-y divide-border">
             {members?.map(member => (
-              <MemberRow key={member.id} clanId={clanId} member={member} roles={roles} canManage={canManage} />
+              <MemberRow key={member.id} clanId={clanId} member={member} roles={roles ?? []} canManageMembers={canManageMembers} />
             ))}
           </div>
         )}
@@ -180,10 +180,4 @@ function LoadingRows() {
       ))}
     </div>
   )
-}
-
-function deriveRoles(members: { roles: ClanRoleView[] }[] | undefined): ClanRoleView[] {
-  const map = new Map<string, ClanRoleView>()
-  for (const member of members ?? []) for (const role of member.roles) map.set(role.id, role)
-  return [...map.values()].sort((a, b) => b.position - a.position)
 }

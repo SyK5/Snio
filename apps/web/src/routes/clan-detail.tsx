@@ -3,10 +3,10 @@ import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MemberRow } from '@/features/clan/member-row'
-import { useClan, useClanMembers, useDeleteClan, useLeaveClan } from '@/features/clan/clan.hooks'
+import { useClan, useClanMembers, useClanRoles, useDeleteClan, useLeaveClan } from '@/features/clan/clan.hooks'
 import { resolveClanError } from '@/features/clan/clan.errors'
 import { m } from '@/i18n/paraglide/messages'
-import type { ClanDetail, ClanRoleView } from '@/features/clan/clan.types'
+import type { ClanDetail } from '@/features/clan/clan.types'
 
 export function ClanDetailPage() {
   const { clanId = '' } = useParams()
@@ -65,8 +65,9 @@ function Header({ clan }: { clan: ClanDetail }) {
 
 function MembersSection({ clanId, clan }: { clanId: string; clan: ClanDetail }) {
   const { data: members, isLoading } = useClanMembers(clanId)
-  const canManage = clan.canManageMembers
-  const roles = deriveRoles(members)
+  const canManageRoles = clan.canManageRoles
+  const canManageMembers = clan.canManageMembers
+  const { data: roles } = useClanRoles(clanId, canManageRoles)
 
   return (
     <Card>
@@ -74,17 +75,11 @@ function MembersSection({ clanId, clan }: { clanId: string; clan: ClanDetail }) 
       {isLoading && <p className="text-sm text-muted-foreground">{m.clan_loading()}</p>}
       <div className="divide-y divide-border">
         {members?.map(member => (
-          <MemberRow key={member.id} clanId={clanId} member={member} roles={roles} canManage={canManage} />
+          <MemberRow key={member.id} clanId={clanId} member={member} roles={roles ?? []} canManageMembers={canManageMembers} />
         ))}
       </div>
     </Card>
   )
-}
-
-function deriveRoles(members: { roles: ClanRoleView[] }[] | undefined): ClanRoleView[] {
-  const map = new Map<string, ClanRoleView>()
-  for (const member of members ?? []) for (const role of member.roles) map.set(role.id, role)
-  return [...map.values()].sort((a, b) => b.position - a.position)
 }
 
 function Logo({ url, tag }: { url: string | null; tag: string }) {

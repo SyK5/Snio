@@ -4,6 +4,7 @@ export interface ClanRoleView {
   name: string
   color: string | null
   position: number
+  manageable: boolean
 }
 
 export type JoinPolicy = 'OPEN' | 'INVITE_ONLY' | 'CLOSED'
@@ -71,6 +72,7 @@ export interface ClanRoleDetail {
   color: string | null
   position: number
   isSystem: boolean
+  manageable: boolean
   grants: ClanRoleGrantView[]
 }
 

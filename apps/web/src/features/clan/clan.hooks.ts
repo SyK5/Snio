@@ -129,8 +129,8 @@ export function useRoleTemplates() {
   return useQuery({ queryKey: roleTemplatesKey, queryFn: () => clanApi.roleTemplates(), staleTime: Infinity })
 }
 
-export function useClanRoles(clanId: string) {
-  return useQuery({ queryKey: rolesKey(clanId), queryFn: () => clanApi.listRoles(clanId), enabled: !!clanId })
+export function useClanRoles(clanId: string, enabled = true) {
+  return useQuery({ queryKey: rolesKey(clanId), queryFn: () => clanApi.listRoles(clanId), enabled: enabled && !!clanId })
 }
 
 export function useCreateRole(clanId: string) {
