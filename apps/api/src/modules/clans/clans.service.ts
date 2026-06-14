@@ -154,7 +154,7 @@ export class ClansService {
   async kick(clanId: string, memberId: string): Promise<void> {
     const member = await this.prisma.clanMember.findFirst({
       where: { id: memberId, left_at: null },
-      include: { roles: { select: { role: { select: { position: true } } } } },
+      include: { roles: { select: { role: { select: { position: true } } } }, user: { select: { display_name: true, discriminator: true } } },
     })
     if (!member) throw clanErrors.memberNotFound()
     const clan = await this.prisma.clan.findFirst({ where: { id: clanId } })
@@ -162,7 +162,7 @@ export class ClansService {
     if (!this.permissions.canManageRole(highestPosition(member.roles))) throw clanErrors.targetRoleTooHigh()
     await this.deactivateMember(memberId)
     await this.notifications.emit(member.user_id, 'CLAN_KICKED', { clanId, clanName: clan?.name ?? '', clanTag: clan?.tag ?? '' })
-    await this.audit.write({ clanId, action: AuditAction.MEMBER_KICKED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { memberId } })
+    await this.audit.write({ clanId, action: AuditAction.MEMBER_KICKED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { targetName: member.user.display_name, targetDiscriminator: member.user.discriminator } })
   }
 
   async listMembers(): Promise<ClanMemberView[]> {
@@ -171,7 +171,7 @@ export class ClansService {
   }
 
   async assignRole(memberId: string, roleId: string): Promise<ClanMemberView> {
-    const member = await this.prisma.clanMember.findFirst({ where: { id: memberId, left_at: null } })
+    const member = await this.prisma.clanMember.findFirst({ where: { id: memberId, left_at: null }, include: { user: { select: { display_name: true, discriminator: true } } } })
     if (!member) throw clanErrors.memberNotFound()
     const role = await this.prisma.clanRoleDef.findFirst({ where: { id: roleId } })
     if (!role) throw clanErrors.roleNotFound()
@@ -179,7 +179,7 @@ export class ClansService {
     if (!this.permissions.canManageRole(role.position)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.clanMemberRole.createMany({ data: [{ member_id: memberId, role_id: roleId }], skipDuplicates: true })
     await this.notifyRoleChange(member.user_id, role.clan_id, role.name, 'assigned')
-    await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_ASSIGNED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { roleId, roleName: role.name } })
+    await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_ASSIGNED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { roleId, roleName: role.name, targetName: member.user.display_name, targetDiscriminator: member.user.discriminator } })
     return this.memberView(memberId)
   }
 
@@ -189,11 +189,10 @@ export class ClansService {
     if (role && !this.permissions.canManageRole(role.position)) throw clanErrors.roleAboveOwnPosition()
     await this.prisma.clanMemberRole.deleteMany({ where: { member_id: memberId, role_id: roleId } })
     if (role) {
-      await runSystem(() => this.ensureMembersHaveRole(role.clan_id))
-      const member = await this.prisma.clanMember.findFirst({ where: { id: memberId } })
+      const member = await this.prisma.clanMember.findFirst({ where: { id: memberId }, include: { user: { select: { display_name: true, discriminator: true } } } })
       if (member) {
         await this.notifyRoleChange(member.user_id, role.clan_id, role.name, 'removed')
-        await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_REMOVED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { roleId, roleName: role.name } })
+        await this.audit.write({ clanId: role.clan_id, action: AuditAction.ROLE_REMOVED, entityType: AuditEntity.MEMBER, entityId: member.user_id, metadata: { roleId, roleName: role.name, targetName: member.user.display_name, targetDiscriminator: member.user.discriminator } })
       }
     }
     return this.memberView(memberId)
