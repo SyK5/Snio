@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 import { RLS_PRISMA, RlsPrismaClient } from '../../common/prisma/prisma.extended'
-import { currentStore, runSystem } from '../../common/context/request-context'
+import { currentStore, requestContext, runSystem } from '../../common/context/request-context'
 import { AuditActionKey, AuditEntityType } from './audit-actions'
 import { AuditLogPage, AuditLogView } from './audit.dto'
 
@@ -22,9 +22,9 @@ export class AuditService {
   constructor(@Inject(RLS_PRISMA) private readonly prisma: RlsPrismaClient) {}
 
   async write(input: WriteInput): Promise<void> {
-    try {
-      const actorId = currentStore()?.userId ?? null
-      await runSystem(() =>
+    const actorId = currentStore()?.userId ?? null
+    void requestContext
+      .run({ requestId: 'audit', system: true }, () =>
         this.prisma.auditLog.create({
           data: {
             clan_id: input.clanId,
@@ -36,9 +36,7 @@ export class AuditService {
           },
         }),
       )
-    } catch {
-      this.logger.warn(`audit write failed: ${input.action} @ ${input.clanId}`)
-    }
+      .catch(() => this.logger.warn(`audit write failed: ${input.action} @ ${input.clanId}`))
   }
 
   async list(clanId: string, cursor: string | undefined, limit: number, category?: string): Promise<AuditLogPage> {
