@@ -40,6 +40,33 @@ async function buildWhere(base: PrismaClient, store: RequestStore, scope: ModelS
   return nest((scope.field as string).split('.'), value)
 }
 
+async function ownedOrgIds(base: PrismaClient, store: RequestStore): Promise<string[]> {
+  if (store.ownedOrgIds) return store.ownedOrgIds
+  if (!store.userId) return []
+  const rows = await base.organization.findMany({ where: { owner_id: store.userId, deleted_at: null }, select: { id: true } })
+  store.ownedOrgIds = rows.map(r => r.id)
+  return store.ownedOrgIds
+}
+
+const CONDITIONAL_FRAGMENTS: Record<string, (base: PrismaClient, store: RequestStore) => Promise<Record<string, unknown>[]>> = {
+  Event: async (base, store) => {
+    const out: Record<string, unknown>[] = []
+    const clans = await clanIds(base, store)
+    if (clans.length) out.push({ clan_id: { in: clans } })
+    const orgs = await ownedOrgIds(base, store)
+    if (orgs.length) out.push({ organization_id: { in: orgs } })
+    return out
+  },
+}
+
+async function conditionalWhere(base: PrismaClient, store: RequestStore, model: string): Promise<Record<string, unknown>> {
+  const build = CONDITIONAL_FRAGMENTS[model]
+  if (!build) throw new ForbiddenException(`RLS: kein conditional Resolver für ${model}`)
+  const fragments = await build(base, store)
+  if (!fragments.length) return { id: { in: [] } }
+  return { OR: fragments }
+}
+
 function validateCreate(model: string, scope: ModelScope, store: RequestStore, args: { data?: unknown }): void {
   const field = scope.scope === 'self' ? 'user_id' : scope.field === 'clan_id' ? 'clan_id' : null
   if (!field) return
@@ -86,7 +113,7 @@ export function rlsExtension(base: PrismaClient, onCtxMutation?: (clanId: string
           if (BLOCKED_OPS.has(operation)) throw new ForbiddenException(`RLS: ${operation} auf ${model} nicht erlaubt, nutze updateMany/deleteMany`)
 
           if (WHERE_OPS.has(operation)) {
-            const where = await buildWhere(base, store, scope)
+            const where = scope.scope === 'conditional' ? await conditionalWhere(base, store, model) : await buildWhere(base, store, scope)
             a.where = a.where ? { AND: [a.where, where] } : where
             const result = await query(a)
             await bumpCtx(store, model, operation)
@@ -94,6 +121,7 @@ export function rlsExtension(base: PrismaClient, onCtxMutation?: (clanId: string
           }
 
           if (VERIFY_OPS.has(operation)) {
+            if (scope.scope === 'conditional') throw new ForbiddenException(`RLS: ${operation} auf ${model} nicht erlaubt, nutze findFirst`)
             const field = scopeField(scope)
             if (field.includes('.')) throw new ForbiddenException(`RLS: ${operation} auf ${model} nicht erlaubt, nutze findFirst`)
             const result = (await query(args)) as Record<string, unknown> | null

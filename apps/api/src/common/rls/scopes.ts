@@ -1,4 +1,4 @@
-export type RlsScope = 'context-free' | 'clan' | 'self' | 'deferred'
+export type RlsScope = 'context-free' | 'clan' | 'self' | 'conditional' | 'deferred'
 
 export interface ModelScope {
   scope: RlsScope
@@ -12,6 +12,7 @@ export const MODEL_SCOPES: Record<string, ModelScope> = {
   EmailVerificationToken: { scope: 'context-free' },
   PasswordResetToken: { scope: 'context-free' },
   Game: { scope: 'context-free' },
+  Organization: { scope: 'context-free' },
 
   Clan: { scope: 'clan', field: 'id' },
   ClanMember: { scope: 'clan', field: 'clan_id' },
@@ -20,7 +21,7 @@ export const MODEL_SCOPES: Record<string, ModelScope> = {
   ClanMemberRole: { scope: 'clan', field: 'member.clan_id' },
   ClanInvite: { scope: 'clan', field: 'clan_id' },
   ClanGame: { scope: 'clan', field: 'clan_id' },
-  Event: { scope: 'clan', field: 'clan_id' },
+  Event: { scope: 'conditional' },
   EventParticipation: { scope: 'clan', field: 'event.clan_id' },
   Training: { scope: 'clan', field: 'clan_id' },
   TrainingParticipation: { scope: 'clan', field: 'training.clan_id' },
