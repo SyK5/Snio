@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { LoggerModule } from 'nestjs-pino'
 import { AppController } from './app.controller'
 import { PrismaModule } from './common/prisma/prisma.module'
+import { RedisModule } from './common/redis/redis.module'
 import { RlsModule } from './common/rls/rls.module'
 import { MailModule } from './common/mail/mail.module'
 import { RequestContextMiddleware } from './common/context/request-context.middleware'
@@ -26,6 +27,7 @@ import { AuditModule } from './modules/audit/audit.module'
         redact: { paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'], remove: true },
       },
     }),
+    RedisModule,
     PrismaModule,
     RlsModule,
     S3Module,

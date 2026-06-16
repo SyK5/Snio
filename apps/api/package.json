@@ -34,6 +34,7 @@
     "@react-email/render": "^2.0.8",
     "argon2": "^0.44.0",
     "cookie-parser": "^1.4.7",
+    "ioredis": "^5.11.1",
     "nestjs-pino": "^4.4.0",
     "pino": "^9.5.0",
     "pino-http": "^10.4.0",
