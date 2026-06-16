@@ -12,9 +12,11 @@ import { ClansPage } from '@/routes/clans'
 import { ClanDetailPage } from '@/routes/clan-detail'
 import { InvitePage } from '@/routes/invite'
 import { AppLayout } from '@/components/layout/app-layout'
+import { RequireAuth } from '@/components/auth/require-auth'
 import { useAuthBootstrap } from '@/features/auth/use-auth-bootstrap'
 import { applyTheme, useThemeStore } from '@/features/theme/theme.store'
 import { useLocaleStore } from '@/features/i18n/locale.store'
+import { m } from '@/i18n/paraglide/messages'
 
 export function App() {
   const preference = useThemeStore(s => s.preference)
@@ -35,8 +37,8 @@ export function App() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/clans" element={<ClansPage />} />
-        <Route path="/clans/:clanId" element={<ClanDetailPage />} />
+        <Route path="/clans" element={<RequireAuth title={m.clan_list_title()}><ClansPage /></RequireAuth>} />
+        <Route path="/clans/:clanId" element={<RequireAuth title={m.clan_list_title()}><ClanDetailPage /></RequireAuth>} />
         <Route path="/invite/:code" element={<InvitePage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
