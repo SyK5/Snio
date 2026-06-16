@@ -4,6 +4,7 @@ import { faHouse, faShieldHalved } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { ProfileMenu } from './profile-menu'
 import { NotificationBell } from '@/features/notification/notification-bell'
+import { useAuthStore } from '@/features/auth/auth.store'
 import { cn } from '@/lib/utils'
 import { m } from '@/i18n/paraglide/messages'
 
@@ -15,9 +16,11 @@ interface NavItem {
 }
 
 export function Sidebar() {
+  const isAuthed = useAuthStore(s => !!s.accessToken)
+
   const topNav: NavItem[] = [
     { to: '/', icon: faHouse, label: m.nav_home(), end: true },
-    { to: '/clans', icon: faShieldHalved, label: m.nav_clans() },
+    ...(isAuthed ? [{ to: '/clans', icon: faShieldHalved, label: m.nav_clans() }] : []),
   ]
 
   return (
@@ -30,7 +33,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <NotificationBell />
+      {isAuthed && <NotificationBell />}
       <ProfileMenu />
     </aside>
   )
