@@ -7,6 +7,8 @@ const WHERE_OPS = new Set(['findMany', 'findFirst', 'findFirstOrThrow', 'count',
 const CREATE_OPS = new Set(['create', 'createMany', 'createManyAndReturn'])
 const VERIFY_OPS = new Set(['findUnique', 'findUniqueOrThrow'])
 const BLOCKED_OPS = new Set(['update', 'delete', 'upsert'])
+const CTX_MODELS = new Set(['Clan', 'ClanMember', 'ClanRoleDef', 'ClanRoleGrant', 'ClanMemberRole'])
+const CTX_WRITE_OPS = new Set(['create', 'createMany', 'createManyAndReturn', 'updateMany', 'updateManyAndReturn', 'deleteMany'])
 
 function nest(path: string[], value: unknown): Record<string, unknown> {
   const [head, ...rest] = path
@@ -50,7 +52,15 @@ function validateCreate(model: string, scope: ModelScope, store: RequestStore, a
   }
 }
 
-export function rlsExtension(base: PrismaClient) {
+export function rlsExtension(base: PrismaClient, onCtxMutation?: (clanId: string) => Promise<unknown>) {
+  async function bumpCtx(store: RequestStore, model: string, operation: string): Promise<void> {
+    if (!onCtxMutation || !store.clanId) return
+    if (!CTX_MODELS.has(model) || !CTX_WRITE_OPS.has(operation)) return
+    const bumped = (store.bumpedClans ??= new Set())
+    if (bumped.has(store.clanId)) return
+    bumped.add(store.clanId)
+    await onCtxMutation(store.clanId)
+  }
   return Prisma.defineExtension({
     name: 'rls',
     query: {
@@ -69,14 +79,18 @@ export function rlsExtension(base: PrismaClient) {
 
           if (CREATE_OPS.has(operation)) {
             validateCreate(model, scope, store, a)
-            return query(a)
+            const result = await query(a)
+            await bumpCtx(store, model, operation)
+            return result
           }
           if (BLOCKED_OPS.has(operation)) throw new ForbiddenException(`RLS: ${operation} auf ${model} nicht erlaubt, nutze updateMany/deleteMany`)
 
           if (WHERE_OPS.has(operation)) {
             const where = await buildWhere(base, store, scope)
             a.where = a.where ? { AND: [a.where, where] } : where
-            return query(a)
+            const result = await query(a)
+            await bumpCtx(store, model, operation)
+            return result
           }
 
           if (VERIFY_OPS.has(operation)) {
