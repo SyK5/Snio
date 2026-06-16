@@ -105,6 +105,12 @@ roles
 
 Event and League get optional organizer_org_id instead of only clan_id
 
+Organizer is polymorphic across three sources: SYSTEM (hosted by Snio directly), CLAN and
+ORGANIZATION. Exactly one source is set per competition, enforced by a check constraint.
+The minimal Organization model (id, slug, name, owner_id, verified) is pulled forward into
+the competitive layer L0 so the polymorphism is real from the start. Full OrganizationMember
+support and org roles stay here in B1.
+
 ### B2 Team registration and anti duplicate participation for events and leagues
 
 Rule:
@@ -260,16 +266,16 @@ A player may only be in exactly one participating team.
 Three channel kinds, scoped differently:
 
 1. Clan channel (type CLAN, clan_id set):
-Visible to clan members.
-Read, write and upload gated by grant (chat_message READ and CREATE, attachment CREATE). Granular per action.
+   Visible to clan members.
+   Read, write and upload gated by grant (chat_message READ and CREATE, attachment CREATE). Granular per action.
 
 2. Private group chat and DM (type GROUP, DIRECT):
-Membership scoped through ChatChannelMember.
-No grants, members write freely.
+   Membership scoped through ChatChannelMember.
+   No grants, members write freely.
 
 3. Match chat (new type MATCH):
-Live chat between two competing teams, both rosters are members, both sides communicate.
-No clan grants, membership equals roster membership of the two teams.
+   Live chat between two competing teams, both rosters are members, both sides communicate.
+   No clan grants, membership equals roster membership of the two teams.
 
 RLS consequence:
 New scope type member (visibility through the ChatChannelMember join), in addition to clan and self.
@@ -318,6 +324,57 @@ The paid path simply skips the cooldown check once payment is confirmed, the dat
 
 UX requirement (already implemented in settings):
 Clear separation between username (login handle, shown as @name, in URL) and display name (shown as Name#tag, freely changeable).
+
+## Competitive Layer: Events, Tournaments, Match Reporting
+
+Full spec in docs/tournament-system.md. This is the overview.
+
+Snio is the middleman. Organizers host, players and clans compete. Organizer is one of
+SYSTEM, CLAN or ORGANIZATION. Events are the light format, solo or team, no bracket.
+Tournaments are bracket based with seeding, match reporting and standings. Leagues are
+season based. Training stays clan only and separate from all of this.
+
+Every event and tournament has three independent axes, kept as separate fields so the
+validation stays flat:
+
+Visibility PUBLIC or PRIVATE, RLS relevant.
+
+Registration policy OPEN, INVITE_ONLY or CLOSED.
+
+Participant type SOLO or TEAM, and for TEAM a clan_only flag plus min and max roster size.
+
+Match results are entered manually for now. Both teams report with a screenshot as proof.
+The first report starts a 30 minute timer. Matching reports confirm automatically,
+mismatches go to a dispute the organizer resolves, and if the timer runs out with only one
+report the submitted result stands. Standings show clan vs clan with icons, score, map and
+mode.
+
+Anti duplicate participation: a player may only be actively in one participating team per
+competition. A player in two registered clans is forced to choose. Undecided at the
+deadline gets locked out of that competition, struck through with an info icon in the UI.
+After choosing, a 24h cooldown runs before the player is active for the chosen team, and
+they stay withdrawn for the other. Enforced by a partial unique index on the active roster
+row plus a roster state machine, driven by a background worker on Redis.
+
+Build order, each layer its own session:
+
+L0 Organizer foundation: polymorphic organizer, minimal Organization model.
+
+L1 Event solo: three axes, conditional visibility, invites.
+
+L2 Roster and anti duplicate: the shared heart, reused by team events, tournaments and
+leagues.
+
+L3 Tournament core and ruleset engine: bracket, seeding, game mode catalog, enforced vs
+descriptive rules.
+
+L4 Match reporting and standings: dual entry, timer, dispute, forfeit, result display.
+
+L5 Penalty and reputation: discipline, reads forfeit and no show data from L4.
+
+Game modes are a seeded catalog per game, not a Prisma enum, so new modes need no
+migration. Enforceable rules are typed fields, descriptive rules are free text. An
+enforceable rule must never live in a text field.
 
 ## Data Model Changes
 
