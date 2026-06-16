@@ -1,11 +1,16 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
 import type { Request } from 'express'
 import { PrismaService } from '../prisma/prisma.service'
+import { CacheService } from '../redis/cache.service'
 import { currentStore } from '../context/request-context'
+import { getClanContext } from './clan-context.cache'
 
 @Injectable()
 export class ClanContextGuard implements CanActivate {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cache: CacheService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request>()
@@ -14,33 +19,14 @@ export class ClanContextGuard implements CanActivate {
     const store = currentStore()
     if (!clanId || !store?.userId) return true
 
-    const clan = await this.prisma.clan.findFirst({
-      where: { id: clanId, deleted_at: null },
-      select: {
-        owner_id: true,
-        members: {
-          where: { user_id: store.userId, left_at: null },
-          select: { roles: { select: { role: { select: { position: true, grants: { select: { grant: true, actions: true } } } } } } },
-        },
-      },
-    })
-    if (!clan) throw new NotFoundException('Clan nicht gefunden')
-
-    const member = clan.members[0]
-    const isOwner = clan.owner_id === store.userId
-    if (!member && !isOwner && !store.isPlatformAdmin) throw new ForbiddenException('Kein Mitglied dieses Clans')
-
-    const grants: Record<string, number> = {}
-    let position = -1
-    for (const mr of member?.roles ?? []) {
-      if (mr.role.position > position) position = mr.role.position
-      for (const g of mr.role.grants) grants[g.grant] = (grants[g.grant] ?? 0) | g.actions
-    }
+    const ctx = await getClanContext(this.cache, this.prisma, clanId, store.userId)
+    if (!ctx) throw new NotFoundException('Clan nicht gefunden')
+    if (!ctx.member && !ctx.owner && !store.isPlatformAdmin) throw new ForbiddenException('Kein Mitglied dieses Clans')
 
     store.clanId = clanId
-    store.isClanOwner = isOwner
-    store.clanRolePosition = position
-    store.grants = grants
+    store.isClanOwner = ctx.owner
+    store.clanRolePosition = ctx.position
+    store.grants = ctx.grants
     return true
   }
 }

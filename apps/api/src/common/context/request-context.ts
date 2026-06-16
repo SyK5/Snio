@@ -11,6 +11,7 @@ export interface RequestStore {
   clanRolePosition?: number
   grants?: Record<string, number>
   membershipClanIds?: string[]
+  bumpedClans?: Set<string>
 }
 
 export const requestContext = new AsyncLocalStorage<RequestStore>()
