@@ -22,7 +22,8 @@ export const MODEL_SCOPES: Record<string, ModelScope> = {
   ClanInvite: { scope: 'clan', field: 'clan_id' },
   ClanGame: { scope: 'clan', field: 'clan_id' },
   Event: { scope: 'conditional' },
-  EventParticipation: { scope: 'clan', field: 'event.clan_id' },
+  EventParticipation: { scope: 'conditional' },
+  EventInvite: { scope: 'conditional' },
   Training: { scope: 'clan', field: 'clan_id' },
   TrainingParticipation: { scope: 'clan', field: 'training.clan_id' },
   CustomEmoji: { scope: 'clan', field: 'clan_id' },
@@ -51,4 +52,17 @@ export const MODEL_SCOPES: Record<string, ModelScope> = {
 
 export function modelScope(model: string): ModelScope | null {
   return MODEL_SCOPES[model] ?? null
+}
+
+export type RelationPolicy = 'GATE' | 'SCOPED' | 'INHERIT'
+
+export const RELATION_POLICIES: Record<string, Record<string, RelationPolicy>> = {
+  Event: {
+    participations: 'SCOPED',
+    invites: 'SCOPED'
+  }
+}
+
+export function relationPolicy(model: string, relation: string): RelationPolicy {
+  return RELATION_POLICIES[model]?.[relation] ?? 'SCOPED'
 }
