@@ -60,6 +60,14 @@ export const organizerCreate: CreateRule = async (base, store, rows) => {
   }
 }
 
+export const selfCreate: CreateRule = async (_base, store, rows) => {
+  if (!store.userId) throw new ForbiddenException('RLS: fehlender Kontext für create')
+  for (const row of rows) {
+    if (row.user_id === undefined) row.user_id = store.userId
+    else if (row.user_id !== store.userId) throw new ForbiddenException('RLS: user_id verletzt Kontext bei create')
+  }
+}
+
 export async function resolveWhere(rules: Rule[] | undefined, base: PrismaClient, store: RequestStore, model: string): Promise<Record<string, unknown>> {
   if (!rules) throw new ForbiddenException(`RLS: kein conditional Resolver für ${model}`)
   const out: Record<string, unknown>[] = []

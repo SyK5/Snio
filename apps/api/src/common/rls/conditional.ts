@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { RequestStore } from '../context/request-context'
-import { Rule, CreateRule, CreateRow, resolveWhere, resolveCreate, selfRow, publicVisible, registered, confirmedPublic, myOrganizer, organizerCreate } from './conditional.kit'
+import { Rule, CreateRule, CreateRow, resolveWhere, resolveCreate, selfRow, publicVisible, registered, confirmedPublic, myOrganizer, organizerCreate, selfCreate } from './conditional.kit'
 
 interface Conditional {
   read: Rule[]
@@ -9,7 +9,7 @@ interface Conditional {
 
 const CONDITIONAL: Record<string, Conditional> = {
   Event: { read: [publicVisible, registered, myOrganizer()], create: organizerCreate },
-  EventParticipation: { read: [selfRow, confirmedPublic, myOrganizer('event')] },
+  EventParticipation: { read: [selfRow, confirmedPublic, myOrganizer('event')], create: selfCreate },
   EventInvite: { read: [myOrganizer('event')] }
 }
 
