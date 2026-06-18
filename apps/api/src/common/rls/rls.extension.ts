@@ -1,7 +1,9 @@
 import { Prisma, PrismaClient } from '@prisma/client'
 import { ForbiddenException } from '@nestjs/common'
 import { currentStore, RequestStore } from '../context/request-context'
-import { ModelScope, modelScope } from './scopes'
+import { ModelScope, modelScope, relationPolicy } from './scopes'
+import { conditionalWhere, conditionalCreate } from './conditional'
+import { clanIds } from './conditional.kit'
 
 const WHERE_OPS = new Set(['findMany', 'findFirst', 'findFirstOrThrow', 'count', 'aggregate', 'groupBy', 'updateMany', 'updateManyAndReturn', 'deleteMany'])
 const CREATE_OPS = new Set(['create', 'createMany', 'createManyAndReturn'])
@@ -14,14 +16,6 @@ function nest(path: string[], value: unknown): Record<string, unknown> {
   const [head, ...rest] = path
   if (!head) return {}
   return rest.length ? { [head]: nest(rest, value) } : { [head]: value }
-}
-
-async function clanIds(base: PrismaClient, store: RequestStore): Promise<string[]> {
-  if (store.membershipClanIds) return store.membershipClanIds
-  if (!store.userId) return []
-  const rows = await base.clanMember.findMany({ where: { user_id: store.userId, left_at: null }, select: { clan_id: true } })
-  store.membershipClanIds = rows.map(r => r.clan_id)
-  return store.membershipClanIds
 }
 
 function scopeField(scope: ModelScope): string {
@@ -40,39 +34,67 @@ async function buildWhere(base: PrismaClient, store: RequestStore, scope: ModelS
   return nest((scope.field as string).split('.'), value)
 }
 
-async function ownedOrgIds(base: PrismaClient, store: RequestStore): Promise<string[]> {
-  if (store.ownedOrgIds) return store.ownedOrgIds
-  if (!store.userId) return []
-  const rows = await base.organization.findMany({ where: { owner_id: store.userId, deleted_at: null }, select: { id: true } })
-  store.ownedOrgIds = rows.map(r => r.id)
-  return store.ownedOrgIds
+interface RelationMeta { target: string; isList: boolean }
+let RELATION_MAP: Record<string, Record<string, RelationMeta>> | null = null
+
+function relationMap(): Record<string, Record<string, RelationMeta>> {
+  if (RELATION_MAP) return RELATION_MAP
+  const map: Record<string, Record<string, RelationMeta>> = {}
+  for (const m of Prisma.dmmf.datamodel.models) {
+    const rels: Record<string, RelationMeta> = {}
+    for (const f of m.fields) if (f.kind === 'object') rels[f.name] = { target: f.type, isList: f.isList }
+    map[m.name] = rels
+  }
+  RELATION_MAP = map
+  return map
 }
 
-const CONDITIONAL_FRAGMENTS: Record<string, (base: PrismaClient, store: RequestStore) => Promise<Record<string, unknown>[]>> = {
-  Event: async (base, store) => {
-    const out: Record<string, unknown>[] = []
-    const clans = await clanIds(base, store)
-    if (clans.length) out.push({ clan_id: { in: clans } })
-    const orgs = await ownedOrgIds(base, store)
-    if (orgs.length) out.push({ organization_id: { in: orgs } })
-    return out
-  },
+async function scopeWhereFor(base: PrismaClient, store: RequestStore, model: string): Promise<Record<string, unknown> | null> {
+  const scope = modelScope(model)
+  if (!scope) throw new ForbiddenException(`RLS: kein Scope für Model ${model}`)
+  if (scope.scope === 'context-free') return null
+  if (scope.scope === 'deferred') throw new ForbiddenException(`RLS: Scope für ${model} noch nicht freigegeben`)
+  if (scope.scope === 'conditional') return conditionalWhere(base, store, model)
+  return buildWhere(base, store, scope)
 }
 
-async function conditionalWhere(base: PrismaClient, store: RequestStore, model: string): Promise<Record<string, unknown>> {
-  const build = CONDITIONAL_FRAGMENTS[model]
-  if (!build) throw new ForbiddenException(`RLS: kein conditional Resolver für ${model}`)
-  const fragments = await build(base, store)
-  if (!fragments.length) return { id: { in: [] } }
-  return { OR: fragments }
+const MAX_RELATION_DEPTH = 8
+
+async function scopeRelations(base: PrismaClient, store: RequestStore, model: string, args: Record<string, unknown>, depth: number): Promise<void> {
+  if (depth > MAX_RELATION_DEPTH) return
+  const container = (args.include ?? args.select) as Record<string, unknown> | undefined
+  if (!container) return
+  const rels = relationMap()[model]
+  if (!rels) return
+  for (const key of Object.keys(container)) {
+    const rel = rels[key]
+    if (!rel) continue
+    const val = container[key]
+    if (val === false) continue
+    const childArgs = (val === true ? {} : { ...(val as Record<string, unknown>) }) as Record<string, unknown>
+    const policy = relationPolicy(model, key)
+    if (policy !== 'INHERIT') {
+      const cw = await scopeWhereFor(base, store, rel.target)
+      if (cw) {
+        if (policy === 'GATE') {
+          const gate = rel.isList ? { [key]: { some: cw } } : { [key]: { is: cw } }
+          args.where = args.where ? { AND: [args.where, gate] } : gate
+        }
+        if (rel.isList) childArgs.where = childArgs.where ? { AND: [childArgs.where, cw] } : cw
+      }
+    }
+    await scopeRelations(base, store, rel.target, childArgs, depth + 1)
+    container[key] = Object.keys(childArgs).length ? childArgs : true
+  }
 }
 
-function validateCreate(model: string, scope: ModelScope, store: RequestStore, args: { data?: unknown }): void {
+async function validateCreate(base: PrismaClient, model: string, scope: ModelScope, store: RequestStore, args: { data?: unknown }): Promise<void> {
+  const rows = args.data ? (Array.isArray(args.data) ? args.data : [args.data]) : []
+  if (scope.scope === 'conditional') return conditionalCreate(base, store, model, rows as Record<string, unknown>[])
   const field = scope.scope === 'self' ? 'user_id' : scope.field === 'clan_id' ? 'clan_id' : null
   if (!field) return
   const expected = field === 'user_id' ? store.userId : store.clanId
   if (!expected) throw new ForbiddenException(`RLS: fehlender Kontext für create ${model}`)
-  const rows = args.data ? (Array.isArray(args.data) ? args.data : [args.data]) : []
   for (const row of rows as Record<string, unknown>[]) {
     if (row[field] === undefined) row[field] = expected
     else if (row[field] !== expected) throw new ForbiddenException(`RLS: ${field} verletzt Kontext bei create ${model}`)
@@ -105,7 +127,7 @@ export function rlsExtension(base: PrismaClient, onCtxMutation?: (clanId: string
           const a = (args ?? {}) as Record<string, unknown>
 
           if (CREATE_OPS.has(operation)) {
-            validateCreate(model, scope, store, a)
+            await validateCreate(base, model, scope, store, a)
             const result = await query(a)
             await bumpCtx(store, model, operation)
             return result
@@ -115,6 +137,7 @@ export function rlsExtension(base: PrismaClient, onCtxMutation?: (clanId: string
           if (WHERE_OPS.has(operation)) {
             const where = scope.scope === 'conditional' ? await conditionalWhere(base, store, model) : await buildWhere(base, store, scope)
             a.where = a.where ? { AND: [a.where, where] } : where
+            await scopeRelations(base, store, model, a, 0)
             const result = await query(a)
             await bumpCtx(store, model, operation)
             return result
@@ -124,7 +147,8 @@ export function rlsExtension(base: PrismaClient, onCtxMutation?: (clanId: string
             if (scope.scope === 'conditional') throw new ForbiddenException(`RLS: ${operation} auf ${model} nicht erlaubt, nutze findFirst`)
             const field = scopeField(scope)
             if (field.includes('.')) throw new ForbiddenException(`RLS: ${operation} auf ${model} nicht erlaubt, nutze findFirst`)
-            const result = (await query(args)) as Record<string, unknown> | null
+            await scopeRelations(base, store, model, a, 0)
+            const result = (await query(a)) as Record<string, unknown> | null
             if (!result) return result
             const allowed = await allowedValues(base, store, scope)
             if (allowed.includes(result[field] as string)) return result
