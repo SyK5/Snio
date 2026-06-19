@@ -25,6 +25,7 @@ export class UsersService {
       displayName: user.display_name,
       discriminator: user.discriminator,
       emailVerified: user.email_verified,
+      isPlatformAdmin: user.is_platform_admin,
       avatarUrl: await this.resolveAvatar(user.avatar_url),
       pendingFields: user.pending_fields,
     }
