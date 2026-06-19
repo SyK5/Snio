@@ -186,16 +186,30 @@ Mark as read support
 
 Settings per NotificationType
 
-### B6 Game Voting
+### B6 Game Voting (Platform Game Catalog)
 
 NotificationType already contains:
 GAME_VOTE_STARTED
 GAME_VOTE_RESULT
 
-Concept:
-Clan members vote for which games the clan officially supports.
+Concept (concretized):
+Platform wide voting that decides which games enter the Snio game catalog. A dedicated tab, separate from clans, on a fixed monthly cycle.
 
-Model and workflow are still open.
+Workflow:
+Any player can suggest a game during the active cycle, picked from an external public multiplayer game API instead of free text.
+Duplicate suggestions do not create a new row: the existing entry's vote count is incremented. Four users suggesting GTA leaves one row, GTA with 4 votes.
+The list is sorted by votes DESC.
+At cycle end the top game is added to the Game catalog. Manual approval by Platform Admin first, automatic later once the pipeline is trusted.
+
+External API (open decision):
+Source for an always current list of multiplayer games plus their available platforms. Candidates: IGDB (most complete, OAuth via Twitch), RAWG (simple, good coverage, platforms included), Giant Bomb.
+To clarify before build: which API, how platforms are fetched, how an approved game is written into the Game table. The insert should be automatic.
+
+Dependencies:
+The monthly cycle needs a background worker (BullMQ on Redis), which arrives with L2 infrastructure.
+A suggestion and vote model with dedup keyed on the external game id, plus per user per cycle vote tracking.
+The seed is the starting point: avoid listing games already in the catalog, the list grows through voting.
+The Platform Admin add games path (see B10) is the manual counterpart and the first piece built.
 
 ### B7 Documents and Certificates
 
@@ -223,6 +237,27 @@ Clan visibility (PUBLIC | PRIVATE) or an invite flow (ClanInvite model plus invi
 Join gating: PRIVATE clans reject open join, entry only through invite or owner/leader add.
 
 The join service runs in runSystem today (no membership yet at join time). The gate check (visibility or valid invite) goes in front of the membership creation, the runSystem block stays as is.
+
+### B10 Admin Dashboard (Platform Admin Global Moderation)
+
+The Platform Admin (User.is_platform_admin, already a bypass in permission checks and RLS) acts as the global moderator across the whole platform, managed through a dedicated frontend area at /admin, guarded so only admins reach it.
+
+Principle:
+The dashboard is not a single build. It is a frontend shell that grows with the layers. Each layer that produces an admin capability hangs its UI here. It can only manage things that exist, so it expands as the competitive layers land.
+
+Sections by availability:
+Games management (buildable now, unblocks the event create flow): list, add with icon, edit, soft delete. First concrete piece, built as the Admin Grundgeruest together with the games backend module.
+Activity view (buildable now): global read over audit data.
+Dispute resolution (arrives with L4): admins resolve reported match conflicts, cheating reports, false result claims. Authority is organizer first, Platform Admin as fallback (D4 in the tournament spec).
+Result and table editing (arrives with L4): override match results and standings.
+Penalties (arrives with L5): discipline actions, reads forfeit and no show data.
+Voting overview (arrives with B6): inspect active and past voting cycles, approve the cycle winner into the catalog.
+
+Backend:
+Reuses the existing Platform Admin bypass. Admin endpoints are platform admin gated. No new authorization primitive needed.
+
+Scope of the first build (Admin Grundgeruest):
+Games backend module plus the admin shell with the games section only. No disputes, results, penalties or voting yet, those ship with their respective layers.
 
 ## Visibility, Registration and Chat (Design Locked, Migration per Phase)
 
