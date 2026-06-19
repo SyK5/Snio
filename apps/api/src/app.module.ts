@@ -13,6 +13,7 @@ import { AuthModule } from './modules/auth/auth.module'
 import { S3Module } from './common/s3/s3.module'
 import { UsersModule } from './modules/users/users.module'
 import { ClansModule } from './modules/clans/clans.module'
+import { GamesModule } from './modules/games/games.module'
 import { EventsModule } from './modules/events/events.module'
 import { OrganizationsModule } from './modules/organizations/organizations.module'
 import { NotificationModule } from './modules/notifications/notification.module'
@@ -37,6 +38,7 @@ import { AuditModule } from './modules/audit/audit.module'
     AuthModule,
     UsersModule,
     ClansModule,
+    GamesModule,
     EventsModule,
     OrganizationsModule,
     NotificationModule,
