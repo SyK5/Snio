@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHouse, faShieldHalved } from '@fortawesome/free-solid-svg-icons'
+import { faHouse, faShieldHalved, faCalendarDays } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { ProfileMenu } from './profile-menu'
 import { NotificationBell } from '@/features/notification/notification-bell'
@@ -21,6 +21,7 @@ export function Sidebar() {
   const topNav: NavItem[] = [
     { to: '/', icon: faHouse, label: m.nav_home(), end: true },
     ...(isAuthed ? [{ to: '/clans', icon: faShieldHalved, label: m.nav_clans() }] : []),
+    ...(isAuthed ? [{ to: '/events', icon: faCalendarDays, label: m.nav_events() }] : []),
   ]
 
   return (

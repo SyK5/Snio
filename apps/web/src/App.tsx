@@ -10,6 +10,8 @@ import { ResetPasswordPage } from '@/routes/reset-password'
 import { SettingsPage } from '@/routes/settings'
 import { ClansPage } from '@/routes/clans'
 import { ClanDetailPage } from '@/routes/clan-detail'
+import { EventsPage } from '@/routes/events'
+import { EventDetailPage } from '@/routes/event-detail'
 import { InvitePage } from '@/routes/invite'
 import { AppLayout } from '@/components/layout/app-layout'
 import { RequireAuth } from '@/components/auth/require-auth'
@@ -39,6 +41,8 @@ export function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/clans" element={<RequireAuth title={m.clan_list_title()}><ClansPage /></RequireAuth>} />
         <Route path="/clans/:clanId" element={<RequireAuth title={m.clan_list_title()}><ClanDetailPage /></RequireAuth>} />
+        <Route path="/events" element={<RequireAuth title={m.events_title()}><EventsPage /></RequireAuth>} />
+        <Route path="/events/:eventId" element={<RequireAuth title={m.events_title()}><EventDetailPage /></RequireAuth>} />
         <Route path="/invite/:code" element={<InvitePage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
