@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faHouse, faShieldHalved, faCalendarDays } from '@fortawesome/free-solid-svg-icons'
+import { faHouse, faShieldHalved, faCalendarDays, faGaugeHigh } from '@fortawesome/free-solid-svg-icons'
 import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
 import { ProfileMenu } from './profile-menu'
 import { NotificationBell } from '@/features/notification/notification-bell'
 import { useAuthStore } from '@/features/auth/auth.store'
+import { useProfile } from '@/features/user/user.hooks'
 import { cn } from '@/lib/utils'
 import { m } from '@/i18n/paraglide/messages'
 
@@ -17,11 +18,14 @@ interface NavItem {
 
 export function Sidebar() {
   const isAuthed = useAuthStore(s => !!s.accessToken)
+  const { data: profile } = useProfile()
+  const isAdmin = !!profile?.isPlatformAdmin
 
   const topNav: NavItem[] = [
     { to: '/', icon: faHouse, label: m.nav_home(), end: true },
     ...(isAuthed ? [{ to: '/clans', icon: faShieldHalved, label: m.nav_clans() }] : []),
     ...(isAuthed ? [{ to: '/events', icon: faCalendarDays, label: m.nav_events() }] : []),
+    ...(isAdmin ? [{ to: '/admin', icon: faGaugeHigh, label: m.nav_admin() }] : []),
   ]
 
   return (
