@@ -6,6 +6,7 @@ export interface MeResponse {
   displayName: string
   discriminator: string
   emailVerified: boolean
+  isPlatformAdmin: boolean
   avatarUrl: string | null
   pendingFields: string[]
 }

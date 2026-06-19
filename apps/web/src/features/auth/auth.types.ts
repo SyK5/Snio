@@ -4,6 +4,7 @@ export interface AuthUser {
   username: string
   username_changed_at: string | null
   email_verified: boolean
+  is_platform_admin: boolean
   display_name: string
   discriminator: string
   avatar_url: string | null
