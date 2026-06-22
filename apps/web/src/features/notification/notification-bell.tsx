@@ -1,15 +1,16 @@
 import { useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBell } from '@fortawesome/free-solid-svg-icons'
+import { faBell, faCircleDot, faEnvelope, faInbox, faShield, faUsers } from '@fortawesome/free-solid-svg-icons'
 import { Card } from '@/components/ui/card'
+import { Segmented } from '@/components/ui/segmented'
+import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { useClickOutside } from '@/hooks/use-click-outside'
-import { cn } from '@/lib/utils'
 import { m } from '@/i18n/paraglide/messages'
-import { useMarkAllRead, useMarkRead, useNotifications, useUnreadCount } from './notification.hooks'
-import { notificationLink, notificationText } from './notification-text'
-import type { NotificationView } from './notification.types'
+import { useMarkAllRead, useUnreadCount } from './notification.hooks'
+import { NotificationList } from './notification-list'
+
+type Filter = 'all' | 'invite' | 'member' | 'role'
 
 export function NotificationBell() {
   const accessToken = useAuthStore(s => s.accessToken)
@@ -19,23 +20,13 @@ export function NotificationBell() {
 
 function BellInner() {
   const [open, setOpen] = useState(false)
+  const [category, setCategory] = useState<Filter>('all')
+  const [unreadOnly, setUnreadOnly] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   useClickOutside(ref, () => setOpen(false))
-  const navigate = useNavigate()
   const { data: unread } = useUnreadCount(true)
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useNotifications(open)
-  const markRead = useMarkRead()
   const markAll = useMarkAllRead()
-
-  const items = data?.pages.flatMap(p => p.items) ?? []
   const count = unread?.count ?? 0
-
-  const onItem = (n: NotificationView) => {
-    if (!n.readAt) markRead.mutate(n.id)
-    const link = notificationLink(n)
-    setOpen(false)
-    if (link) navigate(link)
-  }
 
   return (
     <div ref={ref} className="relative">
@@ -62,40 +53,33 @@ function BellInner() {
               </button>
             )}
           </div>
-          <div className="flex-1 overflow-y-auto">
-            {isLoading && <p className="px-4 py-6 text-center text-sm text-muted-foreground">{m.clan_loading()}</p>}
-            {!isLoading && items.length === 0 && <p className="px-4 py-10 text-center text-sm text-muted-foreground">{m.notif_empty()}</p>}
-            {items.map(n => (
-              <button
-                key={n.id}
-                onClick={() => onItem(n)}
-                className={cn('flex w-full flex-col gap-1 border-b border-border px-4 py-3 text-left transition hover:bg-muted', !n.readAt && 'bg-primary/5')}
-              >
-                <span className="text-sm text-foreground">{notificationText(n)}</span>
-                <span className="text-xs text-muted-foreground">{timeAgo(n.createdAt)}</span>
-              </button>
-            ))}
-            {hasNextPage && (
-              <button
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="w-full cursor-pointer px-4 py-3 text-center text-xs text-muted-foreground transition hover:text-foreground"
-              >
-                {m.notif_load_more()}
-              </button>
-            )}
+          <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
+            <Segmented
+              value={category}
+              onChange={setCategory}
+              options={[
+                { value: 'all', icon: faInbox, title: m.notif_filter_all() },
+                { value: 'invite', icon: faEnvelope, title: m.notif_filter_invites() },
+                { value: 'member', icon: faUsers, title: m.notif_filter_members() },
+                { value: 'role', icon: faShield, title: m.notif_filter_roles() },
+              ]}
+            />
+            <button
+              onClick={() => setUnreadOnly(v => !v)}
+              title={m.notif_filter_unread()}
+              className={cn(
+                'flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-sm transition',
+                unreadOnly ? 'bg-primary text-primary-foreground' : 'border border-border bg-surface-muted text-muted-foreground hover:text-foreground',
+              )}
+            >
+              <FontAwesomeIcon icon={faCircleDot} />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto scrollbar-hide">
+            <NotificationList enabled={open} category={category === 'all' ? undefined : category} unreadOnly={unreadOnly} onClose={() => setOpen(false)} />
           </div>
         </Card>
       )}
     </div>
   )
-}
-
-function timeAgo(iso: string): string {
-  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
-  if (min < 1) return m.notif_time_now()
-  if (min < 60) return m.notif_time_min({ count: min })
-  const h = Math.floor(min / 60)
-  if (h < 24) return m.notif_time_hour({ count: h })
-  return m.notif_time_day({ count: Math.floor(h / 24) })
 }
