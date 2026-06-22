@@ -47,12 +47,20 @@ export class EventsController {
   @Post('clans/:clanId/events')
   @UseGuards(ClanContextGuard, PermissionGuard)
   @RequireGrant('event', Action.CREATE)
-  createClan(@CurrentUser() user: AuthUser, @Param('clanId') clanId: string, @Body(new ZodValidationPipe(createEventSchema)) dto: CreateEventInput): Promise<EventDetailView> {
+  createClan(
+    @CurrentUser() user: AuthUser,
+    @Param('clanId') clanId: string,
+    @Body(new ZodValidationPipe(createEventSchema)) dto: CreateEventInput,
+  ): Promise<EventDetailView> {
     return this.events.createClan(clanId, user, dto)
   }
 
   @Post('organizations/:orgId/events')
-  createOrg(@CurrentUser() user: AuthUser, @Param('orgId') orgId: string, @Body(new ZodValidationPipe(createEventSchema)) dto: CreateEventInput): Promise<EventDetailView> {
+  createOrg(
+    @CurrentUser() user: AuthUser,
+    @Param('orgId') orgId: string,
+    @Body(new ZodValidationPipe(createEventSchema)) dto: CreateEventInput,
+  ): Promise<EventDetailView> {
     return this.events.createOrg(orgId, user, dto)
   }
 
@@ -73,7 +81,12 @@ export class EventsController {
   @Patch('clans/:clanId/events/:eventId')
   @UseGuards(ClanContextGuard, PermissionGuard)
   @RequireGrant('event', Action.UPDATE)
-  update(@CurrentUser() user: AuthUser, @Param('clanId') clanId: string, @Param('eventId') eventId: string, @Body(new ZodValidationPipe(updateEventSchema)) dto: UpdateEventInput): Promise<EventDetailView> {
+  update(
+    @CurrentUser() user: AuthUser,
+    @Param('clanId') clanId: string,
+    @Param('eventId') eventId: string,
+    @Body(new ZodValidationPipe(updateEventSchema)) dto: UpdateEventInput,
+  ): Promise<EventDetailView> {
     return this.events.update(user, clanId, eventId, dto)
   }
 

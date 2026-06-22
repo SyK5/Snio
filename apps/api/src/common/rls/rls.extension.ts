@@ -34,7 +34,10 @@ async function buildWhere(base: PrismaClient, store: RequestStore, scope: ModelS
   return nest((scope.field as string).split('.'), value)
 }
 
-interface RelationMeta { target: string; isList: boolean }
+interface RelationMeta {
+  target: string
+  isList: boolean
+}
 let RELATION_MAP: Record<string, Record<string, RelationMeta>> | null = null
 
 function relationMap(): Record<string, Record<string, RelationMeta>> {

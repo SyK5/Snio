@@ -41,7 +41,11 @@ export class EventInviteService {
 
   async list(clanId: string, eventId: string): Promise<EventInviteView[]> {
     await this.requireClanEvent(clanId, eventId)
-    const invites = await this.prisma.eventInvite.findMany({ where: { event_id: eventId, revoked_at: null }, include: { targetUser: true }, orderBy: { created_at: 'desc' } })
+    const invites = await this.prisma.eventInvite.findMany({
+      where: { event_id: eventId, revoked_at: null },
+      include: { targetUser: true },
+      orderBy: { created_at: 'desc' },
+    })
     return invites.map(i => toView(i, i.targetUser))
   }
 

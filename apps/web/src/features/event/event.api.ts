@@ -11,6 +11,7 @@ export const eventApi = {
   createSystem: (payload: CreateEventPayload) => api.post<EventDetailView>('/events/system', payload).then(r => r.data),
   update: (clanId: string, eventId: string, payload: UpdateEventPayload) => api.patch<EventDetailView>(`/clans/${clanId}/events/${eventId}`, payload).then(r => r.data),
   cancel: (clanId: string, eventId: string) => api.delete(`/clans/${clanId}/events/${eventId}`).then(r => r.data),
-  approve: (clanId: string, eventId: string, userId: string) => api.post<EventDetailView>(`/clans/${clanId}/events/${eventId}/participants/${userId}/approve`).then(r => r.data),
+  approve: (clanId: string, eventId: string, userId: string) =>
+    api.post<EventDetailView>(`/clans/${clanId}/events/${eventId}/participants/${userId}/approve`).then(r => r.data),
   reject: (clanId: string, eventId: string, userId: string) => api.delete<EventDetailView>(`/clans/${clanId}/events/${eventId}/participants/${userId}`).then(r => r.data),
 }

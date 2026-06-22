@@ -11,7 +11,14 @@ import { AuthUser } from '../../common/auth/auth.types'
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe'
 import { EventDetailView } from './events.dto'
 import { EventInviteService } from './event-invite.service'
-import { CreateEventInviteLinkInput, CreateEventInviteTargetedInput, EventInvitePreview, EventInviteView, createEventInviteLinkSchema, createEventInviteTargetedSchema } from './event-invite.dto'
+import {
+  CreateEventInviteLinkInput,
+  CreateEventInviteTargetedInput,
+  EventInvitePreview,
+  EventInviteView,
+  createEventInviteLinkSchema,
+  createEventInviteTargetedSchema,
+} from './event-invite.dto'
 
 @ApiTags('event-invites')
 @Controller()
@@ -23,14 +30,24 @@ export class EventInviteController {
   @Post('clans/:clanId/events/:eventId/invites')
   @UseGuards(ClanContextGuard, PermissionGuard)
   @RequireGrant('event_participation', Action.CREATE)
-  createLink(@CurrentUser() user: AuthUser, @Param('clanId') clanId: string, @Param('eventId') eventId: string, @Body(new ZodValidationPipe(createEventInviteLinkSchema)) dto: CreateEventInviteLinkInput): Promise<EventInviteView> {
+  createLink(
+    @CurrentUser() user: AuthUser,
+    @Param('clanId') clanId: string,
+    @Param('eventId') eventId: string,
+    @Body(new ZodValidationPipe(createEventInviteLinkSchema)) dto: CreateEventInviteLinkInput,
+  ): Promise<EventInviteView> {
     return this.invites.createLink(user, clanId, eventId, dto)
   }
 
   @Post('clans/:clanId/events/:eventId/invites/targeted')
   @UseGuards(ClanContextGuard, PermissionGuard)
   @RequireGrant('event_participation', Action.CREATE)
-  createTargeted(@CurrentUser() user: AuthUser, @Param('clanId') clanId: string, @Param('eventId') eventId: string, @Body(new ZodValidationPipe(createEventInviteTargetedSchema)) dto: CreateEventInviteTargetedInput): Promise<EventInviteView> {
+  createTargeted(
+    @CurrentUser() user: AuthUser,
+    @Param('clanId') clanId: string,
+    @Param('eventId') eventId: string,
+    @Body(new ZodValidationPipe(createEventInviteTargetedSchema)) dto: CreateEventInviteTargetedInput,
+  ): Promise<EventInviteView> {
     return this.invites.createTargeted(user, clanId, eventId, dto)
   }
 

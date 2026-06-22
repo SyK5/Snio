@@ -68,7 +68,11 @@ export function Table<T>({ columns, rows, rowKey, onRowClick, isRowActive, isLoa
                     className={cn('px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground', alignClass[col.align ?? 'left'], col.headerClassName)}
                   >
                     {col.sortAccessor ? (
-                      <button type="button" onClick={() => toggleSort(col.key)} className="inline-flex cursor-pointer items-center gap-1.5 uppercase transition hover:text-foreground">
+                      <button
+                        type="button"
+                        onClick={() => toggleSort(col.key)}
+                        className="inline-flex cursor-pointer items-center gap-1.5 uppercase transition hover:text-foreground"
+                      >
                         {col.header}
                         <FontAwesomeIcon
                           icon={!active ? faSort : sort!.dir === 'asc' ? faSortUp : faSortDown}

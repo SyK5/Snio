@@ -1,6 +1,19 @@
 import { PrismaClient } from '@prisma/client'
 import { RequestStore } from '../context/request-context'
-import { Rule, CreateRule, CreateRow, resolveWhere, resolveCreate, selfRow, publicVisible, registered, confirmedPublic, myOrganizer, organizerCreate, selfCreate } from './conditional.kit'
+import {
+  Rule,
+  CreateRule,
+  CreateRow,
+  resolveWhere,
+  resolveCreate,
+  selfRow,
+  publicVisible,
+  registered,
+  confirmedPublic,
+  myOrganizer,
+  organizerCreate,
+  selfCreate,
+} from './conditional.kit'
 
 interface Conditional {
   read: Rule[]
@@ -10,8 +23,9 @@ interface Conditional {
 const CONDITIONAL: Record<string, Conditional> = {
   Event: { read: [publicVisible, registered, myOrganizer()], create: organizerCreate },
   EventParticipation: { read: [selfRow, confirmedPublic, myOrganizer('event')], create: selfCreate },
-  EventInvite: { read: [myOrganizer('event')] }
+  EventInvite: { read: [myOrganizer('event')] },
 }
 
 export const conditionalWhere = (base: PrismaClient, store: RequestStore, model: string) => resolveWhere(CONDITIONAL[model]?.read, base, store, model)
-export const conditionalCreate = (base: PrismaClient, store: RequestStore, model: string, rows: CreateRow[]) => resolveCreate(CONDITIONAL[model]?.create, base, store, rows)
+export const conditionalCreate = (base: PrismaClient, store: RequestStore, model: string, rows: CreateRow[]) =>
+  resolveCreate(CONDITIONAL[model]?.create, base, store, rows)

@@ -84,7 +84,8 @@ export class EventsService {
     if (await this.prisma.eventParticipation.findFirst({ where: { event_id: eventId, user_id: user.id } })) throw eventErrors.alreadyRegistered()
     const status = event.requires_approval ? ParticipationStatus.PENDING : ParticipationStatus.CONFIRMED
     await this.prisma.eventParticipation.create({ data: { event_id: eventId, user_id: user.id, status } })
-    if (status === ParticipationStatus.PENDING) await this.notifications.emit(event.created_by_id, NotificationType.EVENT_JOIN_REQUEST, { eventId, title: event.title, applicantId: user.id })
+    if (status === ParticipationStatus.PENDING)
+      await this.notifications.emit(event.created_by_id, NotificationType.EVENT_JOIN_REQUEST, { eventId, title: event.title, applicantId: user.id })
     return this.detail(user, eventId)
   }
 
@@ -96,7 +97,10 @@ export class EventsService {
   async approve(user: AuthUser, clanId: string, eventId: string, targetUserId: string): Promise<EventDetailView> {
     const event = await this.prisma.event.findFirst({ where: { id: eventId, clan_id: clanId, deleted_at: null } })
     if (!event) throw eventErrors.notFound()
-    const res = await this.prisma.eventParticipation.updateMany({ where: { event_id: eventId, user_id: targetUserId, status: ParticipationStatus.PENDING }, data: { status: ParticipationStatus.CONFIRMED } })
+    const res = await this.prisma.eventParticipation.updateMany({
+      where: { event_id: eventId, user_id: targetUserId, status: ParticipationStatus.PENDING },
+      data: { status: ParticipationStatus.CONFIRMED },
+    })
     if (!res.count) throw eventErrors.participationNotFound()
     await this.notifications.emit(targetUserId, NotificationType.EVENT_JOIN_ACCEPTED, { eventId, title: event.title })
     return this.detail(user, eventId)

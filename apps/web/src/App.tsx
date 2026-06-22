@@ -42,12 +42,47 @@ export function App() {
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePage />} />
-        <Route path="/clans" element={<RequireAuth title={m.clan_list_title()}><ClansPage /></RequireAuth>} />
-        <Route path="/clans/:clanId" element={<RequireAuth title={m.clan_list_title()}><ClanDetailPage /></RequireAuth>} />
-        <Route path="/events" element={<RequireAuth title={m.events_title()}><EventsPage /></RequireAuth>} />
-        <Route path="/events/:eventId" element={<RequireAuth title={m.events_title()}><EventDetailPage /></RequireAuth>} />
+        <Route
+          path="/clans"
+          element={
+            <RequireAuth title={m.clan_list_title()}>
+              <ClansPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/clans/:clanId"
+          element={
+            <RequireAuth title={m.clan_list_title()}>
+              <ClanDetailPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/events"
+          element={
+            <RequireAuth title={m.events_title()}>
+              <EventsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/events/:eventId"
+          element={
+            <RequireAuth title={m.events_title()}>
+              <EventDetailPage />
+            </RequireAuth>
+          }
+        />
         <Route path="/invite/:code" element={<InvitePage />} />
-        <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+        <Route
+          path="/admin"
+          element={
+            <RequireAdmin>
+              <AdminLayout />
+            </RequireAdmin>
+          }
+        >
           <Route index element={<Navigate to="games" replace />} />
           <Route path="games" element={<AdminGames />} />
         </Route>

@@ -16,6 +16,7 @@ export interface OrganizerSource {
 
 export function toOrganizer(e: OrganizerSource, logoUrl: string | null): OrganizerView {
   if (e.organizer_kind === 'CLAN' && e.clan) return { kind: 'CLAN', id: e.clan.id, name: e.clan.name, slug: e.clan.slug, logoUrl }
-  if (e.organizer_kind === 'ORGANIZATION' && e.organization) return { kind: 'ORGANIZATION', id: e.organization.id, name: e.organization.name, slug: e.organization.slug, logoUrl }
+  if (e.organizer_kind === 'ORGANIZATION' && e.organization)
+    return { kind: 'ORGANIZATION', id: e.organization.id, name: e.organization.name, slug: e.organization.slug, logoUrl }
   return { kind: 'SYSTEM', id: null, name: 'Snio', slug: null, logoUrl: null }
 }

@@ -22,7 +22,10 @@ export const createEventSchema = z
     ruleset: z.string().trim().max(5000).nullable().optional(),
   })
   .refine(d => !d.endsAt || d.endsAt > d.startsAt, { message: 'Ende muss nach dem Start liegen', path: ['endsAt'] })
-  .refine(d => !d.registrationOpensAt || !d.registrationClosesAt || d.registrationClosesAt > d.registrationOpensAt, { message: 'Anmeldeschluss muss nach dem Anmeldestart liegen', path: ['registrationClosesAt'] })
+  .refine(d => !d.registrationOpensAt || !d.registrationClosesAt || d.registrationClosesAt > d.registrationOpensAt, {
+    message: 'Anmeldeschluss muss nach dem Anmeldestart liegen',
+    path: ['registrationClosesAt'],
+  })
 
 export type ListEventsQuery = z.infer<typeof listEventsSchema>
 export type CreateEventInput = z.infer<typeof createEventSchema>
@@ -42,7 +45,10 @@ export const updateEventSchema = z
     ruleset: z.string().trim().max(5000).nullable().optional(),
   })
   .refine(d => !d.startsAt || !d.endsAt || d.endsAt > d.startsAt, { message: 'Ende muss nach dem Start liegen', path: ['endsAt'] })
-  .refine(d => !d.registrationOpensAt || !d.registrationClosesAt || d.registrationClosesAt > d.registrationOpensAt, { message: 'Anmeldeschluss muss nach dem Anmeldestart liegen', path: ['registrationClosesAt'] })
+  .refine(d => !d.registrationOpensAt || !d.registrationClosesAt || d.registrationClosesAt > d.registrationOpensAt, {
+    message: 'Anmeldeschluss muss nach dem Anmeldestart liegen',
+    path: ['registrationClosesAt'],
+  })
 
 export type UpdateEventInput = z.infer<typeof updateEventSchema>
 

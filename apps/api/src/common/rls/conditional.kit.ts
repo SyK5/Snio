@@ -29,7 +29,7 @@ interface OwnerSource {
 
 const organizerOwners: OwnerSource[] = [
   { field: 'clan_id', ids: clanIds },
-  { field: 'organization_id', ids: ownedOrgIds }
+  { field: 'organization_id', ids: ownedOrgIds },
 ]
 
 export const selfRow: Rule = async (_base, store) => [{ user_id: store.userId }]
@@ -37,14 +37,16 @@ export const publicVisible: Rule = async () => [{ visibility: 'PUBLIC' }]
 export const registered: Rule = async (_base, store) => [{ participations: { some: { user_id: store.userId } } }]
 export const confirmedPublic: Rule = async () => [{ status: 'CONFIRMED', event: { visibility: 'PUBLIC', deleted_at: null } }]
 
-export const myOrganizer = (path?: string): Rule => async (base, store) => {
-  const out: Record<string, unknown>[] = []
-  for (const s of organizerOwners) {
-    const ids = await s.ids(base, store)
-    if (ids.length) out.push(path ? { [path]: { [s.field]: { in: ids } } } : { [s.field]: { in: ids } })
+export const myOrganizer =
+  (path?: string): Rule =>
+  async (base, store) => {
+    const out: Record<string, unknown>[] = []
+    for (const s of organizerOwners) {
+      const ids = await s.ids(base, store)
+      if (ids.length) out.push(path ? { [path]: { [s.field]: { in: ids } } } : { [s.field]: { in: ids } })
+    }
+    return out
   }
-  return out
-}
 
 export const organizerCreate: CreateRule = async (base, store, rows) => {
   for (const row of rows) {
@@ -71,7 +73,7 @@ export const selfCreate: CreateRule = async (_base, store, rows) => {
 export async function resolveWhere(rules: Rule[] | undefined, base: PrismaClient, store: RequestStore, model: string): Promise<Record<string, unknown>> {
   if (!rules) throw new ForbiddenException(`RLS: kein conditional Resolver für ${model}`)
   const out: Record<string, unknown>[] = []
-  for (const rule of rules) out.push(...await rule(base, store))
+  for (const rule of rules) out.push(...(await rule(base, store)))
   if (!out.length) return { id: { in: [] } }
   return { OR: out }
 }

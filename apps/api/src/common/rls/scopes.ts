@@ -59,8 +59,8 @@ export type RelationPolicy = 'GATE' | 'SCOPED' | 'INHERIT'
 export const RELATION_POLICIES: Record<string, Record<string, RelationPolicy>> = {
   Event: {
     participations: 'SCOPED',
-    invites: 'SCOPED'
-  }
+    invites: 'SCOPED',
+  },
 }
 
 export function relationPolicy(model: string, relation: string): RelationPolicy {
