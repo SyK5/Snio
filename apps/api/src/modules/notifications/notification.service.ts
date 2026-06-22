@@ -1,8 +1,17 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { NotificationType, Prisma } from '@prisma/client'
 import { RLS_PRISMA, RlsPrismaClient } from '../../common/prisma/prisma.extended'
+import { cursorPage } from '../../common/prisma/cursor-page'
 import { currentUserId, requestContext } from '../../common/context/request-context'
-import { NOTIFIABLE_TYPES, NotifiableType, NotificationPage, NotificationPreferenceView, NotificationView } from './notification.dto'
+import {
+  NOTIFIABLE_TYPES,
+  NOTIFICATION_CATEGORIES,
+  NotifiableType,
+  NotificationCategory,
+  NotificationPage,
+  NotificationPreferenceView,
+  NotificationView,
+} from './notification.dto'
 
 @Injectable()
 export class NotificationService {
@@ -20,15 +29,19 @@ export class NotificationService {
       .catch(() => this.logger.warn(`notification emit failed: ${type} -> ${userId}`))
   }
 
-  async list(cursor: string | undefined, limit: number): Promise<NotificationPage> {
-    const rows = await this.prisma.notification.findMany({
-      orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
-      take: limit + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-    })
-    const hasMore = rows.length > limit
-    const items = rows.slice(0, limit).map(toView)
-    return { items, nextCursor: hasMore ? (items[items.length - 1]?.id ?? null) : null }
+  async list(cursor: string | undefined, limit: number, category?: NotificationCategory, unreadOnly?: boolean): Promise<NotificationPage> {
+    const types = category ? NOTIFICATION_CATEGORIES[category] : undefined
+    return cursorPage(
+      limit,
+      take =>
+        this.prisma.notification.findMany({
+          where: { ...(types ? { type: { in: [...types] } } : {}), ...(unreadOnly ? { read_at: null } : {}) },
+          orderBy: [{ created_at: 'desc' }, { id: 'desc' }],
+          take,
+          ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+        }),
+      toView,
+    )
   }
 
   async unreadCount(): Promise<number> {

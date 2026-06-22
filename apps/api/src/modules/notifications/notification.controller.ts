@@ -24,7 +24,7 @@ export class NotificationController {
 
   @Get()
   list(@Query(new ZodValidationPipe(listNotificationsSchema)) q: ListNotificationsQuery): Promise<NotificationPage> {
-    return this.notifications.list(q.cursor, q.limit)
+    return this.notifications.list(q.cursor, q.limit, q.category, q.unreadOnly)
   }
 
   @Get('unread-count')
