@@ -4,6 +4,7 @@ export interface RequestStore {
   requestId: string
   userId?: string
   isPlatformAdmin?: boolean
+  adminMode?: boolean
   pendingFields?: string[]
   system?: boolean
   clanId?: string
@@ -34,5 +35,17 @@ export async function runSystem<T>(fn: () => Promise<T>): Promise<T> {
     return await fn()
   } finally {
     store.system = prev
+  }
+}
+
+export async function runAdmin<T>(fn: () => Promise<T>): Promise<T> {
+  const store = requestContext.getStore()
+  if (!store) return fn()
+  const prev = store.adminMode
+  store.adminMode = true
+  try {
+    return await fn()
+  } finally {
+    store.adminMode = prev
   }
 }
