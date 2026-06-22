@@ -35,3 +35,12 @@ export function notificationLink(n: NotificationView): string | null {
 function handle(name?: string, discriminator?: string): string {
   return discriminator ? `${name}#${discriminator}` : (name ?? '')
 }
+
+export function timeAgo(iso: string): string {
+  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
+  if (min < 1) return m.notif_time_now()
+  if (min < 60) return m.notif_time_min({ count: min })
+  const h = Math.floor(min / 60)
+  if (h < 24) return m.notif_time_hour({ count: h })
+  return m.notif_time_day({ count: Math.floor(h / 24) })
+}
