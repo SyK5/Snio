@@ -116,7 +116,7 @@ export function rlsExtension(base: PrismaClient, onCtxMutation?: (clanId: string
       $allModels: {
         async $allOperations({ model, operation, args, query }) {
           const store = currentStore()
-          if (!store || store.system || store.isPlatformAdmin) return query(args)
+          if (!store || store.system || (store.isPlatformAdmin && store.adminMode)) return query(args)
 
           const scope = modelScope(model)
           if (!scope) throw new ForbiddenException(`RLS: kein Scope für Model ${model}`)
