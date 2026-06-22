@@ -353,5 +353,7 @@
   "game_error_create_failed": "Spiel konnte nicht angelegt werden, bitte anderen Namen wählen",
   "game_error_icon_key_invalid": "Ungültiger Icon Key",
   "game_error_icon_upload": "Icon Upload fehlgeschlagen, bitte erneut versuchen",
-  "game_error_generic": "Etwas ist schiefgelaufen, bitte erneut versuchen"
+  "game_error_generic": "Etwas ist schiefgelaufen, bitte erneut versuchen",
+  "admin_games_search": "Spiel suchen",
+  "admin_game_slug": "Slug"
 }

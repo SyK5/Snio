@@ -353,5 +353,7 @@
   "game_error_create_failed": "Не удалось создать игру, выберите другое название",
   "game_error_icon_key_invalid": "Недопустимый ключ иконки",
   "game_error_icon_upload": "Не удалось загрузить иконку, попробуйте снова",
-  "game_error_generic": "Что-то пошло не так, попробуйте снова"
+  "game_error_generic": "Что-то пошло не так, попробуйте снова",
+  "admin_games_search": "Поиск игры",
+  "admin_game_slug": "Slug"
 }
