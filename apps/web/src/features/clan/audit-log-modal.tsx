@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { faClockRotateLeft } from '@fortawesome/free-solid-svg-icons'
 import { PagedModal, type PagedModalTab } from '@/components/ui/paged-modal'
+import { ScrollHints } from '@/components/ui/scroll-hints'
 import { getLocale } from '@/i18n/paraglide/runtime'
 import { m } from '@/i18n/paraglide/messages'
 import { useAuditLog } from './audit.hooks'
@@ -34,12 +35,12 @@ export function AuditLogModal({ clanId, open, onClose }: Props) {
       title={m.audit_title()}
       subtitle={m.audit_subtitle()}
       size="lg"
-      bodyClassName="p-0"
+      bodyClassName="p-0 scrollbar-hide"
       tabs={tabs}
       activeTab={category}
       onTabChange={setCategory}
     >
-      <div className="max-h-[60vh] overflow-y-auto">
+      <ScrollHints className="max-h-[60vh] overflow-y-auto scrollbar-hide">
         {isLoading && <p className="px-6 py-10 text-center text-sm text-muted-foreground">{m.clan_loading()}</p>}
         {!isLoading && items.length === 0 && <p className="px-6 py-16 text-center text-sm text-muted-foreground">{m.audit_empty()}</p>}
         {items.length > 0 && (
@@ -58,7 +59,7 @@ export function AuditLogModal({ clanId, open, onClose }: Props) {
             {m.audit_load_more()}
           </button>
         )}
-      </div>
+      </ScrollHints>
     </PagedModal>
   )
 }
