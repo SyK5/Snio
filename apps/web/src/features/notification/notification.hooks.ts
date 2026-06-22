@@ -10,10 +10,10 @@ export function useUnreadCount(enabled: boolean) {
   return useQuery({ queryKey: unreadKey, queryFn: () => notificationApi.unreadCount(), enabled, refetchInterval: 30000 })
 }
 
-export function useNotifications(enabled: boolean) {
+export function useNotifications(enabled: boolean, category?: string, unreadOnly?: boolean) {
   return useInfiniteQuery({
-    queryKey: listKey,
-    queryFn: ({ pageParam }) => notificationApi.list(pageParam),
+    queryKey: [...listKey, category ?? 'all', unreadOnly ? 'unread' : 'any'],
+    queryFn: ({ pageParam }) => notificationApi.list(pageParam, category, unreadOnly),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: last => last.nextCursor ?? undefined,
     enabled,
