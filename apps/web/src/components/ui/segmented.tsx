@@ -4,8 +4,9 @@ import { cn } from '@/lib/utils'
 
 interface SegmentedOption<T extends string> {
   value: T
-  label: string
+  label?: string
   icon?: IconDefinition
+  title?: string
 }
 
 interface SegmentedProps<T extends string> {
@@ -21,6 +22,7 @@ export function Segmented<T extends string>({ value, options, onChange }: Segmen
         <button
           key={option.value}
           onClick={() => onChange(option.value)}
+          title={option.title ?? option.label}
           className={cn(
             'flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition',
             value === option.value ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground',
