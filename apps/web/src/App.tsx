@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { HomePage } from '@/routes/home'
 import { LoginPage } from '@/routes/login'
 import { RegisterPage } from '@/routes/register'
@@ -10,7 +10,8 @@ import { ResetPasswordPage } from '@/routes/reset-password'
 import { SettingsPage } from '@/routes/settings'
 import { ClansPage } from '@/routes/clans'
 import { ClanDetailPage } from '@/routes/clan-detail'
-import { AdminPage } from '@/routes/admin'
+import { AdminLayout } from '@/routes/admin'
+import { AdminGames } from '@/features/admin/admin-games'
 import { EventsPage } from '@/routes/events'
 import { EventDetailPage } from '@/routes/event-detail'
 import { InvitePage } from '@/routes/invite'
@@ -46,7 +47,10 @@ export function App() {
         <Route path="/events" element={<RequireAuth title={m.events_title()}><EventsPage /></RequireAuth>} />
         <Route path="/events/:eventId" element={<RequireAuth title={m.events_title()}><EventDetailPage /></RequireAuth>} />
         <Route path="/invite/:code" element={<InvitePage />} />
-        <Route path="/admin" element={<RequireAdmin><AdminPage /></RequireAdmin>} />
+        <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+          <Route index element={<Navigate to="games" replace />} />
+          <Route path="games" element={<AdminGames />} />
+        </Route>
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
     </Routes>
