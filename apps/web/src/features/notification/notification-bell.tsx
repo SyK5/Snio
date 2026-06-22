@@ -42,7 +42,7 @@ function BellInner() {
       <button
         onClick={() => setOpen(o => !o)}
         title={m.notif_title()}
-        className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-muted-foreground transition hover:bg-muted hover:text-foreground"
+        className="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl text-nav-1-fg transition hover:bg-nav-1-muted hover:text-nav-1-fg-strong"
       >
         <FontAwesomeIcon icon={faBell} />
         {count > 0 && (

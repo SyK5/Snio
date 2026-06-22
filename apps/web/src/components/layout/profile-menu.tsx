@@ -32,7 +32,7 @@ export function ProfileMenu() {
         {profile?.avatarUrl ? (
           <img src={profile.avatarUrl} alt={user?.display_name ?? ''} className="h-9 w-9 rounded-full object-cover" />
         ) : (
-          <FontAwesomeIcon icon={faCircleUser} className="text-3xl text-muted-foreground" />
+          <FontAwesomeIcon icon={faCircleUser} className="text-3xl text-nav-1-fg" />
         )}
       </button>
 

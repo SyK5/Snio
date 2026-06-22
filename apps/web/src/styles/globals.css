@@ -9,6 +9,8 @@
 
   --brand-50: #e9eaff;
   --brand-100: #c7caff;
+  --brand-200: #8993ff;
+  --brand-300: #575fff;
   --brand-400: #4f57f5;
   --brand-500: #171afd;
   --brand-600: #1a23d7;
@@ -21,11 +23,35 @@
   --cyan-500: #06b6d4;
   --cyan-600: #0891b2;
 
+  --nav-50:  #ffffff;
+  --nav-100: #edeef6;
+  --nav-200: #93a0ff;
+  --nav-300: #8b8fa8;
+  --nav-400: #6f74a0;
+  --nav-500: #4d4dcc;
+  --nav-600: #575fff;
+  --nav-700: #232634;
+  --nav-800: #1e2130;
+  --nav-900: #13151f;
+
   --background: #080a14;
   --foreground: #eef0f6;
   --surface: #12131f;
   --surface-muted: #0c0e18;
   --surface-elevated: #191c2a;
+
+  --nav-1: var(--nav-900);
+  --nav-1-fg: var(--nav-300);
+  --nav-1-fg-strong: var(--nav-50);
+  --nav-1-muted: var(--nav-700);
+  --nav-1-active: var(--nav-600);
+
+  --nav-2: var(--nav-800);
+  --nav-2-fg: var(--nav-400);
+  --nav-2-fg-strong: var(--nav-50);
+  --nav-2-muted: #2b2f42;
+  --nav-2-active: var(--nav-500);
+
   --card: #12131f;
   --card-foreground: #eef0f6;
   --popover: #12131f;
@@ -50,11 +76,24 @@
 }
 
 [data-theme='light'] {
-  --background: #f4f5fb;
+  --background: #e4e5eb;
   --foreground: #080a14;
   --surface: #ffffff;
   --surface-muted: #edeef6;
   --surface-elevated: #ffffff;
+
+  --nav-1: var(--nav-900);
+  --nav-1-fg: var(--nav-300);
+  --nav-1-fg-strong: var(--nav-50);
+  --nav-1-muted: var(--nav-700);
+  --nav-1-active: var(--nav-500);
+
+  --nav-2: var(--nav-50);
+  --nav-2-fg: #54586a;
+  --nav-2-fg-strong: #080a14;
+  --nav-2-muted: var(--nav-100);
+  --nav-2-active: var(--nav-200);
+
   --card: #ffffff;
   --card-foreground: #080a14;
   --popover: #ffffff;
@@ -89,6 +128,16 @@
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
   --color-surface-elevated: var(--surface-elevated);
+  --color-nav-1: var(--nav-1);
+  --color-nav-1-fg: var(--nav-1-fg);
+  --color-nav-1-fg-strong: var(--nav-1-fg-strong);
+  --color-nav-1-muted: var(--nav-1-muted);
+  --color-nav-1-active: var(--nav-1-active);
+  --color-nav-2: var(--nav-2);
+  --color-nav-2-fg: var(--nav-2-fg);
+  --color-nav-2-fg-strong: var(--nav-2-fg-strong);
+  --color-nav-2-muted: var(--nav-2-muted);
+  --color-nav-2-active: var(--nav-2-active);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
@@ -137,6 +186,15 @@
 
 .modal-surface {
   background: radial-gradient(115% 65% at 50% -8%, color-mix(in srgb, #ffffff 5%, var(--surface-elevated)), var(--surface-elevated) 62%);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 .theme-transition,
