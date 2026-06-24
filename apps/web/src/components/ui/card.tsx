@@ -1,6 +1,7 @@
 import { forwardRef, type HTMLAttributes } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
+import { withContextMenu, type ContextMenuEntry } from '@/components/ui/context-menu'
 
 const cardVariants = cva('rounded-2xl border', {
   variants: {
@@ -19,10 +20,12 @@ const cardVariants = cva('rounded-2xl border', {
   defaultVariants: { tone: 'base', padding: 'md' },
 })
 
-interface CardProps extends HTMLAttributes<HTMLDivElement>, VariantProps<typeof cardVariants> {}
+interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'contextMenu'>, VariantProps<typeof cardVariants> {
+  contextMenu?: ContextMenuEntry[]
+}
 
-export const Card = forwardRef<HTMLDivElement, CardProps>(({ className, tone, padding, ...props }, ref) => (
-  <div ref={ref} className={cn(cardVariants({ tone, padding }), className)} {...props} />
+export const Card = forwardRef<HTMLDivElement, CardProps>(({ contextMenu, onContextMenu, className, tone, padding, ...props }, ref) => (
+  <div ref={ref} onContextMenu={withContextMenu(contextMenu, onContextMenu)} className={cn(cardVariants({ tone, padding }), className)} {...props} />
 ))
 
 Card.displayName = 'Card'
