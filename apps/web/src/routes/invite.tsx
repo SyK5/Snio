@@ -4,6 +4,8 @@ import { faRightToBracket } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Avatar } from '@/components/ui/avatar'
+import { Centered } from '@/components/ui/centered'
 import { useAuthStore } from '@/features/auth/auth.store'
 import { useInvitePreview, useRedeemInvite } from '@/features/clan/invite.hooks'
 import { resolveClanError } from '@/features/clan/clan.errors'
@@ -34,9 +36,7 @@ export function InvitePage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md items-center px-6">
       <Card className="w-full text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-muted text-lg font-bold text-muted-foreground">
-          {preview.tag.slice(0, 2)}
-        </div>
+        <Avatar fallback={preview.tag.slice(0, 2)} size={56} className="mx-auto mb-4" />
         <p className="text-sm text-muted-foreground">{m.invite_page_join_title()}</p>
         <h1 className="mt-1 text-xl font-bold text-foreground">{preview.name}</h1>
         <p className="mt-0.5 text-sm text-muted-foreground">[{preview.tag}]</p>
@@ -60,8 +60,4 @@ function Invalid({ onBack }: { onBack: () => void }) {
       </Card>
     </div>
   )
-}
-
-function Centered({ children }: { children: string }) {
-  return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">{children}</div>
 }
