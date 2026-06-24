@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
+import { EntityCard } from '@/components/ui/entity-card'
+import { Pager } from '@/components/ui/pager'
 import { OrganizerLogo, StatusBadge } from '@/features/event/event-bits'
 import { formatDateTime } from '@/features/event/event-meta'
 import { useEvents } from '@/features/event/event.hooks'
@@ -44,47 +46,28 @@ export function EventsPage() {
 
       <div className="grid gap-3">{!isLoading && events?.map(event => <EventCard key={event.id} event={event} onClick={() => navigate(`/events/${event.id}`)} />)}</div>
 
-      {(hasPrev || hasNext) && (
-        <div className="mt-6 flex items-center justify-end gap-1">
-          <button
-            onClick={goPrev}
-            disabled={!hasPrev}
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            ‹
-          </button>
-          <span className="min-w-[2rem] text-center text-xs font-semibold text-highlight tabular-nums">{page}</span>
-          <button
-            onClick={goNext}
-            disabled={!hasNext}
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            ›
-          </button>
-        </div>
-      )}
+      <Pager page={page} hasPrev={hasPrev} hasNext={hasNext} onPrev={goPrev} onNext={goNext} />
     </div>
   )
 }
 
 function EventCard({ event, onClick }: { event: EventView; onClick: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="group w-full text-left">
-      <Card className="flex cursor-pointer items-center gap-4 transition light:shadow-sm hover:border-highlight/60 hover:shadow-[0_0_0_1px_var(--highlight)] active:scale-[0.99]">
-        <OrganizerLogo url={event.organizer.logoUrl} name={event.organizer.name} />
-        <div className="min-w-0 flex-1">
-          <div className="truncate font-semibold text-foreground">{event.title}</div>
-          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="truncate">{event.organizer.name}</span>
-            <span className="h-1 w-1 shrink-0 rounded-full bg-highlight" />
-            <span className="truncate">{event.game.name}</span>
-            <span className="h-1 w-1 shrink-0 rounded-full bg-highlight" />
-            <span className="shrink-0">{formatDateTime(event.startsAt)}</span>
-          </div>
-        </div>
-        {event.myStatus && <StatusBadge status={event.myStatus} />}
-      </Card>
-    </button>
+    <EntityCard
+      onClick={onClick}
+      media={<OrganizerLogo url={event.organizer.logoUrl} name={event.organizer.name} />}
+      title={event.title}
+      subtitle={
+        <span className="flex items-center gap-1.5">
+          <span className="truncate">{event.organizer.name}</span>
+          <span className="h-1 w-1 shrink-0 rounded-full bg-highlight" />
+          <span className="truncate">{event.game.name}</span>
+          <span className="h-1 w-1 shrink-0 rounded-full bg-highlight" />
+          <span className="shrink-0">{formatDateTime(event.startsAt)}</span>
+        </span>
+      }
+      trailing={event.myStatus && <StatusBadge status={event.myStatus} />}
+    />
   )
 }
 
