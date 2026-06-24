@@ -2,8 +2,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Centered } from '@/components/ui/centered'
+import { SectionCard } from '@/components/ui/section-card'
+import { ListRow } from '@/components/ui/list-row'
 import { OrganizerLogo, StatusBadge, Tag } from '@/features/event/event-bits'
 import { formatDateTime, policyLabel, visibilityLabel } from '@/features/event/event-meta'
 import { useApproveParticipant, useCancelEvent, useEvent, useLeaveEvent, useRegisterEvent, useRejectParticipant } from '@/features/event/event.hooks'
@@ -108,17 +110,14 @@ function Participants({ event }: { event: EventDetailView }) {
     reject.mutate({ eventId: event.id, userId }, { onSuccess: () => toast.success(m.event_rejected()), onError: err => toast.error(resolveEventError(err)) })
 
   return (
-    <Card>
-      <h2 className="mb-3 text-sm font-semibold text-foreground">{m.event_participants_title()}</h2>
+    <SectionCard title={m.event_participants_title()}>
       {participants.length === 0 && <p className="text-sm text-muted-foreground">{m.event_participants_empty()}</p>}
-      <div className="divide-y divide-border">
-        {participants.map(p => (
-          <div key={p.id} className="flex items-center justify-between gap-3 py-2.5">
-            <span className="min-w-0 truncate text-sm text-foreground">
-              {p.displayName}
-              <span className="text-muted-foreground">#{p.discriminator}</span>
-            </span>
-            {event.canManage && p.status === 'PENDING' ? (
+      {participants.map(p => (
+        <ListRow
+          key={p.id}
+          className="gap-3 py-2.5"
+          trailing={
+            event.canManage && p.status === 'PENDING' ? (
               <div className="flex shrink-0 items-center gap-2">
                 <button
                   onClick={() => onApprove(p.userId)}
@@ -137,11 +136,16 @@ function Participants({ event }: { event: EventDetailView }) {
               </div>
             ) : (
               <StatusBadge status={p.status} />
-            )}
-          </div>
-        ))}
-      </div>
-    </Card>
+            )
+          }
+        >
+          <span className="truncate text-sm text-foreground">
+            {p.displayName}
+            <span className="text-muted-foreground">#{p.discriminator}</span>
+          </span>
+        </ListRow>
+      ))}
+    </SectionCard>
   )
 }
 
@@ -152,8 +156,4 @@ function Meta({ label, value }: { label: string; value: string }) {
       <div className="mt-0.5 text-foreground">{value}</div>
     </div>
   )
-}
-
-function Centered({ children }: { children: string }) {
-  return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">{children}</div>
 }
