@@ -442,6 +442,7 @@ export class ClansService {
     const canEditClan = isOwner || this.permissions.can('clan', Action.UPDATE)
     const canInvite = isOwner || this.permissions.can('clan_invite', Action.CREATE)
     const canViewAudit = isOwner || this.permissions.can('audit_log', Action.READ)
+    const canCreateEvent = isOwner || this.permissions.can('event', Action.CREATE)
     return {
       ...summary,
       description: clan.description,
@@ -453,6 +454,7 @@ export class ClansService {
       canEditClan,
       canInvite,
       canViewAudit,
+      canCreateEvent,
       createdAt: clan.created_at.toISOString(),
     }
   }
