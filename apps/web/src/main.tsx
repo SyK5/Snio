@@ -7,6 +7,7 @@ import { queryClient } from '@/lib/query-client'
 import { App } from '@/App'
 import '@/lib/fontawesome'
 import '@/styles/globals.css'
+import { ContextMenuRoot } from '@/components/ui/context-menu'
 
 const root = document.getElementById('root')
 
@@ -27,6 +28,7 @@ createRoot(root).render(
             },
           }}
         />
+        <ContextMenuRoot />
       </BrowserRouter>
     </QueryClientProvider>
   </StrictMode>,
