@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { faArrowUpRightFromSquare, faUserPlus } from '@fortawesome/free-solid-svg-icons'
 import { Card } from '@/components/ui/card'
+import { EntityCard } from '@/components/ui/entity-card'
+import { Avatar } from '@/components/ui/avatar'
+import { Pager } from '@/components/ui/pager'
 import { Button } from '@/components/ui/button'
 import { CreateClanModal } from '@/features/clan/create-clan-modal'
 import { ClanDetailModal } from '@/features/clan/clan-detail-modal'
@@ -51,25 +54,7 @@ export function ClansPage() {
         {!isLoading && clans?.map(clan => <ClanCard key={clan.id} clan={clan} onClick={() => setSelected(clan)} onInvite={() => setInviting(clan)} />)}
       </div>
 
-      {(hasPrev || hasNext) && (
-        <div className="mt-6 flex items-center justify-end gap-1">
-          <button
-            onClick={goPrev}
-            disabled={!hasPrev}
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            ‹
-          </button>
-          <span className="min-w-[2rem] text-center text-xs font-semibold text-highlight tabular-nums">{page}</span>
-          <button
-            onClick={goNext}
-            disabled={!hasNext}
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            ›
-          </button>
-        </div>
-      )}
+      <Pager page={page} hasPrev={hasPrev} hasNext={hasNext} onPrev={goPrev} onNext={goNext} />
 
       <CreateClanModal open={creating} onClose={() => setCreating(false)} />
 
@@ -82,31 +67,23 @@ export function ClansPage() {
 
 function ClanCard({ clan, onClick, onInvite }: { clan: ClanSummary; onClick: () => void; onInvite: () => void }) {
   return (
-    <button type="button" onClick={onClick} className="group w-full text-left">
-      <Card
-        contextMenu={[
-          { icon: faArrowUpRightFromSquare, label: m.clan_ctx_open_new_tab(), onClick: () => window.open(`/clans/${clan.id}`, '_blank') },
-          { icon: faUserPlus, label: m.clan_ctx_invite(), onClick: onInvite },
-        ]}
-        className="flex cursor-pointer items-center gap-4 transition light:shadow-sm hover:border-highlight/60 hover:shadow-[0_0_0_1px_var(--highlight)] active:scale-[0.99]"
-      >
-        <Logo url={clan.logoUrl} tag={clan.tag} />
-        <div className="min-w-0 flex-1">
-          <div className="truncate font-semibold text-foreground">{clan.name}</div>
-          <div className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span>[{clan.tag}]</span>
-            <span className="h-1 w-1 rounded-full bg-highlight" />
-            <span>{m.clan_member_count({ count: clan.memberCount })}</span>
-          </div>
-        </div>
-      </Card>
-    </button>
+    <EntityCard
+      onClick={onClick}
+      contextMenu={[
+        { icon: faArrowUpRightFromSquare, label: m.clan_ctx_open_new_tab(), onClick: () => window.open(`/clans/${clan.id}`, '_blank') },
+        { icon: faUserPlus, label: m.clan_ctx_invite(), onClick: onInvite },
+      ]}
+      media={<Avatar src={clan.logoUrl} fallback={clan.tag.slice(0, 2)} />}
+      title={clan.name}
+      subtitle={
+        <span className="flex items-center gap-1.5">
+          <span>[{clan.tag}]</span>
+          <span className="h-1 w-1 rounded-full bg-highlight" />
+          <span>{m.clan_member_count({ count: clan.memberCount })}</span>
+        </span>
+      }
+    />
   )
-}
-
-function Logo({ url, tag }: { url: string | null; tag: string }) {
-  if (url) return <img src={url} alt={tag} className="h-12 w-12 rounded-xl object-cover" />
-  return <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-surface-muted text-sm font-bold text-muted-foreground">{tag.slice(0, 2)}</div>
 }
 
 function EmptyState({ onCreate }: { onCreate: () => void }) {
