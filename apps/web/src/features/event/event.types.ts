@@ -46,6 +46,8 @@ export interface EventView {
   location: string | null
   ruleset: string | null
   myStatus: ParticipationStatus | null
+  canManage: boolean
+  canInvite: boolean
   createdAt: string
 }
 

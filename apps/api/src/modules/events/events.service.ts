@@ -9,7 +9,7 @@ import { eventErrors } from './event.errors'
 import { CreateEventInput, EventDetailView, EventPage, EventView, ListEventsQuery, ParticipantView, UpdateEventInput } from './events.dto'
 
 const EVENT_BASE = {
-  clan: { select: { id: true, name: true, slug: true, logo_url: true } },
+  clan: { select: { id: true, name: true, slug: true, logo_url: true, owner_id: true } },
   organization: { select: { id: true, name: true, slug: true, logo_url: true } },
   game: { select: { id: true, slug: true, name: true, icon_url: true } },
 } satisfies Prisma.EventInclude
@@ -42,7 +42,7 @@ export class EventsService {
     })
     const hasMore = events.length === take
     const page = hasMore ? events.slice(0, -1) : events
-    const items = await Promise.all(page.map(e => this.toView(e, e.participations[0]?.status ?? null)))
+    const items = await Promise.all(page.map(e => this.toView(e, e.participations[0]?.status ?? null, user)))
     return { items, nextCursor: hasMore ? page[page.length - 1]!.id : null }
   }
 
@@ -53,7 +53,7 @@ export class EventsService {
     })
     if (!event) throw eventErrors.notFound()
     const myStatus = event.participations.find(p => p.user.id === user.id)?.status ?? null
-    return { ...(await this.toView(event, myStatus)), participants: event.participations.map(toParticipant) }
+    return { ...(await this.toView(event, myStatus, user)), participants: event.participations.map(toParticipant) }
   }
 
   createClan(clanId: string, user: AuthUser, input: CreateEventInput): Promise<EventDetailView> {
@@ -165,12 +165,13 @@ export class EventsService {
       },
       include: EVENT_BASE,
     })
-    return { ...(await this.toView(event, null)), participants: [] }
+    return { ...(await this.toView(event, null, user)), participants: [] }
   }
 
-  private async toView(e: EventBasePayload, myStatus: ParticipationStatus | null): Promise<EventView> {
+  private async toView(e: EventBasePayload, myStatus: ParticipationStatus | null, user: AuthUser): Promise<EventView> {
     const logoKey = e.organizer_kind === 'CLAN' ? (e.clan?.logo_url ?? null) : e.organizer_kind === 'ORGANIZATION' ? (e.organization?.logo_url ?? null) : null
     const logoUrl = logoKey ? await this.s3.presignDownload(logoKey) : null
+    const canManage = e.organizer_kind === 'CLAN' && (e.clan?.owner_id === user.id || e.created_by_id === user.id || user.is_platform_admin)
     return {
       id: e.id,
       organizer: toOrganizer(e, logoUrl),
@@ -188,6 +189,8 @@ export class EventsService {
       location: e.location,
       ruleset: e.ruleset,
       myStatus,
+      canManage,
+      canInvite: canManage,
       createdAt: e.created_at.toISOString(),
     }
   }
