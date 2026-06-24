@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { NotificationType, OrganizerKind, ParticipationStatus, Prisma } from '@prisma/client'
 import { RLS_PRISMA, RlsPrismaClient } from '../../common/prisma/prisma.extended'
+import { runAdmin } from '../../common/context/request-context'
 import { S3Service } from '../../common/s3/s3.service'
 import { AuthUser } from '../../common/auth/auth.types'
 import { NotificationService } from '../notifications/notification.service'
@@ -69,7 +70,7 @@ export class EventsService {
 
   createSystem(user: AuthUser, input: CreateEventInput): Promise<EventDetailView> {
     if (!user.is_platform_admin) throw eventErrors.notPlatformAdmin()
-    return this.persist('SYSTEM', user, input, {})
+    return runAdmin(() => this.persist('SYSTEM', user, input, {}))
   }
 
   async register(user: AuthUser, eventId: string): Promise<EventDetailView> {
