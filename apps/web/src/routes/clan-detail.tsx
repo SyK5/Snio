@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Avatar } from '@/components/ui/avatar'
+import { Centered } from '@/components/ui/centered'
+import { SectionCard } from '@/components/ui/section-card'
 import { MemberRow } from '@/features/clan/member-row'
 import { useClan, useClanMembers, useClanRoles, useDeleteClan, useLeaveClan } from '@/features/clan/clan.hooks'
 import { resolveClanError } from '@/features/clan/clan.errors'
@@ -43,7 +45,7 @@ function Header({ clan }: { clan: ClanDetail }) {
 
   return (
     <div className="mb-8 flex items-start gap-4">
-      <Logo url={clan.logoUrl} tag={clan.tag} />
+      <Avatar src={clan.logoUrl} fallback={clan.tag.slice(0, 2)} size={64} />
       <div className="min-w-0 flex-1">
         <h1 className="text-2xl font-bold text-foreground">{clan.name}</h1>
         <p className="text-sm text-muted-foreground">
@@ -79,23 +81,11 @@ function MembersSection({ clanId, clan }: { clanId: string; clan: ClanDetail }) 
   const { data: roles } = useClanRoles(clanId, canManageRoles)
 
   return (
-    <Card>
-      <h2 className="mb-2 text-sm font-semibold text-foreground">{m.clan_members_title()}</h2>
+    <SectionCard title={m.clan_members_title()}>
       {isLoading && <p className="text-sm text-muted-foreground">{m.clan_loading()}</p>}
-      <div className="divide-y divide-border">
-        {members?.map(member => (
-          <MemberRow key={member.id} clanId={clanId} member={member} roles={roles ?? []} canManageMembers={canManageMembers} />
-        ))}
-      </div>
-    </Card>
+      {members?.map(member => (
+        <MemberRow key={member.id} clanId={clanId} member={member} roles={roles ?? []} canManageMembers={canManageMembers} />
+      ))}
+    </SectionCard>
   )
-}
-
-function Logo({ url, tag }: { url: string | null; tag: string }) {
-  if (url) return <img src={url} alt={tag} className="h-16 w-16 rounded-2xl object-cover" />
-  return <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-muted text-lg font-bold text-muted-foreground">{tag.slice(0, 2)}</div>
-}
-
-function Centered({ children }: { children: string }) {
-  return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">{children}</div>
 }
