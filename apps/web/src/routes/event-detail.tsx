@@ -1,13 +1,15 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCheck, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { OrganizerLogo, StatusBadge, Tag } from '@/features/event/event-bits'
 import { formatDateTime, policyLabel, visibilityLabel } from '@/features/event/event-meta'
-import { useEvent, useLeaveEvent, useRegisterEvent } from '@/features/event/event.hooks'
+import { useApproveParticipant, useCancelEvent, useEvent, useLeaveEvent, useRegisterEvent, useRejectParticipant } from '@/features/event/event.hooks'
 import { resolveEventError } from '@/features/event/event.errors'
 import { m } from '@/i18n/paraglide/messages'
-import type { EventDetailView, ParticipantView } from '@/features/event/event.types'
+import type { EventDetailView } from '@/features/event/event.types'
 
 export function EventDetailPage() {
   const { eventId = '' } = useParams()
@@ -19,14 +21,16 @@ export function EventDetailPage() {
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">
       <Header event={event} />
-      <Participants participants={event.participants} />
+      <Participants event={event} />
     </div>
   )
 }
 
 function Header({ event }: { event: EventDetailView }) {
+  const navigate = useNavigate()
   const register = useRegisterEvent()
   const leave = useLeaveEvent()
+  const cancel = useCancelEvent(event.organizer.id ?? '')
 
   const onRegister = () =>
     register.mutate(event.id, {
@@ -34,6 +38,14 @@ function Header({ event }: { event: EventDetailView }) {
       onError: err => toast.error(resolveEventError(err)),
     })
   const onLeave = () => leave.mutate(event.id, { onSuccess: () => toast.success(m.event_left()), onError: err => toast.error(resolveEventError(err)) })
+  const onCancel = () =>
+    cancel.mutate(event.id, {
+      onSuccess: () => {
+        toast.success(m.event_cancelled())
+        navigate('/events')
+      },
+      onError: err => toast.error(resolveEventError(err)),
+    })
 
   const joined = event.myStatus === 'CONFIRMED' || event.myStatus === 'PENDING'
   const action = joined ? (
@@ -63,7 +75,14 @@ function Header({ event }: { event: EventDetailView }) {
             {event.myStatus && <StatusBadge status={event.myStatus} />}
           </div>
         </div>
-        <div className="shrink-0">{action}</div>
+        <div className="flex shrink-0 flex-col items-end gap-2">
+          {action}
+          {event.canManage && (
+            <Button size="sm" variant="danger" onClick={onCancel} loading={cancel.isPending}>
+              {m.event_manage_cancel()}
+            </Button>
+          )}
+        </div>
       </div>
 
       {event.description && <p className="mt-4 text-sm leading-relaxed text-foreground">{event.description}</p>}
@@ -77,19 +96,48 @@ function Header({ event }: { event: EventDetailView }) {
   )
 }
 
-function Participants({ participants }: { participants: ParticipantView[] }) {
+function Participants({ event }: { event: EventDetailView }) {
+  const clanId = event.organizer.id ?? ''
+  const approve = useApproveParticipant(clanId)
+  const reject = useRejectParticipant(clanId)
+  const participants = event.participants
+
+  const onApprove = (userId: string) =>
+    approve.mutate({ eventId: event.id, userId }, { onSuccess: () => toast.success(m.event_approved()), onError: err => toast.error(resolveEventError(err)) })
+  const onReject = (userId: string) =>
+    reject.mutate({ eventId: event.id, userId }, { onSuccess: () => toast.success(m.event_rejected()), onError: err => toast.error(resolveEventError(err)) })
+
   return (
     <Card>
       <h2 className="mb-3 text-sm font-semibold text-foreground">{m.event_participants_title()}</h2>
       {participants.length === 0 && <p className="text-sm text-muted-foreground">{m.event_participants_empty()}</p>}
       <div className="divide-y divide-border">
         {participants.map(p => (
-          <div key={p.id} className="flex items-center justify-between py-2.5">
-            <span className="text-sm text-foreground">
+          <div key={p.id} className="flex items-center justify-between gap-3 py-2.5">
+            <span className="min-w-0 truncate text-sm text-foreground">
               {p.displayName}
               <span className="text-muted-foreground">#{p.discriminator}</span>
             </span>
-            <StatusBadge status={p.status} />
+            {event.canManage && p.status === 'PENDING' ? (
+              <div className="flex shrink-0 items-center gap-2">
+                <button
+                  onClick={() => onApprove(p.userId)}
+                  title={m.event_approve()}
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-primary/15 text-primary transition hover:bg-primary/25"
+                >
+                  <FontAwesomeIcon icon={faCheck} className="text-xs" />
+                </button>
+                <button
+                  onClick={() => onReject(p.userId)}
+                  title={m.event_reject()}
+                  className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-lg bg-destructive/15 text-destructive transition hover:bg-destructive/25"
+                >
+                  <FontAwesomeIcon icon={faXmark} className="text-xs" />
+                </button>
+              </div>
+            ) : (
+              <StatusBadge status={p.status} />
+            )}
           </div>
         ))}
       </div>
