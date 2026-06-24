@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { faArrowUpRightFromSquare, faUserPlus } from '@fortawesome/free-solid-svg-icons'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { CreateClanModal } from '@/features/clan/create-clan-modal'
 import { ClanDetailModal } from '@/features/clan/clan-detail-modal'
+import { InviteManagerModal } from '@/features/clan/invite-manager-modal'
 import { useClans } from '@/features/clan/clan.hooks'
 import { m } from '@/i18n/paraglide/messages'
 import type { ClanSummary } from '@/features/clan/clan.types'
@@ -14,6 +16,7 @@ export function ClansPage() {
   const { data, isLoading } = useClans(cursor)
   const [creating, setCreating] = useState(false)
   const [selected, setSelected] = useState<ClanSummary | null>(null)
+  const [inviting, setInviting] = useState<ClanSummary | null>(null)
 
   const goNext = () => {
     if (!data?.nextCursor) return
@@ -44,7 +47,9 @@ export function ClansPage() {
 
       {!isLoading && clans?.length === 0 && !hasPrev && <EmptyState onCreate={() => setCreating(true)} />}
 
-      <div className="grid gap-3 sm:grid-cols-2">{!isLoading && clans?.map(clan => <ClanCard key={clan.id} clan={clan} onClick={() => setSelected(clan)} />)}</div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        {!isLoading && clans?.map(clan => <ClanCard key={clan.id} clan={clan} onClick={() => setSelected(clan)} onInvite={() => setInviting(clan)} />)}
+      </div>
 
       {(hasPrev || hasNext) && (
         <div className="mt-6 flex items-center justify-end gap-1">
@@ -69,14 +74,22 @@ export function ClansPage() {
       <CreateClanModal open={creating} onClose={() => setCreating(false)} />
 
       {selected && <ClanDetailModal clan={selected} open={!!selected} onClose={() => setSelected(null)} />}
+
+      {inviting && <InviteManagerModal clanId={inviting.id} open={!!inviting} onClose={() => setInviting(null)} />}
     </div>
   )
 }
 
-function ClanCard({ clan, onClick }: { clan: ClanSummary; onClick: () => void }) {
+function ClanCard({ clan, onClick, onInvite }: { clan: ClanSummary; onClick: () => void; onInvite: () => void }) {
   return (
     <button type="button" onClick={onClick} className="group w-full text-left">
-      <Card className="flex cursor-pointer items-center gap-4 transition light:shadow-sm hover:border-highlight/60 hover:shadow-[0_0_0_1px_var(--highlight)] active:scale-[0.99]">
+      <Card
+        contextMenu={[
+          { icon: faArrowUpRightFromSquare, label: m.clan_ctx_open_new_tab(), onClick: () => window.open(`/clans/${clan.id}`, '_blank') },
+          { icon: faUserPlus, label: m.clan_ctx_invite(), onClick: onInvite },
+        ]}
+        className="flex cursor-pointer items-center gap-4 transition light:shadow-sm hover:border-highlight/60 hover:shadow-[0_0_0_1px_var(--highlight)] active:scale-[0.99]"
+      >
         <Logo url={clan.logoUrl} tag={clan.tag} />
         <div className="min-w-0 flex-1">
           <div className="truncate font-semibold text-foreground">{clan.name}</div>

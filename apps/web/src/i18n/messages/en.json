@@ -84,6 +84,8 @@
   "profile_username_cooldown": "Next free change from",
   "profile_username_cooldown_short": "Change still locked, please try later",
   "clan_list_title": "Your clans",
+  "clan_ctx_open_new_tab": "Open in new tab",
+  "clan_ctx_invite": "Invite",
   "clan_loading": "Loading",
   "table_empty": "No entries",
   "password_show": "Show password",

@@ -84,6 +84,8 @@
   "profile_username_cooldown": "Следующее бесплатное изменение с",
   "profile_username_cooldown_short": "Изменение пока заблокировано, попробуйте позже",
   "clan_list_title": "Твои кланы",
+  "clan_ctx_open_new_tab": "Открыть в новой вкладке",
+  "clan_ctx_invite": "Пригласить",
   "clan_loading": "Загрузка",
   "table_empty": "Нет записей",
   "password_show": "Показать пароль",

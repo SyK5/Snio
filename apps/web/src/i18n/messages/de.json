@@ -84,6 +84,8 @@
   "profile_username_cooldown": "Nächste kostenlose Änderung ab",
   "profile_username_cooldown_short": "Änderung noch gesperrt, bitte später erneut",
   "clan_list_title": "Deine Clans",
+  "clan_ctx_open_new_tab": "In neuem Tab öffnen",
+  "clan_ctx_invite": "Einladen",
   "clan_loading": "Wird geladen",
   "table_empty": "Keine Einträge",
   "password_show": "Passwort anzeigen",

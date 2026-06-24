@@ -84,6 +84,8 @@
   "profile_username_cooldown": "Sonraki ücretsiz değişiklik şu tarihten itibaren",
   "profile_username_cooldown_short": "Değişiklik henüz kilitli, lütfen sonra dene",
   "clan_list_title": "Klanların",
+  "clan_ctx_open_new_tab": "Yeni sekmede aç",
+  "clan_ctx_invite": "Davet et",
   "clan_loading": "Yükleniyor",
   "table_empty": "Kayıt yok",
   "password_show": "Şifreyi göster",
