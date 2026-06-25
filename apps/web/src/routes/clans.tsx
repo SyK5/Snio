@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { faArrowUpRightFromSquare, faUserPlus } from '@fortawesome/free-solid-svg-icons'
-import { Card } from '@/components/ui/card'
 import { EntityCard } from '@/components/ui/entity-card'
+import { SkeletonCard } from '@/components/ui/skeleton'
 import { Avatar } from '@/components/ui/avatar'
 import { Pager } from '@/components/ui/pager'
+import { Page, PageHeader } from '@/components/ui/page'
+import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { CreateClanModal } from '@/features/clan/create-clan-modal'
 import { ClanDetailModal } from '@/features/clan/clan-detail-modal'
@@ -38,17 +40,21 @@ export function ClansPage() {
   const hasNext = !!data?.nextCursor
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">{m.clan_list_title()}</h1>
-        <Button size="sm" onClick={() => setCreating(true)}>
-          {m.clan_create_action()}
-        </Button>
-      </div>
+    <Page>
+      <PageHeader
+        title={m.clan_list_title()}
+        action={
+          <Button size="sm" onClick={() => setCreating(true)}>
+            {m.clan_create_action()}
+          </Button>
+        }
+      />
 
       {isLoading && <LoadingGrid />}
 
-      {!isLoading && clans?.length === 0 && !hasPrev && <EmptyState onCreate={() => setCreating(true)} />}
+      {!isLoading && clans?.length === 0 && !hasPrev && (
+        <EmptyState action={<Button size="sm" variant="ghost" onClick={() => setCreating(true)}>{m.clan_create_action()}</Button>}>{m.clan_empty()}</EmptyState>
+      )}
 
       <div className="grid gap-3 sm:grid-cols-2">
         {!isLoading && clans?.map(clan => <ClanCard key={clan.id} clan={clan} onClick={() => setSelected(clan)} onInvite={() => setInviting(clan)} />)}
@@ -61,7 +67,7 @@ export function ClansPage() {
       {selected && <ClanDetailModal clan={selected} open={!!selected} onClose={() => setSelected(null)} />}
 
       {inviting && <InviteManagerModal clanId={inviting.id} open={!!inviting} onClose={() => setInviting(null)} />}
-    </div>
+    </Page>
   )
 }
 
@@ -86,28 +92,11 @@ function ClanCard({ clan, onClick, onInvite }: { clan: ClanSummary; onClick: () 
   )
 }
 
-function EmptyState({ onCreate }: { onCreate: () => void }) {
-  return (
-    <Card tone="muted" className="flex flex-col items-center gap-2 py-10 text-center">
-      <p className="text-sm text-muted-foreground">{m.clan_empty()}</p>
-      <Button size="sm" variant="ghost" onClick={onCreate}>
-        {m.clan_create_action()}
-      </Button>
-    </Card>
-  )
-}
-
 function LoadingGrid() {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i} className="flex items-center gap-4">
-          <div className="h-12 w-12 animate-pulse rounded-xl bg-muted" />
-          <div className="flex flex-col gap-2">
-            <div className="h-4 w-28 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-20 animate-pulse rounded bg-muted" />
-          </div>
-        </Card>
+        <SkeletonCard key={i} />
       ))}
     </div>
   )
