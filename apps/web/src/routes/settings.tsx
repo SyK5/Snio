@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMoon, faSun, faDesktop, faLock } from '@fortawesome/free-solid-svg-icons'
 import { Card } from '@/components/ui/card'
 import { Segmented } from '@/components/ui/segmented'
+import { Page, PageHeader } from '@/components/ui/page'
 import { useThemeStore, type ThemePreference } from '@/features/theme/theme.store'
 import { useLocaleStore } from '@/features/i18n/locale.store'
 import { useCurrentUser } from '@/features/auth/auth.hooks'
@@ -33,8 +34,8 @@ export function SettingsPage() {
   const localeOptions = locales.map(l => ({ value: l, label: LOCALE_LABELS[l] ?? l }))
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-10">
-      <h1 className="mb-6 text-2xl font-bold text-foreground">{m.settings_title()}</h1>
+    <Page width="md">
+      <PageHeader title={m.settings_title()} />
 
       <Card padding="md" className="mb-6 flex flex-col gap-6">
         <Field label={m.settings_theme()}>
@@ -54,7 +55,7 @@ export function SettingsPage() {
           <NotificationPreferences />
         </div>
       )}
-    </div>
+    </Page>
   )
 }
 
