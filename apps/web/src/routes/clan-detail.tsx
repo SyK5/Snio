@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar } from '@/components/ui/avatar'
 import { Centered } from '@/components/ui/centered'
 import { SectionCard } from '@/components/ui/section-card'
+import { Page } from '@/components/ui/page'
 import { MemberRow } from '@/features/clan/member-row'
 import { useClan, useClanMembers, useClanRoles, useDeleteClan, useLeaveClan } from '@/features/clan/clan.hooks'
 import { resolveClanError } from '@/features/clan/clan.errors'
@@ -20,10 +21,10 @@ export function ClanDetailPage() {
   if (error || !clan) return <Centered>{m.clan_not_found()}</Centered>
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <Page width="lg">
       <Header clan={clan} />
       <MembersSection clanId={clanId} clan={clan} />
-    </div>
+    </Page>
   )
 }
 
