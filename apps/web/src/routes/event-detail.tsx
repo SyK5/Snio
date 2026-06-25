@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Centered } from '@/components/ui/centered'
 import { SectionCard } from '@/components/ui/section-card'
 import { ListRow } from '@/components/ui/list-row'
+import { Page } from '@/components/ui/page'
 import { OrganizerLogo, StatusBadge, Tag } from '@/features/event/event-bits'
 import { formatDateTime, policyLabel, visibilityLabel } from '@/features/event/event-meta'
 import { useApproveParticipant, useCancelEvent, useEvent, useLeaveEvent, useRegisterEvent, useRejectParticipant } from '@/features/event/event.hooks'
@@ -21,10 +22,10 @@ export function EventDetailPage() {
   if (error || !event) return <Centered>{m.event_error_not_found()}</Centered>
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
+    <Page width="lg">
       <Header event={event} />
       <Participants event={event} />
-    </div>
+    </Page>
   )
 }
 
