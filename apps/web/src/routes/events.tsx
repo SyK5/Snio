@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card } from '@/components/ui/card'
 import { EntityCard } from '@/components/ui/entity-card'
+import { SkeletonCard } from '@/components/ui/skeleton'
 import { Pager } from '@/components/ui/pager'
+import { Page, PageHeader } from '@/components/ui/page'
+import { EmptyState } from '@/components/ui/empty-state'
 import { OrganizerLogo, StatusBadge } from '@/features/event/event-bits'
 import { formatDateTime } from '@/features/event/event-meta'
 import { useEvents } from '@/features/event/event.hooks'
@@ -33,21 +35,17 @@ export function EventsPage() {
   const hasNext = !!data?.nextCursor
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-10">
-      <h1 className="mb-6 text-2xl font-bold text-foreground">{m.events_title()}</h1>
+    <Page>
+      <PageHeader title={m.events_title()} />
 
       {isLoading && <LoadingGrid />}
 
-      {!isLoading && events?.length === 0 && !hasPrev && (
-        <Card tone="muted" className="py-10 text-center text-sm text-muted-foreground">
-          {m.events_empty()}
-        </Card>
-      )}
+      {!isLoading && events?.length === 0 && !hasPrev && <EmptyState>{m.events_empty()}</EmptyState>}
 
       <div className="grid gap-3">{!isLoading && events?.map(event => <EventCard key={event.id} event={event} onClick={() => navigate(`/events/${event.id}`)} />)}</div>
 
       <Pager page={page} hasPrev={hasPrev} hasNext={hasNext} onPrev={goPrev} onNext={goNext} />
-    </div>
+    </Page>
   )
 }
 
@@ -75,13 +73,7 @@ function LoadingGrid() {
   return (
     <div className="grid gap-3">
       {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i} className="flex items-center gap-4">
-          <div className="h-12 w-12 animate-pulse rounded-xl bg-muted" />
-          <div className="flex flex-col gap-2">
-            <div className="h-4 w-40 animate-pulse rounded bg-muted" />
-            <div className="h-3 w-28 animate-pulse rounded bg-muted" />
-          </div>
-        </Card>
+        <SkeletonCard key={i} />
       ))}
     </div>
   )
