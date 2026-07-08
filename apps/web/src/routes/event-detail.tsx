@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -7,10 +8,12 @@ import { Centered } from '@/components/ui/centered'
 import { SectionCard } from '@/components/ui/section-card'
 import { ListRow } from '@/components/ui/list-row'
 import { Page } from '@/components/ui/page'
-import { OrganizerLogo, StatusBadge, Tag } from '@/features/event/event-bits'
+import { OrganizerLogo, StatusBadge, Tag, KindBadge } from '@/features/event/event-bits'
 import { formatDateTime, policyLabel, visibilityLabel } from '@/features/event/event-meta'
 import { useApproveParticipant, useCancelEvent, useEvent, useLeaveEvent, useRegisterEvent, useRejectParticipant } from '@/features/event/event.hooks'
 import { resolveEventError } from '@/features/event/event.errors'
+import { EventInviteManagerModal } from '@/features/event/event-invite-manager-modal'
+import { EventFormModal } from '@/features/event/event-form-modal'
 import { m } from '@/i18n/paraglide/messages'
 import type { EventDetailView } from '@/features/event/event.types'
 
@@ -30,10 +33,13 @@ export function EventDetailPage() {
 }
 
 function Header({ event }: { event: EventDetailView }) {
+  const clanId = event.organizer.id ?? ''
+  const [inviteOpen, setInviteOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
   const navigate = useNavigate()
   const register = useRegisterEvent()
   const leave = useLeaveEvent()
-  const cancel = useCancelEvent(event.organizer.id ?? '')
+  const cancel = useCancelEvent(clanId)
 
   const onRegister = () =>
     register.mutate(event.id, {
@@ -73,6 +79,7 @@ function Header({ event }: { event: EventDetailView }) {
             {event.organizer.name} · {event.game.name}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            <KindBadge kind={event.organizer.kind} />
             <Tag>{visibilityLabel[event.visibility]()}</Tag>
             <Tag>{policyLabel[event.registrationPolicy]()}</Tag>
             {event.myStatus && <StatusBadge status={event.myStatus} />}
@@ -80,6 +87,16 @@ function Header({ event }: { event: EventDetailView }) {
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
           {action}
+          {event.canManage && (
+            <Button size="sm" variant="ghost" onClick={() => setEditOpen(true)}>
+              {m.event_edit()}
+            </Button>
+          )}
+          {event.canInvite && (
+            <Button size="sm" variant="ghost" onClick={() => setInviteOpen(true)}>
+              {m.event_invites_manage()}
+            </Button>
+          )}
           {event.canManage && (
             <Button size="sm" variant="danger" onClick={onCancel} loading={cancel.isPending}>
               {m.event_manage_cancel()}
@@ -95,6 +112,9 @@ function Header({ event }: { event: EventDetailView }) {
         {event.endsAt && <Meta label={m.event_ends()} value={formatDateTime(event.endsAt)} />}
         {event.location && <Meta label={m.event_location()} value={event.location} />}
       </div>
+
+      <EventInviteManagerModal clanId={clanId} eventId={event.id} open={inviteOpen} onClose={() => setInviteOpen(false)} />
+      <EventFormModal open={editOpen} onClose={() => setEditOpen(false)} event={event} />
     </div>
   )
 }

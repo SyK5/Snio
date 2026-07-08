@@ -1,5 +1,11 @@
 import { m } from '@/i18n/paraglide/messages'
-import type { EventVisibility, ParticipationStatus, RegistrationPolicy } from './event.types'
+import type { EventVisibility, OrganizerKind, ParticipationStatus, RegistrationPolicy } from './event.types'
+
+export const kindLabel: Record<OrganizerKind, () => string> = {
+  CLAN: m.event_kind_clan,
+  ORGANIZATION: m.event_kind_organization,
+  SYSTEM: m.event_kind_system,
+}
 
 export const statusLabel: Record<ParticipationStatus, () => string> = {
   PENDING: m.event_status_pending,
