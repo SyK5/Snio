@@ -35,10 +35,10 @@ export function useLeaveEvent() {
   })
 }
 
-export function useCreateClanEvent(clanId: string) {
+export function useCreateClanEvent() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (payload: CreateEventPayload) => eventApi.createClan(clanId, payload),
+    mutationFn: ({ clanId, payload }: { clanId: string; payload: CreateEventPayload }) => eventApi.createClan(clanId, payload),
     onSuccess: event => {
       qc.setQueryData(detailKey(event.id), event)
       qc.invalidateQueries({ queryKey: LIST_KEY })

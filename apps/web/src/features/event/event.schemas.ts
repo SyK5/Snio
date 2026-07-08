@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 export const createEventForm = z
   .object({
+    clanId: z.string().min(1, 'Clan wählen'),
     gameId: z.string().min(1, 'Spiel wählen'),
     title: z.string().trim().min(2, 'Mindestens 2 Zeichen').max(120, 'Maximal 120 Zeichen'),
     description: z.string().trim().max(2000, 'Maximal 2000 Zeichen').optional(),

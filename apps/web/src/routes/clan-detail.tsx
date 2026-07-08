@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -9,7 +8,6 @@ import { Page } from '@/components/ui/page'
 import { MemberRow } from '@/features/clan/member-row'
 import { useClan, useClanMembers, useClanRoles, useDeleteClan, useLeaveClan } from '@/features/clan/clan.hooks'
 import { resolveClanError } from '@/features/clan/clan.errors'
-import { CreateEventModal } from '@/features/event/create-event-modal'
 import { m } from '@/i18n/paraglide/messages'
 import type { ClanDetail } from '@/features/clan/clan.types'
 
@@ -32,7 +30,6 @@ function Header({ clan }: { clan: ClanDetail }) {
   const navigate = useNavigate()
   const leave = useLeaveClan()
   const remove = useDeleteClan()
-  const [createOpen, setCreateOpen] = useState(false)
 
   const onLeave = () => leave.mutate(clan.id, { onSuccess: () => navigate('/clans'), onError: error => toast.error(resolveClanError(error)) })
   const onDelete = () =>
@@ -54,12 +51,7 @@ function Header({ clan }: { clan: ClanDetail }) {
         </p>
         {clan.description && <p className="mt-2 text-sm text-foreground">{clan.description}</p>}
       </div>
-      <div className="flex shrink-0 flex-wrap justify-end gap-2">
-        {clan.canCreateEvent && (
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            {m.event_create_open()}
-          </Button>
-        )}
+      <div className="flex shrink-0 gap-2">
         {clan.isOwner ? (
           <Button size="sm" variant="danger" onClick={onDelete} loading={remove.isPending}>
             {m.clan_delete()}
@@ -70,7 +62,6 @@ function Header({ clan }: { clan: ClanDetail }) {
           </Button>
         )}
       </div>
-      <CreateEventModal clanId={clan.id} open={createOpen} onClose={() => setCreateOpen(false)} />
     </div>
   )
 }
