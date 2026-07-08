@@ -105,6 +105,15 @@ export interface ClanDetail extends ClanSummary {
   createdAt: string
 }
 
+export interface MyClanView {
+  id: string
+  slug: string
+  name: string
+  tag: string
+  logoUrl: string | null
+  canCreateEvent: boolean
+}
+
 export interface ClanMemberView {
   id: string
   userId: string

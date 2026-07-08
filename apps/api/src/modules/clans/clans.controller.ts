@@ -21,6 +21,7 @@ import {
   CreateRoleInput,
   GrantCatalogEntry,
   ListClansQuery,
+  MyClanView,
   ReorderRolesInput,
   RoleTemplateView,
   SetGrantsInput,
@@ -51,6 +52,11 @@ export class ClansController {
   @Get()
   list(@Query(new ZodValidationPipe(listClansSchema)) query: ListClansQuery): Promise<ClanPage> {
     return this.clans.list(query)
+  }
+
+  @Get('mine')
+  myClans(@CurrentUser() user: AuthUser): Promise<MyClanView[]> {
+    return this.clans.myClans(user.id)
   }
 
   @Post(':clanId/join')

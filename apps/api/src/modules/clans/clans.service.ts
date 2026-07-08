@@ -23,6 +23,7 @@ import {
   CreateRoleInput,
   GrantCatalogEntry,
   ListClansQuery,
+  MyClanView,
   RoleTemplateView,
   SetGrantsInput,
   UpdateClanInput,
@@ -89,6 +90,26 @@ export class ClansService {
     if (!clan) throw clanErrors.notFound()
     const memberCount = await this.prisma.clanMember.count({ where: { clan_id: clanId, left_at: null } })
     return this.toDetail(clan, memberCount, userId)
+  }
+
+  async myClans(userId: string): Promise<MyClanView[]> {
+    const members = await runSystem(() =>
+      this.prisma.clanMember.findMany({
+        where: { user_id: userId, left_at: null, clan: { deleted_at: null } },
+        include: { clan: true, roles: { include: { role: { include: { grants: { select: { grant: true, actions: true } } } } } } },
+        orderBy: { joined_at: 'asc' },
+      }),
+    )
+    return Promise.all(
+      members.map(async m => ({
+        id: m.clan.id,
+        slug: m.clan.slug,
+        name: m.clan.name,
+        tag: m.clan.tag,
+        logoUrl: await this.resolveImage(m.clan.logo_url),
+        canCreateEvent: m.clan.owner_id === userId || m.roles.some(mr => mr.role.grants.some(g => g.grant === 'event' && (g.actions & Action.CREATE) !== 0)),
+      })),
+    )
   }
 
   async update(clanId: string, userId: string, input: UpdateClanInput): Promise<ClanDetail> {
