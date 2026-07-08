@@ -388,5 +388,21 @@
   "event_approved": "Participant approved",
   "event_rejected": "Participant removed",
   "event_manage_cancel": "Cancel event",
-  "event_cancelled": "Event cancelled"
+  "event_cancelled": "Event cancelled",
+  "event_field_clan": "Clan",
+  "event_kind_clan": "Clan",
+  "event_kind_organization": "Organizer",
+  "event_kind_system": "Snio",
+  "event_invites_manage": "Invites",
+  "event_invites_title": "Manage invites",
+  "event_invites_subtitle": "Invite players to this event",
+  "event_redeem_title": "You have been invited to",
+  "event_redeem_action": "Join event",
+  "event_redeem_joined": "You are in",
+  "event_redeem_invalid": "Invite invalid or expired",
+  "event_redeem_back": "To events",
+  "event_edit": "Edit",
+  "event_edit_title": "Edit event",
+  "event_save": "Save",
+  "event_updated": "Event updated"
 }

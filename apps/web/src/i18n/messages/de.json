@@ -388,5 +388,21 @@
   "event_approved": "Teilnehmer bestätigt",
   "event_rejected": "Teilnehmer entfernt",
   "event_manage_cancel": "Event absagen",
-  "event_cancelled": "Event abgesagt"
+  "event_cancelled": "Event abgesagt",
+  "event_field_clan": "Clan",
+  "event_kind_clan": "Clan",
+  "event_kind_organization": "Organisator",
+  "event_kind_system": "Snio",
+  "event_invites_manage": "Einladungen",
+  "event_invites_title": "Einladungen verwalten",
+  "event_invites_subtitle": "Lade Spieler zu diesem Event ein",
+  "event_redeem_title": "Du wurdest eingeladen zu",
+  "event_redeem_action": "Event beitreten",
+  "event_redeem_joined": "Du bist dabei",
+  "event_redeem_invalid": "Einladung ungültig oder abgelaufen",
+  "event_redeem_back": "Zu den Events",
+  "event_edit": "Bearbeiten",
+  "event_edit_title": "Event bearbeiten",
+  "event_save": "Speichern",
+  "event_updated": "Event aktualisiert"
 }

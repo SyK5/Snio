@@ -388,5 +388,21 @@
   "event_approved": "Участник подтверждён",
   "event_rejected": "Участник удалён",
   "event_manage_cancel": "Отменить событие",
-  "event_cancelled": "Событие отменено"
+  "event_cancelled": "Событие отменено",
+  "event_field_clan": "Клан",
+  "event_kind_clan": "Клан",
+  "event_kind_organization": "Организатор",
+  "event_kind_system": "Snio",
+  "event_invites_manage": "Приглашения",
+  "event_invites_title": "Управление приглашениями",
+  "event_invites_subtitle": "Пригласите игроков на это событие",
+  "event_redeem_title": "Вас пригласили на",
+  "event_redeem_action": "Присоединиться",
+  "event_redeem_joined": "Вы участвуете",
+  "event_redeem_invalid": "Приглашение недействительно или истекло",
+  "event_redeem_back": "К событиям",
+  "event_edit": "Изменить",
+  "event_edit_title": "Изменить событие",
+  "event_save": "Сохранить",
+  "event_updated": "Событие обновлено"
 }

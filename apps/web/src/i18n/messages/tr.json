@@ -388,5 +388,21 @@
   "event_approved": "Katılımcı onaylandı",
   "event_rejected": "Katılımcı kaldırıldı",
   "event_manage_cancel": "Etkinliği iptal et",
-  "event_cancelled": "Etkinlik iptal edildi"
+  "event_cancelled": "Etkinlik iptal edildi",
+  "event_field_clan": "Klan",
+  "event_kind_clan": "Klan",
+  "event_kind_organization": "Organizatör",
+  "event_kind_system": "Snio",
+  "event_invites_manage": "Davetler",
+  "event_invites_title": "Davetleri yönet",
+  "event_invites_subtitle": "Bu etkinliğe oyuncu davet et",
+  "event_redeem_title": "Şuna davet edildin",
+  "event_redeem_action": "Etkinliğe katıl",
+  "event_redeem_joined": "Katıldın",
+  "event_redeem_invalid": "Davet geçersiz veya süresi dolmuş",
+  "event_redeem_back": "Etkinliklere",
+  "event_edit": "Düzenle",
+  "event_edit_title": "Etkinliği düzenle",
+  "event_save": "Kaydet",
+  "event_updated": "Etkinlik güncellendi"
 }
