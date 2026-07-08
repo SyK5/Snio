@@ -15,6 +15,7 @@ import { AdminGames } from '@/features/admin/admin-games'
 import { EventsPage } from '@/routes/events'
 import { EventDetailPage } from '@/routes/event-detail'
 import { InvitePage } from '@/routes/invite'
+import { EventInvitePage } from '@/routes/event-invite'
 import { AppLayout } from '@/components/layout/app-layout'
 import { RequireAuth } from '@/components/auth/require-auth'
 import { RequireAdmin } from '@/components/auth/require-admin'
@@ -75,6 +76,7 @@ export function App() {
           }
         />
         <Route path="/invite/:code" element={<InvitePage />} />
+        <Route path="/event-invite/:code" element={<EventInvitePage />} />
         <Route
           path="/admin"
           element={
