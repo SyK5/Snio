@@ -8,6 +8,7 @@ import type {
   CreateClanPayload,
   CreateRolePayload,
   GrantCatalogEntry,
+  MyClan,
   RoleTemplateView,
   UpdateClanPayload,
   UpdateRolePayload,
@@ -15,6 +16,7 @@ import type {
 
 export const clanApi = {
   list: (cursor?: string, limit = 20) => api.get<ClanPage>('/clans', { params: { ...(cursor ? { cursor } : {}), limit } }).then(r => r.data),
+  mine: () => api.get<MyClan[]>('/clans/mine').then(r => r.data),
   detail: (clanId: string) => api.get<ClanDetail>(`/clans/${clanId}`).then(r => r.data),
   create: (payload: CreateClanPayload) => api.post<ClanDetail>('/clans', payload).then(r => r.data),
   update: (clanId: string, payload: UpdateClanPayload) => api.patch<ClanDetail>(`/clans/${clanId}`, payload).then(r => r.data),

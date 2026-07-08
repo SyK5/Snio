@@ -31,6 +31,11 @@ export function useClans(cursor?: string) {
   })
 }
 
+export function useMyClans() {
+  const accessToken = useAuthStore(s => s.accessToken)
+  return useQuery({ queryKey: ['my-clans'], queryFn: () => clanApi.mine(), enabled: !!accessToken })
+}
+
 export function useClan(clanId: string) {
   return useQuery({ queryKey: detailKey(clanId), queryFn: () => clanApi.detail(clanId), enabled: !!clanId })
 }

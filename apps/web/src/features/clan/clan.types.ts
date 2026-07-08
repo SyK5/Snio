@@ -37,6 +37,15 @@ export interface ClanPage {
   nextCursor: string | null
 }
 
+export interface MyClan {
+  id: string
+  slug: string
+  name: string
+  tag: string
+  logoUrl: string | null
+  canCreateEvent: boolean
+}
+
 export interface ClanMemberView {
   id: string
   userId: string
